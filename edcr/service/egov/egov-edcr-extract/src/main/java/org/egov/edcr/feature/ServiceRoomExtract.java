@@ -56,54 +56,57 @@ public class ServiceRoomExtract extends FeatureExtract {
 //
 //            return planDetail;
 
-                    Map<Integer, List<BigDecimal>> serviceRoomHeightMap = new HashMap<>();
-                    String serviceRoomLayerName = String.format(layerNames.getLayerName("BLK_" + block.getNumber() + "FLR_" + floor.getNumber() + "_SERVICEROOM"), block.getNumber(), floor.getNumber(), "+\\d");
-                    List<String> serviceRoomLayers = Util.getLayerNamesLike(pl.getDoc(), serviceRoomLayerName);
+                    if(floor.getUnits() != null && !floor.getUnits().isEmpty())
+                        for (FloorUnit floorUnit : floor.getUnits()) {
+                            Map<Integer, List<BigDecimal>> serviceRoomHeightMap = new HashMap<>();
+                            String serviceRoomLayerName = String.format(layerNames.getLayerName("LAYER_NAME_UNIT_SERVICEROOM"), block.getNumber(), floor.getNumber(), floorUnit.getNumber(), "+\\d");
+                            List<String> serviceRoomLayers = Util.getLayerNamesLike(pl.getDoc(), serviceRoomLayerName);
 
-                    if (!serviceRoomLayers.isEmpty()) {
-                        for (String serviceRoomLayer : serviceRoomLayers) {
-                            for (String type : roomOccupancyTypes) {
-                                Integer colorCode = roomOccupancyFeature.get(type);
-                                List<BigDecimal> serviceRoomheights = Util.getListOfDimensionByColourCode(pl, serviceRoomLayer, colorCode);
-                                if (!serviceRoomheights.isEmpty())
-                                    serviceRoomHeightMap.put(colorCode, serviceRoomheights);
-                            }
+                            if (!serviceRoomLayers.isEmpty()) {
+                                for (String serviceRoomLayer : serviceRoomLayers) {
+                                    for (String type : roomOccupancyTypes) {
+                                        Integer colorCode = roomOccupancyFeature.get(type);
+                                        List<BigDecimal> serviceRoomheights = Util.getListOfDimensionByColourCode(pl, serviceRoomLayer, colorCode);
+                                        if (!serviceRoomheights.isEmpty())
+                                            serviceRoomHeightMap.put(colorCode, serviceRoomheights);
+                                    }
 
-                            List<DXFLWPolyline> roomPolyLines = Util.getPolyLinesByLayer(pl.getDoc(), serviceRoomLayer);
+                                    List<DXFLWPolyline> roomPolyLines = Util.getPolyLinesByLayer(pl.getDoc(), serviceRoomLayer);
 
-                            if (!serviceRoomHeightMap.isEmpty() || !roomPolyLines.isEmpty()) {
+                                    if (!serviceRoomHeightMap.isEmpty() || !roomPolyLines.isEmpty()) {
 
-                                boolean isClosed = roomPolyLines.stream().allMatch(dxflwPolyline -> dxflwPolyline.isClosed());
+                                        boolean isClosed = roomPolyLines.stream().allMatch(dxflwPolyline -> dxflwPolyline.isClosed());
 
-                                ServiceRoom room = new ServiceRoom();
-                                String[] roomNo = serviceRoomLayer.split("_");
-                                if (roomNo != null && roomNo.length == 7) {
-                                    room.setNumber(roomNo[6]);
-                                }
-                                room.setClosed(isClosed);
-
-                                List<RoomHeight> roomHeights = new ArrayList<>();
-                                if (!roomPolyLines.isEmpty()) {
-                                    List<Measurement> rooms = new ArrayList<Measurement>();
-                                    roomPolyLines.stream().forEach(rp -> {
-                                        Measurement m = new MeasurementDetail(rp, true);
-                                        if (!serviceRoomHeightMap.isEmpty() && serviceRoomHeightMap.containsKey(m.getColorCode())) {
-                                            for (BigDecimal value : serviceRoomHeightMap.get(m.getColorCode())) {
-                                                RoomHeight roomHeight = new RoomHeight();
-                                                roomHeight.setColorCode(m.getColorCode());
-                                                roomHeight.setHeight(value);
-                                                roomHeights.add(roomHeight);
-                                            }
-                                            room.setHeights(roomHeights);
+                                        ServiceRoom room = new ServiceRoom();
+                                        String[] roomNo = serviceRoomLayer.split("_");
+                                        if (roomNo != null && roomNo.length == 7) {
+                                            room.setNumber(roomNo[6]);
                                         }
-                                        rooms.add(m);
-                                    });
-                                    room.setRooms(rooms);
+                                        room.setClosed(isClosed);
+
+                                        List<RoomHeight> roomHeights = new ArrayList<>();
+                                        if (!roomPolyLines.isEmpty()) {
+                                            List<Measurement> rooms = new ArrayList<Measurement>();
+                                            roomPolyLines.stream().forEach(rp -> {
+                                                Measurement m = new MeasurementDetail(rp, true);
+                                                if (!serviceRoomHeightMap.isEmpty() && serviceRoomHeightMap.containsKey(m.getColorCode())) {
+                                                    for (BigDecimal value : serviceRoomHeightMap.get(m.getColorCode())) {
+                                                        RoomHeight roomHeight = new RoomHeight();
+                                                        roomHeight.setColorCode(m.getColorCode());
+                                                        roomHeight.setHeight(value);
+                                                        roomHeights.add(roomHeight);
+                                                    }
+                                                    room.setHeights(roomHeights);
+                                                }
+                                                rooms.add(m);
+                                            });
+                                            room.setRooms(rooms);
+                                        }
+                                        floorUnit.addServiceRoom(room);
+                                    }
                                 }
-                                floor.addServiceRoom(room);
                             }
                         }
-                    }
                 }
         }
         return pl;

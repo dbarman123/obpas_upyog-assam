@@ -384,11 +384,13 @@ public class Far_Assam extends Far {
 
         // Subtracting Basement ServiceRooms Area from total build up area
         if(floor.getNumber() < 0){
-            for(Measurement serviceFloor: floor.getServiceRooms()){
-                totalAreaToDeduct = totalAreaToDeduct.add(serviceFloor.getArea());
-                parkingAndServiceFloorArea = parkingAndServiceFloorArea.add(serviceFloor.getArea());
-                LOG.info("Subtracting Basement ServiceRoom Area from totalBuildUpArea: " + serviceFloor.getArea());
-            }
+            if (floor.getUnits() != null && !floor.getUnits().isEmpty())
+                for (FloorUnit floorUnit : floor.getUnits())
+                    for (Measurement serviceFloor : floorUnit.getServiceRooms()) {
+                        totalAreaToDeduct = totalAreaToDeduct.add(serviceFloor.getArea());
+                        parkingAndServiceFloorArea = parkingAndServiceFloorArea.add(serviceFloor.getArea());
+                        LOG.info("Subtracting Basement ServiceRoom Area from totalBuildUpArea: " + serviceFloor.getArea());
+                    }
         }
 
         // Entrance Lobby Area Deduction

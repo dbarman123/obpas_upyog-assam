@@ -596,6 +596,7 @@ public class EdcrReportConstants {
     public static final String WC_VENTILATION_AREA_UNIT = " sqm";
     public static final String WC_VENTILATION_WIDTH_UNIT = " m";
     public static final String WC_VENTILATION_AT_FLOOR = " at floor ";
+    public static final String WC_VENTILATION_FLOOR_UNIT = "'s FloorUnit ";
  // Rule Numbers
     public static final String RULE_VENT_01 = "Clause 55";
     public static final String SUB_RULE_SIDE_YARD = "83b (ii)";

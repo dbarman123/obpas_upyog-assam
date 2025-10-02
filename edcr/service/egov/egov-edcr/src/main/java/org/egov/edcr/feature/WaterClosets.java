@@ -52,17 +52,7 @@ import static org.egov.edcr.constants.CommonFeatureConstants.HEIGHT_AREA_WIDTH_G
 import static org.egov.edcr.constants.CommonFeatureConstants.WATER_CLOSET_VENTILATION_AREA;
 import static org.egov.edcr.constants.CommonKeyConstants.COMMON_WATER_CLOSETS;
 import static org.egov.edcr.constants.CommonKeyConstants.WATER_CLOSETS_VENTILATION;
-import static org.egov.edcr.constants.EdcrReportConstants.RULE_41_IV;
-import static org.egov.edcr.constants.EdcrReportConstants.RULE_91_D;
-import static org.egov.edcr.constants.EdcrReportConstants.WATERCLOSETS_DESCRIPTION;
-import static org.egov.edcr.constants.EdcrReportConstants.WC_VENTILATION_AREA_DESC;
-import static org.egov.edcr.constants.EdcrReportConstants.WC_VENTILATION_AREA_UNIT;
-import static org.egov.edcr.constants.EdcrReportConstants.WC_VENTILATION_AT_FLOOR;
-import static org.egov.edcr.constants.EdcrReportConstants.WC_VENTILATION_MISSING_DESC;
-import static org.egov.edcr.constants.EdcrReportConstants.WC_VENTILATION_NOT_AVAILABLE;
-import static org.egov.edcr.constants.EdcrReportConstants.WC_VENTILATION_NOT_DEFINED;
-import static org.egov.edcr.constants.EdcrReportConstants.WC_VENTILATION_WIDTH_DESC;
-import static org.egov.edcr.constants.EdcrReportConstants.WC_VENTILATION_WIDTH_UNIT;
+import static org.egov.edcr.constants.EdcrReportConstants.*;
 import static org.egov.edcr.service.FeatureUtil.mapReportDetails;
 
 import java.math.BigDecimal;
@@ -75,16 +65,7 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.egov.common.entity.edcr.Block;
-import org.egov.common.entity.edcr.FeatureEnum;
-import org.egov.common.entity.edcr.Floor;
-import org.egov.common.entity.edcr.Measurement;
-import org.egov.common.entity.edcr.Plan;
-import org.egov.common.entity.edcr.ReportScrutinyDetail;
-import org.egov.common.entity.edcr.Result;
-import org.egov.common.entity.edcr.RoomHeight;
-import org.egov.common.entity.edcr.ScrutinyDetail;
-import org.egov.common.entity.edcr.WaterClosetsRequirement;
+import org.egov.common.entity.edcr.*;
 import org.egov.edcr.service.MDMSCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -146,27 +127,30 @@ public class WaterClosets extends FeatureProcess {
 	        }
 
 	        for (Floor floor : block.getBuilding().getFloors()) {
-	            if (!hasValidWaterClosets(floor)) {
-	                LOG.debug("Skipping floor {} in block {} due to invalid water closet data", floor.getNumber(), block.getNumber());
-	                continue;
-	            }
+                if (floor.getUnits() != null && !floor.getUnits().isEmpty())
+                    for (FloorUnit floorUnit : floor.getUnits()) {
+                        if (!hasValidWaterClosets(floorUnit)) {
+                            LOG.debug("Skipping floor {} in block {} due to invalid water closet data", floor.getNumber(), block.getNumber());
+                            continue;
+                        }
 
-	            BigDecimal minHeight = getMinHeight(floor.getWaterClosets().getHeights());
-	            BigDecimal minWidth = getMinWidth(floor.getWaterClosets().getRooms());
-	            BigDecimal totalArea = getTotalArea(floor.getWaterClosets().getRooms());
+                        BigDecimal minHeight = getMinHeight(floorUnit.getWaterClosets().getHeights());
+                        BigDecimal minWidth = getMinWidth(floorUnit.getWaterClosets().getRooms());
+                        BigDecimal totalArea = getTotalArea(floorUnit.getWaterClosets().getRooms());
 
-	            LOG.debug("Floor {} in block {} - Min Height: {}, Min Width: {}, Total Area: {}",
-	                    floor.getNumber(), block.getNumber(), minHeight, minWidth, totalArea);
+                        LOG.debug("Floor {} and FloorUnit {} in block {} - Min Height: {}, Min Width: {}, Total Area: {}",
+                                floor.getNumber(), floorUnit.getNumber(), block.getNumber(), minHeight, minWidth, totalArea);
 
-	            processWCVentilation(floor, ventScrutinyDetail, pl);
+                        processWCVentilation(floor, floorUnit, ventScrutinyDetail, pl);
 
-	            Map<String, String> dimDetails = buildDimensionDetails(
-	                    wcRule.getWaterClosetsHeight(), wcRule.getWaterClosetsArea(), wcRule.getWaterClosetsWidth(),
-	                    minHeight, totalArea, minWidth
-	            );
-	            dimScrutinyDetail.getDetail().add(dimDetails);
-	            LOG.debug("Added dimension validation details for floor {} in block {}", floor.getNumber(), block.getNumber());
-	        }
+                        Map<String, String> dimDetails = buildDimensionDetails(
+                                wcRule.getWaterClosetsHeight(), wcRule.getWaterClosetsArea(), wcRule.getWaterClosetsWidth(),
+                                minHeight, totalArea, minWidth
+                        );
+                        dimScrutinyDetail.getDetail().add(dimDetails);
+                        LOG.debug("Added dimension validation details for floor {} in block {}", floor.getNumber(), block.getNumber());
+                    }
+            }
 	    }
 
 	    pl.getReportOutput().getScrutinyDetails().add(dimScrutinyDetail);
@@ -176,19 +160,19 @@ public class WaterClosets extends FeatureProcess {
 	    return pl;
 	}
 
-	private void processWCVentilation(Floor floor, ScrutinyDetail scrutinyDetail, Plan pl) {
-	    LOG.debug("Processing Water Closet Ventilation validation for floor {}", floor.getNumber());
+	private void processWCVentilation(Floor floor, FloorUnit floorUnit, ScrutinyDetail scrutinyDetail, Plan pl) {
+        LOG.debug("Processing Water Closet Ventilation validation for FloorUnit {}", floorUnit.getNumber());
 
-	    List<Measurement> wcVentilation = floor.getWaterClosets().getWaterClosetVentialtion();
+	    List<Measurement> wcVentilation = floorUnit.getWaterClosets().getWaterClosetVentialtion();
 
 	    if (wcVentilation == null || wcVentilation.isEmpty()) {
-	        LOG.warn("Water closet ventilation missing for floor {}", floor.getNumber());
+            LOG.warn("Water closet ventilation missing for floor {} and floorUnit {}", floor.getNumber(), floorUnit.getNumber());
 
 	        ReportScrutinyDetail detail = new ReportScrutinyDetail();
 	        detail.setRuleNo(RULE_91_D);
 	        detail.setDescription(WC_VENTILATION_MISSING_DESC);
 	        detail.setRequired(WC_VENTILATION_NOT_DEFINED);
-	        detail.setProvided(WC_VENTILATION_NOT_AVAILABLE + floor.getNumber());
+            detail.setProvided(WC_VENTILATION_NOT_AVAILABLE + floor.getNumber() + WC_VENTILATION_FLOOR_UNIT + floorUnit.getNumber());
 	        detail.setStatus(Result.Not_Accepted.getResultVal());
 
 	        scrutinyDetail.getDetail().add(mapReportDetails(detail));
@@ -223,7 +207,7 @@ public class WaterClosets extends FeatureProcess {
 	            .map(Measurement::getWidth)
 	            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-	    LOG.debug("Provided ventilation area: {}, width: {} for floor {}", providedArea, providedWidth, floor.getNumber());
+        LOG.debug("Provided ventilation area: {}, width: {} for floor {} and Unit {}", providedArea, providedWidth, floor.getNumber(), floorUnit.getNumber());
 
 	    // Area validation
 	    if (requiredArea.compareTo(BigDecimal.ZERO) > 0) {
@@ -281,14 +265,14 @@ public class WaterClosets extends FeatureProcess {
 	    return ruleOpt;
 	}
 
-	private boolean hasValidWaterClosets(Floor floor) {
-	    boolean hasValid = floor.getWaterClosets() != null
-	            && floor.getWaterClosets().getHeights() != null
-	            && !floor.getWaterClosets().getHeights().isEmpty()
-	            && floor.getWaterClosets().getRooms() != null
-	            && !floor.getWaterClosets().getRooms().isEmpty();
+	private boolean hasValidWaterClosets(FloorUnit floorUnit) {
+	    boolean hasValid = floorUnit.getWaterClosets() != null
+	            && floorUnit.getWaterClosets().getHeights() != null
+	            && !floorUnit.getWaterClosets().getHeights().isEmpty()
+	            && floorUnit.getWaterClosets().getRooms() != null
+	            && !floorUnit.getWaterClosets().getRooms().isEmpty();
 
-	    LOG.debug("Floor {} has valid water closets? {}", floor.getNumber(), hasValid);
+        LOG.debug("FloorUnit {} has valid water closets? {}", floorUnit.getNumber(), hasValid);
 	    return hasValid;
 	}
 

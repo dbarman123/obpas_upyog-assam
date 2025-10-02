@@ -7,11 +7,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.egov.common.entity.edcr.Block;
-import org.egov.common.entity.edcr.Floor;
-import org.egov.common.entity.edcr.Measurement;
-import org.egov.common.entity.edcr.Room;
-import org.egov.common.entity.edcr.RoomHeight;
+import org.egov.common.entity.edcr.*;
 import org.egov.edcr.entity.blackbox.MeasurementDetail;
 import org.egov.edcr.entity.blackbox.PlanDetail;
 import org.egov.edcr.service.LayerNames;
@@ -41,23 +37,26 @@ public class BathRoomWaterClosetsExtract extends FeatureExtract {
         for (Block block : planDetail.getBlocks())
             if (block.getBuilding() != null && block.getBuilding().getFloors() != null)
                 for (Floor f : block.getBuilding().getFloors()) {
-                    String layerName = String.format(layerNames.getLayerName("LAYER_NAME_BLK_FLR_WC_BATH"), block.getNumber(),
-                            f.getNumber());
-                    rooms = Util.getPolyLinesByLayer(planDetail.getDoc(), layerName);
-                    roomMeasurements = rooms.stream()
-                            .map(flightPolyLine -> new MeasurementDetail(flightPolyLine, true)).collect(Collectors.toList());
-                    f.setBathRoomWaterClosets(new Room());
-                    f.getBathRoomWaterClosets().setRooms(roomMeasurements);
-                    roomHeights = Util.getListOfDimensionValueByLayer(planDetail,
-                            String.format(layerNames.getLayerName("LAYER_NAME_BLK_FLR_WC_BATH_HT"), block.getNumber(),
-                                    f.getNumber()));
-                    roomHeightsList = new ArrayList<>();
-                    for (BigDecimal h : roomHeights) {
-                        height = new RoomHeight();
-                        height.setHeight(h);
-                        roomHeightsList.add(height);
-                    }
-                    f.getBathRoomWaterClosets().setHeights(roomHeightsList);
+                    if(f.getUnits() != null && !f.getUnits().isEmpty())
+                        for(FloorUnit floorUnit : f.getUnits()) {
+                            String layerName = String.format(layerNames.getLayerName("LAYER_NAME_BLK_FLR_UNIT_WC_BATH"), block.getNumber(),
+                                    f.getNumber(), floorUnit.getNumber());
+                            rooms = Util.getPolyLinesByLayer(planDetail.getDoc(), layerName);
+                            roomMeasurements = rooms.stream()
+                                    .map(flightPolyLine -> new MeasurementDetail(flightPolyLine, true)).collect(Collectors.toList());
+                            floorUnit.setBathRoomWaterClosets(new Room());
+                            floorUnit.getBathRoomWaterClosets().setRooms(roomMeasurements);
+                            roomHeights = Util.getListOfDimensionValueByLayer(planDetail,
+                                    String.format(layerNames.getLayerName("LAYER_NAME_BLK_FLR_UNIT_WC_BATH_HT"), block.getNumber(),
+                                            f.getNumber(), floorUnit.getNumber()));
+                            roomHeightsList = new ArrayList<>();
+                            for (BigDecimal h : roomHeights) {
+                                height = new RoomHeight();
+                                height.setHeight(h);
+                                roomHeightsList.add(height);
+                            }
+                            floorUnit.getBathRoomWaterClosets().setHeights(roomHeightsList);
+                        }
                 }
 
         return planDetail;

@@ -68,6 +68,9 @@ public class FloorUnit extends Measurement {
     private List<Room> regularRooms = new ArrayList<>();
     private List<Room> acRooms = new ArrayList<>();
     private Room commonRoom;
+    private Room bathRoomWaterClosets;
+    private List<ServiceRoom> serviceRooms = new ArrayList<>();
+    private Room waterClosets;
 
 
     public Occupancy getOccupancy() {
@@ -172,5 +175,33 @@ public class FloorUnit extends Measurement {
 
     public void setCommonRoom(Room commonRoom) {
         this.commonRoom = commonRoom;
+    }
+
+    public Room getBathRoomWaterClosets() {
+        return bathRoomWaterClosets;
+    }
+
+    public void setBathRoomWaterClosets(Room bathRoomWaterClosets) {
+        this.bathRoomWaterClosets = bathRoomWaterClosets;
+    }
+
+    public List<ServiceRoom> getServiceRooms() {
+        return serviceRooms;
+    }
+
+    public void setServiceRooms(List<ServiceRoom> serviceRooms) {
+        this.serviceRooms = serviceRooms;
+    }
+
+    public void addServiceRoom(ServiceRoom serviceRoom) {
+        this.serviceRooms.add(serviceRoom);
+    }
+
+    public Room getWaterClosets() {
+        return waterClosets;
+    }
+
+    public void setWaterClosets(Room waterClosets) {
+        this.waterClosets = waterClosets;
     }
 }

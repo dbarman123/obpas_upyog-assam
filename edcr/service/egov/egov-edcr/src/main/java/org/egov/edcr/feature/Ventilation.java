@@ -105,8 +105,11 @@ public class Ventilation extends FeatureProcess {
 
 	        if (b.getBuilding() != null && b.getBuilding().getFloors() != null) {
 	            for (Floor f : b.getBuilding().getFloors()) {
-	                processGeneralVentilation(f, ventilationValues[0], generalScrutiny, pl);
-	                // processBathroomVentilation(f, ventilationValues[1], bathScrutiny, pl); // Uncomment if needed
+                    if(f.getUnits() != null && !f.getUnits().isEmpty())
+                        for(FloorUnit floorUnit : f.getUnits()) {
+                            processGeneralVentilation(f, floorUnit, ventilationValues[0], generalScrutiny, pl);
+                            // processBathroomVentilation(f, ventilationValues[1], bathScrutiny, pl); // Uncomment if needed
+                        }
 	            }
 	        }
 	    }
@@ -166,16 +169,16 @@ public class Ventilation extends FeatureProcess {
 	 * @param scrutinyDetail The scrutiny detail object to add results to
 	 * @param pl The building plan for adding scrutiny details to report
 	 */
-	private void processGeneralVentilation(Floor floor, BigDecimal ventilationRatio,
+	private void processGeneralVentilation(Floor floor, FloorUnit floorUnit, BigDecimal ventilationRatio,
 	                                       ScrutinyDetail scrutinyDetail, Plan pl) {
-	    if (floor.getLightAndVentilation() != null &&
-	        floor.getLightAndVentilation().getMeasurements() != null &&
-	        !floor.getLightAndVentilation().getMeasurements().isEmpty()) {
+	    if (floorUnit.getLightAndVentilation() != null &&
+	        floorUnit.getLightAndVentilation().getMeasurements() != null &&
+	        !floorUnit.getLightAndVentilation().getMeasurements().isEmpty()) {
 
-	        BigDecimal totalVentilationArea = floor.getLightAndVentilation().getMeasurements().stream()
+	        BigDecimal totalVentilationArea = floorUnit.getLightAndVentilation().getMeasurements().stream()
 	            .map(Measurement::getArea).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-	        BigDecimal totalCarpetArea = floor.getOccupancies().stream()
+	        BigDecimal totalCarpetArea = floorUnit.getOccupancies().stream()
 	            .map(Occupancy::getCarpetArea).reduce(BigDecimal.ZERO, BigDecimal::add);
 
 	        if (totalVentilationArea.compareTo(BigDecimal.ZERO) > 0) {

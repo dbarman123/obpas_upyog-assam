@@ -616,14 +616,18 @@ public class AdditionalFeature_Assam extends FeatureProcess {
                                 maxArchitectureHeight = roomHeight.getHeight();
                         }
                     }
-                if (!floor.getServiceRooms().isEmpty())
-                    for (ServiceRoom serviceRoom : floor.getServiceRooms()) {
-                        for (RoomHeight roomHeight : serviceRoom.getHeights()) {
-                            if (maxServiceRoomHeight.compareTo(roomHeight.getHeight()) < 0) {
-                                maxServiceRoomHeight = roomHeight.getHeight();
+                if (floor.getUnits() != null && !floor.getUnits().isEmpty()) {
+                    for (FloorUnit floorUnit : floor.getUnits())
+                        if (!floorUnit.getServiceRooms().isEmpty())
+                            for (ServiceRoom serviceRoom : floorUnit.getServiceRooms()) {
+                                for (RoomHeight roomHeight : serviceRoom.getHeights()) {
+                                    if (maxServiceRoomHeight.compareTo(roomHeight.getHeight()) < 0) {
+                                        maxServiceRoomHeight = roomHeight.getHeight();
+                                    }
+                                }
                             }
-                        }
-                    }
+                }
+
             }
 
             // Chimneys and architectural features ≤ 1.5 m height.
