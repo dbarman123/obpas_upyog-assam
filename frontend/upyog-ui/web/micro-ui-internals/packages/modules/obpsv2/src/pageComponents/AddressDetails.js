@@ -54,12 +54,12 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
   const [permanentAddressLine1, setPermanentAddressLine1] = useState(formData?.address?.permanent?.addressLine1 || searchResult?.landInfo?.address?.addressLine1||"");
   const [permanentAddressLine2, setPermanentAddressLine2] = useState(formData?.address?.permanent?.addressLine2 || searchResult?.landInfo?.address?.addressLine2 || "");
   const [permanentDistrict, setPermanentDistrict] = useState(formData?.address?.permanent?.district || searchResultDistrict|| "");
-  const searchResultCity = searchResult?.landInfo?.address?.district? {
-    "code" : searchResult?.landInfo?.address?.district,
-    "i18nKey" : searchResult?.landInfo?.address?.district
+  const searchResultCity = searchResult?.landInfo?.address?.locality?.code? {
+    "code" : searchResult?.landInfo?.address?.locality?.code,
+    "i18nKey" : searchResult?.landInfo?.address?.locality?.code
   } : "";
   const [permanentCity, setPermanentCity] = useState(formData?.address?.permanent?.city || searchResultCity || "");
-    const searchResultState = searchResult?.landInfo?.address?.state ? {
+  const searchResultState = searchResult?.landInfo?.address?.state ? {
     "code" : searchResult?.landInfo?.address?.state,
     "i18nKey" : searchResult?.landInfo?.address?.state
   } : "";
@@ -68,15 +68,14 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
 
   // Correspondence Address Fields
   const [sameAsPermanent, setSameAsPermanent] = useState(formData?.address?.sameAsPermanent || false);
-  const [correspondenceHouseNo, setCorrespondenceHouseNo] = useState(formData?.address?.correspondence?.houseNo || "");
-  const [correspondenceAddressLine1, setCorrespondenceAddressLine1] = useState(formData?.address?.correspondence?.addressLine1 || "");
-  const [correspondenceAddressLine2, setCorrespondenceAddressLine2] = useState(formData?.address?.correspondence?.addressLine2 || "");
-  const [correspondenceDistrict, setCorrespondenceDistrict] = useState(formData?.address?.correspondence?.district || "");
-  const [correspondenceCity, setCorrespondenceCity] = useState(formData?.address?.correspondence?.city || "");
-  const [correspondenceState, setCorrespondenceState] = useState(formData?.address?.correspondence?.state || "");
-  const [correspondencePincode, setCorrespondencePincode] = useState(formData?.address?.correspondence?.pincode || "");
-
-  // Update permanent city options when permanent district changes
+  const [correspondenceHouseNo, setCorrespondenceHouseNo] = useState(formData?.address?.correspondence?.houseNo || searchResult?.landInfo?.address?.houseNo || "");
+  const [correspondenceAddressLine1, setCorrespondenceAddressLine1] = useState(formData?.address?.correspondence?.addressLine1 || searchResult?.landInfo?.address?.addressLine1 || "");
+  const [correspondenceAddressLine2, setCorrespondenceAddressLine2] = useState(formData?.address?.correspondence?.addressLine2 || searchResult?.landInfo?.address?.addressLine2 || "");
+  const [correspondenceDistrict, setCorrespondenceDistrict] = useState(formData?.address?.correspondence?.district || searchResultDistrict || "");
+  const [correspondenceCity, setCorrespondenceCity] = useState(formData?.address?.correspondence?.city || searchResultCity || "");
+  const [correspondenceState, setCorrespondenceState] = useState(formData?.address?.correspondence?.state || searchResultState || "");
+  const [correspondencePincode, setCorrespondencePincode] = useState(formData?.address?.correspondence?.pincode || searchResult?.landInfo?.address?.pincode || "");
+    // Update permanent city options when permanent district changes
   useEffect(() => {
     if (permanentDistrict && mdmsData?.revenueVillages) {
       const formattedRevenueVillage = mdmsData.revenueVillages
@@ -197,7 +196,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
       >
         <div>
           {/* Permanent Address Section */}
-          <CardHeader>{t("BPA_PERMANENT_ADDRESS")}</CardHeader>
+          <CardHeader>{t("BPA_SITE_ADDRESS")}</CardHeader>
           
           {/* House No */}
           <CardLabel>{`${t("BPA_HOUSE_NO")}`}</CardLabel>
@@ -253,6 +252,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
             option={districtOptions}
             selected={permanentDistrict}
             optionKey="i18nKey"
+            optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
             select={(value) => setPermanentDistrict(value)}
             placeholder={t("BPA_SELECT_DISTRICT")}
           />
@@ -264,6 +264,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
             option={permanentCityOptions}
             selected={permanentCity}
             optionKey="i18nKey"
+            optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
             select={(value) => setPermanentCity(value)}
             placeholder={!permanentDistrict ? t("BPA_SELECT_DISTRICT_FIRST") : t("BPA_SELECT_CITY")}
             disable={!permanentDistrict}
@@ -290,7 +291,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
           {/* Same as Permanent Address Checkbox */}
           <CheckBox
             label={t("BPA_SAME_AS_PERMANENT")}
-            value={sameAsPermanent}
+            checked={sameAsPermanent}
             onChange={(e) => setSameAsPermanent(e.target.checked)}
           />
 
@@ -354,6 +355,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
               option={districtOptions}
               selected={correspondenceDistrict}
               optionKey="i18nKey"
+              optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
               select={(value) => setCorrespondenceDistrict(value)}
               placeholder={t("BPA_SELECT_DISTRICT")}
               disable={sameAsPermanent}
@@ -366,6 +368,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
               option={correspondenceCityOptions}
               selected={correspondenceCity}
               optionKey="i18nKey"
+              optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
               select={(value) => setCorrespondenceCity(value)}
               placeholder={!correspondenceDistrict ? t("BPA_SELECT_DISTRICT_FIRST") : t("BPA_SELECT_CITY")}
               disable={sameAsPermanent || !correspondenceDistrict}

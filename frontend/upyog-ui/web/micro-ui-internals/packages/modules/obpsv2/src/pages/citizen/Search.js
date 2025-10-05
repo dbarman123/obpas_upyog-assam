@@ -1,46 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
-import useOBPSV2Search from "../../../../../libraries/src/hooks/obpsv2/useOBPSV2Search";
-const Search = ({ path }) => {
-  const userInfos = sessionStorage.getItem("Digit.citizen.userRequestObject");
-  const userInfo = userInfos ? JSON.parse(userInfos) : {};
-  const userInformation = userInfo?.value?.info;
 
+const Search = ({ path }) => {
   const { t } = useTranslation();
   const tenantId = Digit.ULBService.getCitizenCurrentTenant(true) || Digit.ULBService.getCurrentTenantId();
   const location = useLocation();
-  const details = () => {
-    return "NEW_CONSTRUCTION"
-  }
-  const [selectedType, setSelectedType] = useState(details());
+  const [selectedType, setSelectedType] = useState("");
   const [payload, setPayload] = useState({});
   const [searchData, setSearchData] = useState({});
+  const [paramerror, setparamerror] = useState("");
 
-  useEffect(()=>{
+  useEffect(() => {
     if (location.pathname === "/upyog-ui/citizen/obpsv2/rtp/search/application" || location.pathname === "/upyog-ui/employee/obps/search/application") {
-      Digit.SessionStorage.del("OBPSV2.INBOX")
+      Digit.SessionStorage.del("OBPSV2.INBOX");
     }
-  },[location.pathname])
+  }, [location.pathname]);
 
-  const Search = Digit.ComponentRegistryService.getComponent("RTASearchApplication");
+  useEffect(() => {
+    if (Object.keys(payload).length === 0) {
+      const initialPayload = {
+        ...(window.location.href.includes("/search/obps-application") && {
+          mobileNumber: Digit.UserService.getUser()?.info?.mobileNumber,
+        }),
+      };
+      if (Object.keys(initialPayload).length > 0) {
+        setPayload(initialPayload);
+      }
+    }
+  }, []);
 
-  const checkData = (data) => {
-    if (data?.applicationNo === "" && data?.fromDate === "" && data?.mobileNumber === "" && data?.serviceType === "" && data?.status === "" && data?.toDate === "") return false
-
-    return true
-
-  }
-
-  const [paramerror,setparamerror] = useState("")
+  const SearchComponent = Digit.ComponentRegistryService.getComponent("RTASearchApplication");
 
   function onSubmit(_data) {
     setSearchData(_data);
-    var fromDate = new Date(_data?.fromDate);
+    const fromDate = new Date(_data?.fromDate);
     fromDate?.setSeconds(fromDate?.getSeconds() - 19800);
-    var toDate = new Date(_data?.toDate);
+    const toDate = new Date(_data?.toDate);
     setSelectedType(_data?.applicationType?.code ? _data?.applicationType?.code : selectedType);
     toDate?.setSeconds(toDate?.getSeconds() + 86399 - 19800);
+    
     const data = {
       ..._data,
       ...(_data.toDate ? { toDate: toDate?.getTime() } : {}),
@@ -49,43 +48,34 @@ const Search = ({ path }) => {
 
     setPayload(
       Object.keys(data)
-        .filter((k) => data[k])
+        .filter((k) => data[k] && k !== "businessServices")
         .reduce((acc, key) => ({ ...acc, [key]: typeof data[key] === "object" ? data[key].code : data[key] }), {})
     );
   }
 
-  let params = {};
-  let filters = {};
-    if (Object.keys(payload).length === 0) {
-      let payload1 = {
-        applicationType: "NEW_CONSTRUCTION",
-        // serviceType: "NEW_CONSTRUCTION",
-        ...(window.location.href.includes("/search/obps-application") && {
-          mobileNumber: Digit.UserService.getUser()?.info?.mobileNumber,
-        }),
-      };
-
-      setPayload({ ...payload, ...payload1 });
-    }
-  filters = payload;
-  const { data: bpaData = [], isLoading: isBpaSearchLoading, isSuccess: isBpaSuccess, error: bpaerror } = useOBPSV2Search(
-    selectedType,
-    payload,
+  const { isLoading: isBpaSearchLoading, isError, error: bpaerror, data: bpaData } = Digit.Hooks.obpsv2.useBPASearchApi({
     tenantId,
-    filters,
-    params,
-    {enabled:paramerror===""}
-  );
+    filters: payload,
+    enabled: Object.keys(payload).length > 0
+  });
+
+  const processedData = React.useMemo(() => {
+    if (isBpaSearchLoading || isError || !bpaData?.bpa?.length) {
+      return [];
+    }
+    return bpaData.bpa;
+  }, [isBpaSearchLoading, isError, bpaData]);
+
   return (
-    <Search
+    <SearchComponent
       t={t}
       tenantId={tenantId}
       onSubmit={onSubmit}
       searchData={searchData}
       isLoading={isBpaSearchLoading}
-      Count={bpaData?.[0]?.Count}
+      Count={bpaData?.count || 0}
       error={paramerror}
-      data={!isBpaSearchLoading && isBpaSuccess && bpaData?.length > 0 ? bpaData : [{ display: "ES_COMMON_NO_DATA" }]}
+      data={processedData}
       setparamerror={setparamerror}
     />
   );

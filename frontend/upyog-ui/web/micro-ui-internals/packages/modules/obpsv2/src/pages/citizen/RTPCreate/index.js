@@ -8,7 +8,8 @@ const RTPCreate = ({ parentRoute }) => {
   const queryClient = useQueryClient();
     const match = useRouteMatch();
     const { t } = useTranslation();
-    const { pathname } = useLocation();
+    const location = useLocation();
+    const { pathname } = location;
     const history = useHistory();
     let config = [];
     const [params, setParams, clearParams] = Digit.Hooks.useSessionStorage("EDCR_CREATE", {});
@@ -61,8 +62,13 @@ const RTPCreate = ({ parentRoute }) => {
           setIsSubmitBtnDisable(false);
           if (result?.data?.edcrDetail) {
             setParams(result?.data?.edcrDetail);
+            const urlParams = new URLSearchParams(location.search);
+            const applicationNo = urlParams.get('applicationNo');
+            const redirectUrl = applicationNo 
+                ? `/upyog-ui/citizen/obpsv2/rtp/apply/acknowledgement?applicationNo=${applicationNo}`
+                : `/upyog-ui/citizen/obpsv2/rtp/apply/acknowledgement`;
             history.replace(
-              `/upyog-ui/citizen/obpsv2/rtp/apply/acknowledgement`, ///${result?.data?.edcrDetail?.[0]?.edcrNumber}
+              redirectUrl,
               { data: result?.data?.edcrDetail }
             );
           }

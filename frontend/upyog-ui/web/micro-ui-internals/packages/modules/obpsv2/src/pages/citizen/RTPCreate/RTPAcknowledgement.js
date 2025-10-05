@@ -1,13 +1,18 @@
 import { Banner, Card, CardText, LinkButton, SubmitBar, Toast } from "@upyog/digit-ui-react-components";
 import React, { useState, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const RTPAcknowledgement = (props) => {
   const { t } = useTranslation();
   const history = useHistory();
+  const location = useLocation();
   const [showToast, setShowToast] = useState(false);
-
+  const [bpaUpdateResponse, setBpaUpdateResponse] = useState(null);
+  
+  // Extract applicationNo from URL
+  const urlParams = new URLSearchParams(location.search);
+  const applicationNo = urlParams.get('applicationNo');
   useEffect(() => { 
     if (props?.data?.type == "ERROR" && !showToast) setShowToast(true); 
   }, [props?.data?.data]);
@@ -59,6 +64,13 @@ const RTPAcknowledgement = (props) => {
     }
 }, [!homePageUrlLinksLoading]);
 
+  // Single useEffect to handle BPA process
+  useEffect(() => {
+    if (applicationNo && edcrData?.status === "Accepted") {
+      handleBPAProcess();
+    }
+  }, [applicationNo, edcrData]);
+
 
   const printReciept = async () => {
     var win = window.open(edcrData.planReport, '_blank');
@@ -67,12 +79,52 @@ const RTPAcknowledgement = (props) => {
     }
   };
 
+  const handleBPAProcess = async () => {
+    if (!applicationNo) {
+      console.log('No applicationNo found in URL');
+      return;
+    }
+    
+    try {
+      console.log('Starting BPA process for applicationNo:', applicationNo);
+      // BPA Search call using applicationNumber from URL
+      const bpaSearchResponse = await Digit.OBPSV2Services.search({
+        tenantId: Digit.ULBService.getCitizenCurrentTenant(true) || Digit.ULBService.getCurrentTenantId(),
+        filters: { applicationNo }
+      });
+      
+      console.log('BPA Search Response:', bpaSearchResponse);
+
+      if (bpaSearchResponse?.bpa?.length > 0) {
+        const bpaData = bpaSearchResponse.bpa[0];
+        
+        // BPA Update call with workflow action and edcrNumber
+        const updateResponse = await Digit.OBPSV2Services.update({
+          BPA: {
+            ...bpaData,
+            edcrNumber: edcrData?.edcrNumber,
+            workflow: {
+              action: "APPLY_FOR_SCRUTINY"
+            }
+          }
+        });
+        
+        console.log("BPA Update Response:", updateResponse);
+        setBpaUpdateResponse(updateResponse);
+      } else {
+        console.log('No BPA data found for applicationNo:', applicationNo);
+      }
+    } catch (error) {
+      console.error("Error in BPA process:", error);
+    }
+  };
+
   const routeToBPAScreen = async () => {
+    await handleBPAProcess();
     history.push(
       `/upyog-ui/citizen/obps/bpa/${edcrData?.appliactionType?.toLowerCase()}/${edcrData?.applicationSubType?.toLowerCase()}/docs-required`,
       { edcrNumber: edcrData?.edcrNumber }
     );
-    // window.location.assign(`${window.location.origin}/upyog-ui/citizen/obps/new-building-permit/docs-required`);
   }
 
   return (
@@ -89,6 +141,18 @@ const RTPAcknowledgement = (props) => {
             style={{width: "100%", padding: "10px"}}
           />
           <CardText style={{ padding: "0px 8px", marginBottom: "10px" }}>{`${t("PDF_STATIC_LABEL_CONSOLIDATED_BILL_CONSUMER_ID_TL")} - ${edcrData?.applicationNumber}`}</CardText>
+          {bpaUpdateResponse?.bpa?.[0] && (
+            <CardText style={{ 
+              whiteSpace: "pre", 
+              width: "60%", 
+              fontWeight: "bold",
+              color: "#00703C",
+              padding: "0px 8px",
+              marginBottom: "10px"
+            }}>
+              {t(bpaUpdateResponse.bpa[0].status)}
+            </CardText>
+          )}
           <div className="primary-label-btn d-grid" style={{ marginLeft: "unset", marginBottom: "10px", padding: "0px 8px" }} onClick={printReciept}>
             <svg width="20" height="23" viewBox="0 0 20 23" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19.3334 8H14V0H6.00002V8H0.666687L10 17.3333L19.3334 8ZM0.666687 20V22.6667H19.3334V20H0.666687Z" fill="#a82227" />
@@ -96,10 +160,6 @@ const RTPAcknowledgement = (props) => {
             {t("RTP_DOWNLOAD_SCRUTINY_REPORT_LABEL")}
           </div>
           <div style={{padding: "0px 10px"}}>
-            <Link to={{pathname: `/upyog-ui/citizen/obps/${bpaLinks?.linkData?.flow?.toLowerCase()}/${edcrData?.appliactionType?.toLowerCase()}/${edcrData?.applicationSubType?.toLowerCase()}/docs-required`, state: bpaLinks}} replace>
-              <SubmitBar label={t("BPA_APPLY_FOR_BPA_LABEL")} onSubmit={() => (sessionStorage.setItem("clickOnBPAApplyAfterEDCR",true))}/>
-              <CardText className="button-sub-text"  style={{fontSize: "14px", lineHeight: "16px", textAlign: "center", margin: "0px", marginTop: "4px", fontWeight: "400", color: "#0B0C0C"}}>{t("BPA_FOR_NEW_CONSTRUCTION_LABEL")}</CardText>
-            </Link>
             <div style={{marginTop: "12px", paddingBottom: "10px"}}>
               <Link to={`/upyog-ui/citizen`} >
                 <LinkButton label={t("CORE_COMMON_GO_TO_HOME")} />

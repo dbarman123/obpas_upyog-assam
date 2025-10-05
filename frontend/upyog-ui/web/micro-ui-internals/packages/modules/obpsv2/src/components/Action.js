@@ -14,13 +14,11 @@ import {
 import { OBPSV2Services } from "../../../../libraries/src/services/elements/OBPSV2";
 import { useTranslation } from "react-i18next";
 
-const Action = ({ selectedAction, applicationNo, closeModal }) => {
+const Action = ({ selectedAction, applicationNo, closeModal, setSelectedAction, setToastMessage, setShowToast: parentSetShowToast }) => {
   const { t } = useTranslation();
   const [comments, setComments] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
   const [actionError, setActionError] = useState(null);
-  const [toastMessage, setToastMessage] = useState("");
-  const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState(false);
   const [oldRTPName, setOldRTPName] = useState();
   const [newRTPName, setNewRTPName] = useState();
@@ -30,14 +28,23 @@ const Action = ({ selectedAction, applicationNo, closeModal }) => {
   const [assignResponse, setAssignResponse] = useState(null);
   const tenantId =  Digit.ULBService.getCitizenCurrentTenant(true) || Digit.ULBService.getCurrentTenantId();
   useEffect(() => {
-    if (showToast || error) {
+    if (toast || error) {
       const timer = setTimeout(() => {
         setToast(false);
-        setError(null)
+        setError(null);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [showToast, error]);
+  }, [toast, error]);
+
+  // Cleanup effect when component unmounts
+  useEffect(() => {
+    return () => {
+      setPopup(false);
+      setError(null);
+      setToast(false);
+    };
+  }, []);
   useEffect(() => {
     if (selectedAction) {
       switch (selectedAction) {
@@ -48,6 +55,9 @@ const Action = ({ selectedAction, applicationNo, closeModal }) => {
             setPopup(true);
           break;
         case "APPROVE":
+          setPopup(true);
+          break;
+        case "ACCEPT":
           setPopup(true);
           break;
         case "SEND":
@@ -61,14 +71,12 @@ const Action = ({ selectedAction, applicationNo, closeModal }) => {
             setPopup(true);
             break;
         case "EDIT":
-
-          const url = window.location.href;
-          const redirectingUrl =`${window.location.origin}/upyog-ui/citizen/obpsv2/editApplication/${applicationNo}`;;
+          const redirectingUrl = `${window.location.origin}/upyog-ui/citizen/obpsv2/editApplication/${applicationNo}`;
           redirectToPage(redirectingUrl);
           break;
           case "APPLY_FOR_SCRUTINY":
             let scrutinyurl=window.location.href;
-            let scrutinyRedirectingUrl= scrutinyurl.split("/inbox")[0] + "/apply/home";
+            let scrutinyRedirectingUrl= scrutinyurl.split("/inbox")[0] + `/apply/home?applicationNo=${applicationNo}`;
             redirectToPage(scrutinyRedirectingUrl);
             break;
         default:
@@ -121,15 +129,6 @@ const Action = ({ selectedAction, applicationNo, closeModal }) => {
   }
 
   async function onAssign(selectedAction, comments) {
-    if (selectedAction === "REJECT" && !comments) {
-      setActionError(t("CS_MANDATORY_COMMENTS"));
-      return;
-    }
-
-    if (selectedAction === "APPROVE" && !comments) {
-      setActionError(t("CS_MANDATORY_COMMENTS"));
-      return;
-    }
 
         const bpaDetails = await OBPSV2Services.search({
             tenantId,
@@ -141,61 +140,83 @@ const Action = ({ selectedAction, applicationNo, closeModal }) => {
             ...(bpaDetails.bpa[0].workflow || {}),
             action: selectedAction ,
             assignes: null,
-            comments: null,
+            comments: comments,
             };
             try {
                 const response = await OBPSV2Services.update({BPA : bpaDetails?.bpa[0]}, tenantId);
-                setToast(true);
-                setPopup(false)
-        
+                setAssignResponse(response);
+                
+                // Close popup first
+                setPopup(false);
+                
+                // Then show toast after a small delay
+                setTimeout(() => {
+                    if (setToastMessage && typeof setToastMessage === 'function') {
+                        setToastMessage(t(`CS_ACTION_UPDATE_${selectedAction}_TEXT`));
+                    }
+                    if (typeof parentSetShowToast === 'function') {
+                        parentSetShowToast(true);
+                    }
+                    // Reset selected action to hide modal
+                    if (setSelectedAction && typeof setSelectedAction === 'function') {
+                        setSelectedAction(null);
+                    }
+                }, 100);
+                
+                // Refresh data if refetch function is available
+                if (typeof refetch === 'function') {
+                    await refetch();
+                }
                 
                 return response;
             }
             catch(error){
-                setError(error?.response?.data?.Errors[0].message)
-                throw new Error(error?.response?.data?.Errors[0].message);
+                setError(error?.response?.data?.Errors?.[0]?.message || 'An error occurred');
+                setPopup(false); // Close popup on error
+                console.error('Update error:', error);
             }
-
-            
         }
-        setAssignResponse(response);
-        setToast(true)
-        await refetch();
-    const updatedWorkflowDetails = await Digit.WorkflowService.getByBusinessId(tenantId, acknowledgementIds);
-    setWorkflowDetails(updatedWorkflowDetails);
       
-      setTimeout(() => setShowToast(false), 5000);
-      closeModal(setPopup(false));
+
+      if (closeModal && typeof closeModal === 'function') {
+        closeModal();
+      }
   }
 
   return (
     <React.Fragment>
       {selectedAction && popup && (
         <Modal
-          headerBarMain={<Heading label={t(selectedAction)} />}
-          headerBarEnd={<CloseBtn onClick={() => setPopup(false)} />}
+            headerBarMain={<Heading label={t(`CS_ACTION_${selectedAction}`)} />}
+            headerBarEnd={<CloseBtn onClick={() => {
+            setPopup(false);
+            if (setSelectedAction && typeof setSelectedAction === 'function') {
+              setSelectedAction(null);
+            }
+          }} />}
           actionCancelLabel={t("CS_COMMON_CANCEL")}
-          actionCancelOnSubmit={() => setPopup(false)}
-          actionSaveLabel={t("CS_COMMON_CONFIRM")}
+          actionCancelOnSubmit={() => {
+            setPopup(false);
+            if (setSelectedAction && typeof setSelectedAction === 'function') {
+              setSelectedAction(null);
+            }
+          }}
+          actionSaveLabel={t("CS_COMMON_SUBMIT")}
+          popupStyles={{ zIndex: 1001 }}
           actionSaveOnSubmit={() => {
-        if(selectedAction==="APPROVE"||selectedAction==="SEND"||selectedAction==="REJECT"||selectedAction==="SEND_BACK_TO_RTP"||selectedAction==="VALIDATE_GIS")
-        //setActionError(t("CS_MANDATORY_REASON"));
-           onAssign(selectedAction, "Edit");
+        if(selectedAction==="APPROVE"||selectedAction==="ACCEPT"||selectedAction==="SEND"||selectedAction==="REJECT"||selectedAction==="SEND_BACK_TO_RTP"||selectedAction==="VALIDATE_GIS")
+           onAssign(selectedAction, comments);
       if(selectedAction==="NEWRTP"&&!oldRTPName)
         setActionError(t("CS_OLD_RTP_NAME_MANDATORY"))
       if(selectedAction==="NEWRTP" &&!newRTPName)
         setActionError(t("CS_NEW_RTP_NAME_MANDATORY"))
-        if(selectedAction === "REJECT" && !comments)
-        setActionError(t("CS_MANDATORY_COMMENTS"));
-        
-       
       }}
           error={error}
           
         >
           <Card>
             <React.Fragment>
-              {(selectedAction === "APPROVE" || selectedAction === "SEND" || selectedAction === "REJECT" || selectedAction==="SEND_BACK_TO_RTP") && (
+              {(selectedAction === "APPROVE" || selectedAction === "ACCEPT" || selectedAction === "SEND" || selectedAction === "REJECT" || selectedAction==="SEND_BACK_TO_RTP") && (
                 <div>
                   <CardLabel>{t("COMMENTS")}</CardLabel>
                   <TextArea
@@ -255,15 +276,15 @@ const Action = ({ selectedAction, applicationNo, closeModal }) => {
       )}
 
       {(toast||error) && (
-                        <Toast
-                          error={error ? error : null}
-                          
-                          label={error ? error : t(`ACTION_UPDATE_DONE_SUCCESSFULLY`)}
-                          onClose={() => {
-                            setToast(false);
-                          }}
-                        />
-                      )}
+          <Toast
+            error={error ? error : null}
+            
+            label={error ? error : t(`CS_ACTION_UPDATE_${selectedAction}_TEXT`)}
+            onClose={() => {
+              setToast(false);
+            }}
+          />
+        )}
     </React.Fragment>
   );
 };

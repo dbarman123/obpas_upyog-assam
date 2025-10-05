@@ -17,15 +17,6 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
     { code: "TRANSITION_ZONE", name: "Transition Zone", i18nKey: "BPA_TRANSITION_ZONE" }
   ];
 
-  // Occupancy Type Options
-  const occupancyTypeOptions = [
-    { code: "TYPE1", name: "Type 1", i18nKey: "BPA_TYPE1" },
-    { code: "TYPE2", name: "Type 2", i18nKey: "BPA_TYPE2" },
-    { code: "TYPE3", name: "Type 3", i18nKey: "BPA_TYPE3" },
-    { code: "TYPE4", name: "Type 4" , i18nKey: "BPA_TYPE4"},
-    { code: "TYPE5", name: "Type 5" , i18nKey: "BPA_TYPE5"},
-  ];
-
   // Registered Technical Person Options
   const rtpOptions = [
     { code: "RTP001", name: "Ranjit +91 9988888890, ranjit@gmail.com", i18nKey: "BPA_RTP001" },
@@ -42,7 +33,8 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
     "BPA", 
     [
       { name: "constructionTypes" }, 
-      { name: "rtpCategories" }
+      { name: "rtpCategories" },
+      { name:"PermissibleZone"}
     ],
     {
       select: (data) => {
@@ -54,6 +46,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
   // State for dropdown options
   const [constructionTypeOptions, setConstructionTypeOptions] = useState([]);
   const [rtpCategoryOptions, setRtpCategoryOptions] = useState([]);
+  const [occupancyTypeOptions, setOccupancyTypeOptions] = useState([]);
   
     // Initialize districts from MDMS data
     useEffect(() => {
@@ -74,13 +67,28 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
         }));
         setRtpCategoryOptions(formattedRtpCategories);
       }
+      if(mdmsData?.PermissibleZone){
+        const formattedOccupancyTypes = mdmsData.PermissibleZone.map((occupancyTypes) => ({
+          code: occupancyTypes.code,
+          name: occupancyTypes.name,
+          i18nKey: occupancyTypes.name,
+        }));
+        setOccupancyTypeOptions(formattedOccupancyTypes);
+      }
     }, [mdmsData]);
 
   // State initialization from formData
   const landData = formData?.land || {};
 
   // Construction Type
-  const [constructionType, setConstructionType] = useState(landData?.constructionType || constructionTypeOptions.find(opt => opt.code === searchResult?.landInfo?.constructionType)|| "");
+  const [constructionType, setConstructionType] = useState(
+    landData?.constructionType || 
+    (searchResult?.additionalDetails?.constructionType ? {
+      "code": searchResult?.additionalDetails?.constructionType,
+      "i18nKey": searchResult?.additionalDetails?.constructionType
+    } : "") || 
+    ""
+  );  
 
   // Land Record Numbers
   const [oldDagNumber, setOldDagNumber] = useState(landData?.oldDagNumber || searchResult?.landInfo?.oldDagNumber ||"");
@@ -96,21 +104,21 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
   const [westOwner, setWestOwner] = useState(landData?.adjoiningOwners?.west || searchResult?.additionalDetails?.adjoiningOwners?.west || "");
 
   // Future Provisions
-  const [verticalExtension, setVerticalExtension] = useState(landData?.futureProvisions?.verticalExtension|| searchResult?.landInfo?.verticalExtension || "NO");
-  const [verticalExtensionArea, setVerticalExtensionArea] = useState(landData?.futureProvisions?.verticalExtensionArea || searchResult?.landInfo?.verticalExtensionArea|| "");
-  const [horizontalExtension, setHorizontalExtension] = useState(landData?.futureProvisions?.horizontalExtension || searchResult?.landInfo?.horizontalExtension || "NO");
-  const [horizontalExtensionArea, setHorizontalExtensionArea] = useState(landData?.futureProvisions?.horizontalExtensionArea || searchResult?.landInfo?.horizontalExtensionArea|| "");
+  
+  const [verticalExtension, setVerticalExtension] = useState(landData?.futureProvisions?.verticalExtension || searchResult?.additionalDetails?.futureProvisions?.verticalExtension || "NO");
+  const [verticalExtensionArea, setVerticalExtensionArea] = useState(landData?.futureProvisions?.verticalExtensionArea || searchResult?.additionalDetails?.futureProvisions?.verticalExtensionArea || "");
+  const [horizontalExtension, setHorizontalExtension] = useState(landData?.futureProvisions?.horizontalExtension || searchResult?.additionalDetails?.futureProvisions?.horizontalExtension || "NO");
+  const [horizontalExtensionArea, setHorizontalExtensionArea] = useState(landData?.futureProvisions?.horizontalExtensionArea || searchResult?.additionalDetails?.futureProvisions?.horizontalExtensionArea || "");
 
   // RTP and Occupancy
-  const searchResultRTPCategory = rtpCategoryOptions.find(opt => opt.i18nKey === searchResult?.rtpDetails?.rtpCategory)
-  const [rtpCategory, setRtpCategory] = useState(landData?.rtpCategory || searchResultRTPCategory||"");
+  const [rtpCategory, setRtpCategory] = useState(landData?.rtpCategory || (searchResult?.rtpDetails?.rtpCategory ? {"code": searchResult?.rtpDetails?.rtpCategory, "i18nKey": searchResult?.rtpDetails?.rtpCategory} : "") || "");
   const [registeredTechnicalPerson, setRegisteredTechnicalPerson] = useState(landData?.registeredTechnicalPerson || rtpOptions.find(opt => opt.name === searchResult?.rtpDetails?.rtpName) ||"");
-  const [occupancyType, setOccupancyType] = useState(landData?.occupancyType || occupancyTypeOptions.find(opt => opt.code === searchResult?.landInfo?.units?.[0]?.occupancyType) || "");
+  const [occupancyType, setOccupancyType] = useState(landData?.occupancyType || (searchResult?.landInfo?.units?.[0]?.occupancyType ? {"code": searchResult?.landInfo?.units[0].occupancyType, "i18nKey": searchResult?.landInfo?.units[0].occupancyType} : "") || "");
 
   // TOD Benefits
   const [todBenefits, setTodBenefits] = useState(landData?.todBenefits || futureProvisionOptions.find(opt => opt.code === searchResult?.additionalDetails?.todBenefits)  ||"NO");
-  const [todWithTdr, setTodWithTdr] = useState(landData?.todWithTdr ||  false);
-  const [todZone, setTodZone] = useState(landData?.todZone || "");
+  const [todWithTdr, setTodWithTdr] = useState(landData?.todWithTdr || searchResult?.additionalDetails?.todWithTdr  ||  false);
+  const [todZone, setTodZone] = useState(landData?.todZone || searchResult?.additionalDetails?.todZone || "");
   const [tdrUsed, setTdrUsed] = useState(landData?.tdrUsed || futureProvisionOptions.find(opt => opt.code === searchResult?.additionalDetails?.tdrUsed)||"NO");
   const [todAcknowledgement, setTodAcknowledgement] = useState(landData?.todAcknowledgement || searchResult?.additionalDetails?.todAcknowledgement||false);
 
@@ -328,7 +336,10 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
           />
 
           {/* Total Plot Area */}
-          <CardLabel>{`${t("BPA_TOTAL_PLOT_AREA")}`} <span className="check-page-link-button">*</span></CardLabel>
+          <CardLabel>
+            {`${t("BPA_TOTAL_PLOT_AREA")}`} <span className="check-page-link-button">*</span>
+            {totalPlotArea && <span style={{ color: "#666", fontSize: "12px", marginLeft: "8px" }}>({totalPlotArea} sq m)</span>}
+            </CardLabel>          
           <TextInput
             t={t}
             type="number"
@@ -353,7 +364,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             ValidationRequired={true}
           />
 
-          <CardLabel>{`${t("BPA_SOUTH_OWNER")}`}</CardLabel>
+          <CardLabel>{`${t("BPA_SOUTH_OWNER")}`} <span className="check-page-link-button">*</span></CardLabel>
           <TextInput
             t={t}
             type="text"
@@ -363,7 +374,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             onChange={(e) => setSouthOwner(e.target.value)}
           />
 
-          <CardLabel>{`${t("BPA_EAST_OWNER")}`}</CardLabel>
+          <CardLabel>{`${t("BPA_EAST_OWNER")}`} <span className="check-page-link-button">*</span></CardLabel>
           <TextInput
             t={t}
             type="text"
@@ -373,7 +384,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             onChange={(e) => setEastOwner(e.target.value)}
           />
 
-          <CardLabel>{`${t("BPA_WEST_OWNER")}`}</CardLabel>
+          <CardLabel>{`${t("BPA_WEST_OWNER")}`} <span className="check-page-link-button">*</span></CardLabel>
           <TextInput
             t={t}
             type="text"
@@ -468,6 +479,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             selected={occupancyType}
             optionKey="i18nKey"
             select={setOccupancyType}
+            optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
             placeholder={t("BPA_SELECT_OCCUPANCY_TYPE")}
           />
 
@@ -577,7 +589,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
           {todBenefits?.code === "YES" && (
               <CheckBox
                 label={t("BPA_TOD_ACKNOWLEDGEMENT")}
-                value={todAcknowledgement}
+                checked={todAcknowledgement}
                 onChange={(e) => setTodAcknowledgement(e.target.checked)}
               />
           )}

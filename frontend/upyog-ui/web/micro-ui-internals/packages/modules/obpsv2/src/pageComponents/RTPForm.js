@@ -5,18 +5,31 @@ import { getPattern, stringReplaceAll, sortDropdownNames  } from "../utils";
 
 const RTPForm = ({ t, config, onSelect, userType, formData, ownerIndex = 0, addNewOwner, isShowToast, isSubmitBtnDisable, setIsShowToast }) => {
     const { pathname: url } = useLocation();
-    const tenantId = Digit.ULBService.getCurrentTenantId();
+    const tenantId =Digit.ULBService.getCitizenCurrentTenant(true)
     const stateId = Digit.ULBService.getStateId();
     const [citymoduleList, setCitymoduleList] = useState([]);
     const [name, setName] = useState(formData?.Scrutiny?.[0]?.applicantName);
-    const [tenantIdData, setTenantIdData] = useState(formData?.Scrutiny?.[0]?.tenantIdData);
+    const [tenantIdData, setTenantIdData] = useState(formData?.Scrutiny?.[0]?.tenantIdData || {code: tenantId, name: tenantId, i18nKey:tenantId});
     const [uploadedFile, setUploadedFile] = useState(() => formData?.Scrutiny?.[0]?.proofIdentity?.fileStoreId || null);
     const [file, setFile] = useState(formData?.owners?.documents?.proofIdentity);
     const [error, setError] = useState(null);
     const [uploadMessage, setUploadMessage] = useState("");
     const [showToast, setShowToast] = useState(null);
     const history = useHistory();
+    const location = useLocation();
+    
+    // Extract applicationNo from URL
+    const urlParams = new URLSearchParams(location.search);
+    const applicationNo = urlParams.get('applicationNo');
 
+    // Fetch BPA data if applicationNo is present
+    const { data: bpaData } = Digit.Hooks.obpsv2.useBPASearchApi(
+        {
+            tenantId,
+            filters: { applicationNo },
+        },
+        { enabled: !!applicationNo }
+    );
 
     let validation = { };
 
@@ -68,6 +81,13 @@ const RTPForm = ({ t, config, onSelect, userType, formData, ownerIndex = 0, addN
         }
     }, [citymodules]);
 
+    // Auto-fill applicant name from BPA data
+    useEffect(() => {
+        if (bpaData?.bpa?.[0]?.landInfo?.owners?.[0]?.name && !name) {
+            setName(bpaData.bpa[0].landInfo.owners[0].name);
+        }
+    }, [bpaData]);
+
     useEffect(() => {
         if (uploadMessage || isShowToast) {
             setName("");
@@ -77,8 +97,11 @@ const RTPForm = ({ t, config, onSelect, userType, formData, ownerIndex = 0, addN
             setUploadMessage("");
         }
         if (isShowToast) {
+            const redirectUrl = applicationNo 
+                ? `/upyog-ui/citizen/obpsv2/rtp/apply/acknowledgement?applicationNo=${applicationNo}`
+                : `/upyog-ui/citizen/obpsv2/rtp/apply/acknowledgement`;
             history.replace(
-                `/upyog-ui/citizen/obpsv2/rtp/apply/acknowledgement`,
+                redirectUrl,
                 { data: isShowToast?.label ? isShowToast?.label : "BPA_INTERNAL_SERVER_ERROR", type: "ERROR"}
               );
         }

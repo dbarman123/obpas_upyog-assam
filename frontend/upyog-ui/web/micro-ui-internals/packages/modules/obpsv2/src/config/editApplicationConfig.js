@@ -40,7 +40,6 @@ export const editApplicationConfig = [
           hideInEmployee: true,
           isMandatory: true,
           texts: {
-            header:"APPLICANT_ADDRESS_DETAILS",
             submitBarLabel: "CS_COMMON_NEXT",
           },
         },
@@ -64,7 +63,7 @@ export const editApplicationConfig = [
             withoutLabel: true,
             key: "documents",
             type: "component",
-            nextStep: "form22A",
+            nextStep: null,
             hideInEmployee: true,
             isMandatory: true,
             texts: {

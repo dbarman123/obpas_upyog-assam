@@ -47,7 +47,35 @@ export const checkForNotNull = (value = "") => {
 };
 
 export const checkForNA = (value = "") => {
-  return checkForNotNull(value) ? value : "CS_NA";
+  return checkForNotNull(value) ? value : "NA";
+};
+
+export const showHidingLinksForStakeholder = (roles = []) => {
+  let userInfos = sessionStorage.getItem("Digit.citizen.userRequestObject");
+  const userInfo = userInfos ? JSON.parse(userInfos) : {};
+  let checkedRoles = [];
+  const rolearray = roles?.map((role) => {
+    userInfo?.value?.info?.roles?.map((item) => {
+      if (item.code === role.code && item.tenantId === role.tenantId) {
+        checkedRoles.push(item);
+      }
+    });
+  });
+  return checkedRoles?.length;
+};
+
+export const showHidingLinksForBPA = (roles = []) => {
+  const userInfo = Digit.UserService.getUser();
+  const tenantId = Digit.ULBService.getCurrentTenantId();
+  let checkedRoles = [];
+  const rolearray = roles?.map((role) => {
+    userInfo?.info?.roles?.map((item) => {
+      if (item.code == role && item.tenantId === tenantId) {
+        checkedRoles.push(item);
+      }
+    });
+  });
+  return checkedRoles?.length;
 };
 
 export const bpaPayload = async(data) => {
@@ -97,13 +125,13 @@ export const bpaPayload = async(data) => {
         adjoiningOwners: data?.land?.adjoiningOwners,
         futureProvisions: data?.land?.futureProvisions,
         todBenefits: data?.land?.todBenefits?.code,
-        todWithTdr: data?.land?.todWithTdr?.code,
-        todZone: data?.land?.todZone?.code,
+        todWithTdr: data?.land?.todWithTdr,
+        todZone: data?.land?.todZone,
         tdrUsed: data?.land?.tdrUsed?.code,
         todAcknowledgement: data?.land?.todAcknowledgement,
       },
       areaMapping: {
-        buildingPermitAuthority: "GMC",
+        buildingPermitAuthority: data?.areaMapping?.bpAuthority?.code,
         district: data?.areaMapping?.district?.code,
         mouza: data?.areaMapping?.mouza?.code || data?.areaMapping?.mouza,
         planningArea: data?.areaMapping?.planningArea?.code,
@@ -144,6 +172,7 @@ export const bpaPayload = async(data) => {
           addressLine1: data?.address?.permanent?.addressLine1,
           addressLine2: data?.address?.permanent?.addressLine2,
           city: data?.address?.permanent?.city?.code,
+          locality:{code: data?.address?.permanent?.city?.code},
           country: "INDIA",
           district: data?.address?.permanent?.district?.code,
           houseNo: data?.address?.permanent?.houseNo,

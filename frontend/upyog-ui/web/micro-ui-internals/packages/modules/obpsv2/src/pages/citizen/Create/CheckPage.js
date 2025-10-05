@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Fragment } from "react";
 import {
   Card,
   CardHeader,
@@ -49,7 +49,7 @@ const CheckPage = ({ onSubmit, value = {} }) => {
   const toggleExpanded = (key) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-  const { applicant = {}, address = {}, land = {}, documents = {} } = value;
+  const {areaMapping={}, applicant = {}, address = {}, land = {}, documents = {} } = value;
   const flow = window.location.href.includes("editApplication") ? "editApplication" : "buildingPermit"
   const setDeclarationHandler = () => {
     setAgree(!agree);
@@ -173,6 +173,52 @@ const CheckPage = ({ onSubmit, value = {} }) => {
           }}
         >
           <CardSubHeader style={{ fontSize: "24px", marginTop: "24px" }}>
+            {t("BPA_AREA_MAPPING")}
+          </CardSubHeader>
+          <ActionButton
+            jumpTo={`/upyog-ui/citizen/obpsv2/building-permit/area-mapping`}
+          />
+        </div>
+
+        <StatusTable>
+          <Row
+            label={t("DISTRICT")}
+            text={checkForNA(t(areaMapping?.district?.code))}
+          />
+          <Row
+            label={t("PLANNING_AREA")}
+            text={checkForNA(t(areaMapping?.planningArea?.code))}
+          />
+          <Row
+            label={t("PP_AUTHORITY")}
+            text={checkForNA(t(areaMapping?.ppAuthority?.code))}
+          />
+          <Row
+            label={t("BP_AUTHORITY")}
+            text={checkForNA(t(areaMapping?.bpAuthority?.code))}
+          />
+          <Row
+            label={t("REVENUE_VILLAGE")}
+            text={checkForNA(t(areaMapping?.revenueVillage?.code))}
+          />
+          <Row
+            label={t("MOUZA")}
+            text={checkForNA(t(areaMapping?.mouza?.code) || t(areaMapping?.mouza))}
+          />
+          <Row
+            label={t("WARD")}
+            text={checkForNA(areaMapping?.ward)}
+          />
+        </StatusTable>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <CardSubHeader style={{ fontSize: "24px", marginTop: "24px" }}>
             {t("BPA_APPLICANT_DETAILS")}
           </CardSubHeader>
           <ActionButton
@@ -240,7 +286,7 @@ const CheckPage = ({ onSubmit, value = {} }) => {
           }}
         >
           <CardSubHeader style={{ fontSize: "20px" }}>
-            {t("BPA_PERMANENT_ADDRESS")}
+            {t("BPA_SITE_ADDRESS")}
           </CardSubHeader>
         </div>
 
@@ -259,15 +305,15 @@ const CheckPage = ({ onSubmit, value = {} }) => {
           />
           <Row
             label={t("BPA_DISTRICT")}
-            text={checkForNA(address?.permanent?.district?.name)}
+            text={checkForNA(t(address?.permanent?.district?.code))}
           />
           <Row
             label={t("BPA_CITY_VILLAGE")}
-            text={checkForNA(address?.permanent?.city?.name)}
+            text={checkForNA(t(address?.permanent?.city?.code))}
           />
           <Row
             label={t("BPA_STATE")}
-            text={checkForNA(address?.permanent?.state?.name)}
+            text={checkForNA(t(address?.permanent?.state?.code))}
           />
           <Row
             label={t("BPA_PIN_CODE")}
@@ -291,7 +337,7 @@ const CheckPage = ({ onSubmit, value = {} }) => {
         {address?.sameAsPermanent ? (
           <div style={{ marginTop: "16px" }}>
             <CheckBox
-              label={t("BPA_SAME_AS_PERMANENT")}
+              label={t("BPA_SAME_AS_SITE_ADDRESS")}
               checked={true}
               disabled={true}
             />
@@ -312,15 +358,15 @@ const CheckPage = ({ onSubmit, value = {} }) => {
             />
             <Row
               label={t("BPA_DISTRICT")}
-              text={checkForNA(address?.correspondence?.district?.name)}
+              text={checkForNA(t(address?.correspondence?.district?.code))}
             />
             <Row
               label={t("BPA_CITY_VILLAGE")}
-              text={checkForNA(address?.correspondence?.city?.name)}
+              text={checkForNA(t(address?.correspondence?.city?.code))}
             />
             <Row
               label={t("BPA_STATE")}
-              text={checkForNA(address?.correspondence?.state?.name)}
+              text={checkForNA(t(address?.correspondence?.state?.code))}
             />
             <Row
               label={t("BPA_PIN_CODE")}
@@ -348,7 +394,7 @@ const CheckPage = ({ onSubmit, value = {} }) => {
         <StatusTable>
           <Row
             label={t("BPA_CONSTRUCTION_TYPE")}
-            text={checkForNA(land?.constructionType?.name)}
+            text={checkForNA(t(land?.constructionType?.code))}
           />
           <Row
             label={t("BPA_OLD_DAG_NUMBER")}
@@ -368,7 +414,7 @@ const CheckPage = ({ onSubmit, value = {} }) => {
           />
           <Row
             label={t("BPA_TOTAL_PLOT_AREA")}
-            text={land?.totalPlotArea ? `${land.totalPlotArea} sq. ft.` : ""}
+            text={land?.totalPlotArea ? `${land.totalPlotArea} sq. m.` : ""}
           />
         </StatusTable>
 
@@ -420,47 +466,77 @@ const CheckPage = ({ onSubmit, value = {} }) => {
         <StatusTable>
           <Row
             label={t("BPA_VERTICAL_EXTENSION")}
-            text={checkForNA(land?.futureProvisions?.verticalExtension?.name)}
+            text={checkForNA(t(land?.futureProvisions?.verticalExtension?.code))}
           />
+          {land?.futureProvisions?.verticalExtension?.code === "YES" && (
+            <Row
+              label={t("BPA_VERTICAL_EXTENSION_AREA")}
+              text={`${land?.futureProvisions?.verticalExtensionArea} floors`}
+            />
+          )}
           <Row
             label={t("BPA_HORIZONTAL_EXTENSION")}
-            text={checkForNA(land?.futureProvisions?.horizontalExtension?.name)}
+            text={checkForNA(t(land?.futureProvisions?.horizontalExtension?.code))}
           />
+          {land?.futureProvisions?.horizontalExtension?.code === "YES" && (
+            <Row
+              label={t("BPA_HORIZONTAL_EXTENSION_AREA")}
+              text={`${land?.futureProvisions?.horizontalExtensionArea} sq m`}
+            />
+          )}
         </StatusTable>
 
         <StatusTable style={{ marginTop: "16px" }}>
           <Row
             label={t("BPA_RTP_CATEGORY")}
-            text={checkForNA(land?.rtpCategory?.name)}
+            text={checkForNA(t(land?.rtpCategory?.code))}
           />
           <Row
             label={t("BPA_REGISTERED_TECHNICAL_PERSON")}
-            text={checkForNA(land?.registeredTechnicalPerson?.name)}
+            text={checkForNA(t(land?.registeredTechnicalPerson?.code))}
           />
           <Row
             label={t("BPA_OCCUPANCY_TYPE")}
-            text={checkForNA(land?.occupancyType?.name)}
+            text={checkForNA(t(land?.occupancyType?.code))}
           />
           <Row
             label={t("BPA_TOD_BENEFITS")}
-            text={
-              land?.todBenefits
-                ? `${t("CS_YES")}, ${land.todBenefits}`
-                : t("CS_NO")
-            }
+            text={checkForNA(t(land?.todBenefits?.code))}
           />
-          <Row
-            label={t("BPA_FORM_36")}
-            text={land?.form36 ? t("BPA_FILE_UPLOADED") : t("CS_NA")}
-          />
-          <Row
-            label={t("BPA_FORM_39")}
-            text={land?.form39 ? t("BPA_FILE_UPLOADED") : t("CS_NA")}
-          />
-          <Row
-            label={t("BPA_TOD_ZONE")}
-            text={checkForNA(land?.todZone?.name)}
-          />
+          {land?.todBenefits?.code === "YES" && (
+            <>
+              <Row
+                label={t("BPA_TOD_WITH_TDR")}
+                text={checkForNA(t(land?.todWithTdr?.code))}
+              />
+              <Row
+                label={t("BPA_TOD_ZONE")}
+                text={checkForNA(t(land?.todZone?.code))}
+              />
+            </>
+          )}
+          {land?.documents && land.documents.length > 0 && (
+            <div style={{ marginTop: "16px" }}>
+              <DocumentsPreview
+                documents={[{
+                  values: land.documents.map(doc => ({
+                    title: doc.documentType === "FORM_36" ? "Form 36" : "Form 39",
+                    url: `/filestore/v1/files/id?tenantId=${Digit.ULBService.getCurrentTenantId()}&fileStoreId=${doc.fileStoreId}`,
+                    documentType: doc.documentType
+                  }))
+                }]}
+                svgStyles={{}}
+                isSendBackFlow={false}
+                isHrLine={true}
+                titleStyles={{
+                  fontSize: "16px",
+                  lineHeight: "20px",
+                  fontWeight: 600,
+                  marginBottom: "8px",
+                }}
+              />
+            </div>
+          )}
         </StatusTable>
         {window.location.href.includes("editApplication") ? (
           <React.Fragment>
@@ -481,22 +557,23 @@ const CheckPage = ({ onSubmit, value = {} }) => {
                 onClick={() => routeTo(`${routeLink}/document-details`)}
               />
               {
-                <DocumentsPreview
-                  documents={getOrderDocuments(applicationDocs)}
-                  svgStyles={{}}
-                  isSendBackFlow={false}
-                  isHrLine={true}
-                  titleStyles={{
-                    fontSize: "18px",
-                    lineHeight: "24px",
-                    fontWeight: 700,
-                    marginBottom: "10px",
-                  }}
-                />
+              <DocumentsPreview
+              documents={getOrderDocuments(applicationDocs)}
+              svgStyles={{}}
+              isSendBackFlow={false}
+              isHrLine={true}
+              hideTitle={true}
+              titleStyles={{
+                fontSize: "18px",
+                lineHeight: "24px",
+                fontWeight: 700,
+                marginBottom: "10px",
+              }}
+            />
               }
             </StatusTable>
             
-              <div
+              {/* <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -590,7 +667,7 @@ const CheckPage = ({ onSubmit, value = {} }) => {
                   </div>
                 </React.Fragment>
               )}
-            </StatusTable>
+            </StatusTable> */}
           </React.Fragment>
         ) : null}
 

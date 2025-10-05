@@ -2,7 +2,6 @@ import React, { Fragment } from "react";
 import { TextInput, SubmitBar, DatePicker, SearchField, Dropdown, CardLabelError, MobileNumber } from "@upyog/digit-ui-react-components";
 import { useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import useBusinessServiceData from "../../../../../libraries/src/hooks/obpsv2/useBusinessServiceData";
 const SearchFormFieldsComponent = ({ formState, Controller, register, control, t, reset, previousPage }) => {
   const stateTenantId = Digit.ULBService.getStateId();
   const tenantId = Digit.ULBService.getCitizenCurrentTenant(true) || Digit.ULBService.getCurrentTenantId();;
@@ -19,41 +18,36 @@ const SearchFormFieldsComponent = ({ formState, Controller, register, control, t
     Applicationtype: applicationType?.code || (userInformation?.roles?.filter((ob) => ob.code.includes("BPAREG_") ).length>0 &&  userInformation?.roles?.filter((ob) => ob.code.includes("BPA_") || ob.code.includes("CITIZEN") ).length<=0 ?"BPA_STAKEHOLDER_REGISTRATION" :"BUILDING_PLAN_SCRUTINY"),
     tenantId: stateTenantId,
   });
-  const businessServices = "BPA_GMDA_GMC";
-  const { isLoading, data: businessServiceData } = useBusinessServiceData(tenantId, businessServices, {});
-  let bpaStatus = [],
-    applicationStatuses = [];
-  businessServiceData?.BusinessServices?.map((data) => {
-    data.states.map((state) => {
-      if (state.state && state.applicationStatus) {
-        if (data.business == "bpa-services") {
-          bpaStatus.push({
-            code: state.applicationStatus,
-            i18nKey: `WF_BPA_${state.state}`,
-            module: data.business,
-          });
-        } 
-            
-          }
-        })
-      })
-  applicationStatuses = bpaStatus;
+
+    const applicationStatuses = [ { i18nKey: "Pending RTP Approval", code: "PENDING_RTP_APPROVAL", value: t("BPA_PENDING_RTP_APPROVAL") },
+      { i18nKey: "Edit Application", code: "EDIT_APPLICATION", value: t("BPA_EDIT_APPLICATION") },
+      { i18nKey: "GIS Validation", code: "GIS_VALIDATION", value: t("BPA_GIS_VALIDATION") },
+      { i18nKey: "Pending For Scrutiny", code: "PENDING_FOR_SCRUTINY", value: t("BPA_PENDING_FOR_SCRUTINY") },
+      { i18nKey: "Send To Citizen", code: "SEND_TO_CITIZEN", value: t("BPA_SEND_TO_CITIZEN") },
+      { i18nKey: "Citizen Approval", code: "CITIZEN_APPROVAL", value: t("BPA_CITIZEN_APPROVAL") },
+      { i18nKey: "Pending GMDA Engineer", code: "PENDING_GMDA_ENGINEER", value: t("BPA_PENDING_GMDA_ENGINEER") },
+      { i18nKey: "Pending Town Planner", code: "PENDING_TOWNPLANNER", value: t("BPA_PENDING_TOWNPLANNER") },
+      { i18nKey: "Pending CEO", code: "PENDING_CEO", value: t("BPA_PENDING_CEO") },
+      { i18nKey: "Payment Pending", code: "PAYMENT_PENDING", value: t("BPA_PAYMENT_PENDING") },
+      { i18nKey: "Forwarded To Zonal Officer", code: "FORWARDED_TO_ZONAL_OFFICER", value: t("BPA_FORWARDED_TO_ZONAL_OFFICER") },
+      { i18nKey: "Forwarded To Associate Planner", code: "FORWARDED_TO_ASSOCIATE_PLANNER", value: t("BPA_FORWARDED_TO_ASSOCIATE_PLANNER") },
+      { i18nKey: "Pending Commissioner", code: "PENDING_COMMISSIONER", value: t("BPA_PENDING_COMMISSIONER") },
+      { i18nKey: "Citizen Final Payment", code: "CITIZEN_FINAL_PAYMENT", value: t("BPA_CITIZEN_FINAL_PAYMENT") },
+      { i18nKey: "Application Completed", code: "APPLICATION_COMPLETED", value: t("BPA_APPLICATION_COMPLETED") },
+      { i18nKey: "Rejected", code: "REJECTED", value: t("BPA_REJECTED") }]; 
 
   return (
     <>
       <SearchField>
-        <label>{t("OBPAS_SEARCH_APPLICATION_NO_LABEL")}</label>
+        <label>{t("BPA_APPLICATION_NUMBER_LABEL")}</label>
         <TextInput name="applicationNo" inputRef={register({})} />
       </SearchField>
-      {
-        window.location.href.includes("citizen/obpsv2/rtp/search/application") &&
-        <SearchField>
-           
-          <CardLabelError>{formState?.errors?.["mobileNumber"]?.message}</CardLabelError>
-          <label>{t("CORE_COMMON_MOBILE_NUMBER")}</label>
-          <MobileNumber name="mobileNumber"
-           type="number"
-           inputRef={register({
+      
+      <SearchField>
+        <label>{t("CORE_COMMON_MOBILE_NUMBER")}</label>
+        <MobileNumber
+          name="mobileNumber"
+          inputRef={register({
             minLength: {
               value: 10,
               message: t("CORE_COMMON_MOBILE_ERROR"),
@@ -67,60 +61,79 @@ const SearchFormFieldsComponent = ({ formState, Controller, register, control, t
               message: t("CORE_COMMON_MOBILE_ERROR"),
             },
           })}
-
-
+          type="number"
         />
-        </SearchField>
-      }
-      <SearchField>
-        <label>{t("OBPAS_SEARCH_WARD_LABEL")}</label>
-        <TextInput name="wardNo" inputRef={register({})} />
+        <CardLabelError>{formState?.errors?.["mobileNumber"]?.message}</CardLabelError>
       </SearchField>
+      
       <SearchField>
-        <label>{t("OBPAS_APP_FROM_DATE_SEARCH_PARAM")}</label>
-        <Controller render={(props) => <DatePicker date={props.value} onChange={props.onChange} />} name="fromDate" control={control} />
+        <label>{t("APPLICANT_NAME")}</label>
+        <TextInput name="applicantName" inputRef={register({})} />
       </SearchField>
+      
       <SearchField>
-          <label>{t("OBPAS_APP_TO_DATE_SEARCH_PARAM")}</label>
-          <Controller render={(props) => <DatePicker date={props.value} onChange={props.onChange} />} name="toDate" control={control} />
-      </SearchField>
-      <SearchField>
-        <label>{t("OBPAS_SEARCH_APPLICATION_STATUS_LABEL")}</label>
+        <label>{t("BPA_STATUS_LABEL")}</label>
         <Controller
           control={control}
           name="status"
           render={(props) => (
-            <Dropdown selected={props.value} select={props.onChange} onBlur={props.onBlur} option={applicationStatuses} optionKey="i18nKey" t={t} />
+            <Dropdown 
+              selected={props.value} 
+              select={props.onChange} 
+              onBlur={props.onBlur} 
+              option={applicationStatuses} 
+              optionKey="i18nKey" 
+              t={t}
+              disable={false}
+            />
           )}
         />
       </SearchField>
-      {window.location.href.includes("citizen/obpsv2/search/application") && <SearchField></SearchField>}
+      
+      <SearchField>
+        <label>{t("BPA_FROM_DATE_LABEL")}</label>
+        <Controller 
+          render={(props) => <DatePicker date={props.value} disabled={false} onChange={props.onChange} />} 
+          name="fromDate" 
+          control={control} 
+        />
+      </SearchField>
+      
+      <SearchField>
+        <label>{t("BPA_TO_DATE_LABEL")}</label>
+        <Controller 
+          render={(props) => <DatePicker date={props.value} disabled={false} onChange={props.onChange} />} 
+          name="toDate" 
+          control={control} 
+        />
+      </SearchField>
+      <SearchField>
+      </SearchField>
       <SearchField className="submit">
-              <SubmitBar label={t("ES_COMMON_SEARCH")} submit />
-              <p
-                style={{ marginTop: "24px" }}
-                onClick={() => {
-                  reset({
-                    applicationNo: "",
-                    mobileNumber: window.location.href.includes("/search/obps-application") ? currentUserPhoneNumber : "",
-                    // mobileNumber: "",
-                    fromDate: "",
-                    toDate: "",
-                    status: "",
-                    offset: 0,
-                    limit: 10,
-                    sortBy: "commencementDate",
-                    sortOrder: "DESC",
-                    applicationType: "",
-                    "isSubmitSuccessful":false,
-                  });
-                  previousPage();
-                  // closeMobilePopupModal()
-                }}
-              >
-                {t(`ES_COMMON_CLEAR_ALL`)}
-              </p>
-            </SearchField>
+        <SubmitBar label={t("ES_COMMON_SEARCH")} submit />
+        <p
+          style={{ marginTop: "10px" }}
+          onClick={() => {
+            reset({
+              applicationNo: "",
+              mobileNumber: "",
+              applicantName: "",
+              fromDate: "",
+              toDate: "",
+              status: "",
+              offset: 0,
+              limit: 10,
+              sortBy: "commencementDate",
+              sortOrder: "DESC",
+              applicationType: "",
+              "isSubmitSuccessful":false,
+            });
+            previousPage();
+          }}
+        >
+          {t(`ES_COMMON_CLEAR_ALL`)}
+        </p>
+      </SearchField>
      
     </>
   );

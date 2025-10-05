@@ -29,8 +29,8 @@ const RTASearchApplication = ({ tenantId, t, onSubmit, data, error, searchData, 
   const { register, control, handleSubmit, setValue, getValues, reset, formState } = useForm({
     defaultValues: {
       applicationNo: "",
-      mobileNumber: window.location.href.includes("/search/obps-application") ? currentUserPhoneNumber : "",
-      // mobileNumber: "",
+      mobileNumber: "",
+      applicantName: "",
       fromDate: "",
       toDate: "",
       status: "",
@@ -55,8 +55,8 @@ const RTASearchApplication = ({ tenantId, t, onSubmit, data, error, searchData, 
       //reset({ ...searchData, isSubmitSuccessful: false });
       reset({
         applicationNo: "",
-        // mobileNumber: "",
-       mobileNumber: window.location.href.includes("/search/obps-application") ? Digit.UserService.getUser()?.info?.mobileNumber : "",
+        mobileNumber: "",
+        applicantName: "",
         fromDate: "",
         toDate: "",
         status: "",
