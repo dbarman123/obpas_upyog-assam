@@ -117,6 +117,7 @@ public class KitchenExtract extends FeatureExtract {
                                         }
 
                         for (FloorUnit floorUnit : floor.getUnits()) {
+                            LOG.debug("Extracting Kitchen data for Block: " + block.getNumber() + " Floor: " + floor.getNumber() + " Unit: " + floorUnit.getUnitNumber());
                             extractKitchensData(pl, block, floor, floorUnit);
                         }
                     }
@@ -145,6 +146,7 @@ public class KitchenExtract extends FeatureExtract {
 
         List<BigDecimal> kitchenHeight = Util.getListOfDimensionByColourCode(pl, kitchenLayer, DxfFileConstants.KITCHEN_HEIGHT_COLOR);
         List<BigDecimal> kitchenWidth = Util.getListOfDimensionByColourCode(pl, kitchenLayer, DxfFileConstants.KITCHEN_WIDTH_COLOR);
+        LOG.debug("Kitchen Layer: " + kitchenLayer + " Kitchen Heights: " + kitchenHeight + " Kitchen Widths: " + kitchenWidth);
 
         List<DXFLWPolyline> residentialKitchenPolyLines = Util.getPolyLinesByLayerAndColor(pl.getDoc(),
                 kitchenLayer, DxfFileConstants.RESIDENTIAL_KITCHEN_ROOM_COLOR, pl);
@@ -158,6 +160,13 @@ public class KitchenExtract extends FeatureExtract {
                 pl.getDoc(), kitchenLayer, DxfFileConstants.COMMERCIAL_KITCHEN_STORE_ROOM_COLOR, pl);
         List<DXFLWPolyline> commercialKitchenDiningPolyLines = Util.getPolyLinesByLayerAndColor(
                 pl.getDoc(), kitchenLayer, DxfFileConstants.COMMERCIAL_KITCHEN_DINING_ROOM_COLOR, pl);
+
+        LOG.debug("Found - Residential Kitchens: " + residentialKitchenPolyLines.size() +
+                ", Residential Stores: " + residentialKitchenStorePolyLines.size() +
+                ", Residential Dining: " + residentialKitchenDiningPolyLines.size() +
+                ", Commercial Kitchens: " + commercialKitchenPolyLines.size() +
+                ", Commercial Stores: " + commercialKitchenStorePolyLines.size() +
+                ", Commercial Dining: " + commercialKitchenDiningPolyLines.size());
 
         if (!residentialKitchenPolyLines.isEmpty())
             kitchenPolyLines.addAll(residentialKitchenPolyLines);
@@ -197,6 +206,7 @@ public class KitchenExtract extends FeatureExtract {
         }
 
         int noOfResidentialKitchens = residentialKitchenPolyLines.size();
+        LOG.debug("No of Residential Kitchens found: " + noOfResidentialKitchens);
         pl.setTotalKitchens(BigDecimal.valueOf(noOfResidentialKitchens));
     }
 

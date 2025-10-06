@@ -27,6 +27,7 @@ public class VerandahExtract extends FeatureExtract {
 
 	@Override
 	public PlanDetail extract(PlanDetail pl) {
+        LOG.debug("Starting of VerandahExtract extract method");
 		for (Block b : pl.getBlocks()) {
 			if (b.getBuilding() != null && b.getBuilding().getFloors() != null
 					&& !b.getBuilding().getFloors().isEmpty()) {
@@ -65,6 +66,7 @@ public class VerandahExtract extends FeatureExtract {
 			}
 		}
 
+        LOG.debug("Ending of VerandahExtract extract method");
 		return pl;
 	}
 

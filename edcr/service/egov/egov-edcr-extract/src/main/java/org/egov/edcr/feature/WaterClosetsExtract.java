@@ -29,6 +29,7 @@ public class WaterClosetsExtract extends FeatureExtract {
 
     @Override
     public PlanDetail extract(PlanDetail planDetail) {
+        LOG.debug("Starting of WaterClosetsExtract extract method");
         List<DXFLWPolyline> rooms;
         List<DXFLWPolyline> ventilationWC;
         List<Measurement> roomMeasurements;
@@ -72,6 +73,8 @@ public class WaterClosetsExtract extends FeatureExtract {
 
                     if(f.getUnits() != null && !f.getUnits().isEmpty())
                         for(FloorUnit floorUnit : f.getUnits()) {
+                            LOG.debug("Processing WaterCloset for Block: " + block.getNumber() + " Floor: " + f.getNumber() + " Unit: " + floorUnit.getUnitNumber());
+
                             String layerName = layerNames.getLayerName("LAYER_NAME_BLOCK_NAME_PREFIX") + block.getNumber() + "_"
                                     + layerNames.getLayerName("LAYER_NAME_FLOOR_NAME_PREFIX") + f.getNumber() + "_"
                                     + layerNames.getLayerName("LAYER_NAME_UNIT_NAME_PREFIX") + floorUnit.getUnitNumber() + "_"
@@ -80,6 +83,9 @@ public class WaterClosetsExtract extends FeatureExtract {
                                     + layerNames.getLayerName("LAYER_NAME_FLOOR_NAME_PREFIX") + f.getNumber() + "_"
                                     + layerNames.getLayerName("LAYER_NAME_UNIT_NAME_PREFIX") + floorUnit.getUnitNumber() + "_"
                                     + layerNames.getLayerName("LAYER_NAME_WATER_CLOSET_VENTILATION");
+
+                            LOG.debug("Water Closet Layer Name: " + layerName);
+                            LOG.debug("Water Closet Ventilation Layer Name: " + ventilationLayerName);
                             rooms = Util.getPolyLinesByLayer(planDetail.getDoc(), layerName);
                             ventilationWC = Util.getPolyLinesByLayer(planDetail.getDoc(), ventilationLayerName);
                             roomMeasurements = rooms.stream()
@@ -88,7 +94,6 @@ public class WaterClosetsExtract extends FeatureExtract {
                                     .map(flightPolyLine -> new MeasurementDetail(flightPolyLine, true)).collect(Collectors.toList());
                             floorUnit.setWaterClosets(new Room());
 
-//                    f.setVentilation(ventilationMeasurements);
                             floorUnit.getWaterClosets().setRooms(roomMeasurements);
                             floorUnit.getWaterClosets().setWaterClosetVentilation(ventilationMeasurements);
                             roomHeights = Util.getListOfDimensionValueByLayer(planDetail,
@@ -100,9 +105,11 @@ public class WaterClosetsExtract extends FeatureExtract {
                                 roomHeightsList.add(height);
                             }
                             floorUnit.getWaterClosets().setHeights(roomHeightsList);
+                            LOG.debug("Added WaterCloset with " + floorUnit.getWaterClosets().getRooms().size() + " rooms and " + floorUnit.getWaterClosets().getHeights().size() + " heights to Unit: " + floorUnit.getUnitNumber());
                         }
                 }
 
+        LOG.debug("Ending of WaterClosetsExtract extract method");
         return planDetail;
     }
 

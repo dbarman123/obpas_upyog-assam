@@ -101,21 +101,35 @@ public class Kitchen extends FeatureProcess {
      */
     @Override
     public Plan process(Plan pl) {
+        LOG.info("Starting Plan processing for Plan ID");
         validate(pl);
         Map<String, Integer> heightOfRoomFeaturesColor = pl.getSubFeatureColorCodesMaster().get(HEIGHT_OF_ROOM);
+        LOG.info("Retrieved heightOfRoomFeaturesColor map with {} entries",
+                heightOfRoomFeaturesColor != null ? heightOfRoomFeaturesColor.size() : 0);
 
-        if (pl == null || pl.getBlocks() == null) return pl;
+        if (pl == null || pl.getBlocks() == null){
+            LOG.warn("Plan or Plan blocks are null, returning plan as is");
+            return pl;
+        }
 
         OccupancyTypeHelper mostRestrictiveOccupancy = pl.getVirtualBuilding() != null
                 ? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
                 : null;
+        LOG.info("Most restrictive occupancy determined: {}",
+                mostRestrictiveOccupancy != null ? mostRestrictiveOccupancy.getType().getCode() : "null");
 
-        if (mostRestrictiveOccupancy == null || mostRestrictiveOccupancy.getSubtype() == null)
+        if (mostRestrictiveOccupancy == null || mostRestrictiveOccupancy.getSubtype() == null){
+            LOG.warn("Most restrictive occupancy or its subtype is null, returning plan as is");
             return pl;
+        }
 
         String occupancyCode = mostRestrictiveOccupancy.getType().getCode();
-        if (!(A.equalsIgnoreCase(occupancyCode) || F.equalsIgnoreCase(occupancyCode)))
+        LOG.info("Occupancy code of most restrictive occupancy: {}", occupancyCode);
+
+        if (!(A.equalsIgnoreCase(occupancyCode) || F.equalsIgnoreCase(occupancyCode))) {
+            LOG.warn("Occupancy code {} is not A or F, skipping processing", occupancyCode);
             return pl;
+        }
 
         for (Block block : pl.getBlocks()) {
             processKitchenForBlock(block, pl, mostRestrictiveOccupancy, heightOfRoomFeaturesColor);

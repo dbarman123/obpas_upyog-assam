@@ -21,15 +21,17 @@ public class BasementExtract extends FeatureExtract {
 
     @Override
     public PlanDetail extract(PlanDetail pl) {
+        LOG.debug("Starting of BasementExtract extract method");
         Map<String, Integer> basementFeaturesColor = pl.getSubFeatureColorCodesMaster().get("Basement");
         for (Block b : pl.getBlocks())
             if (b.getBuilding() != null && b.getBuilding().getFloors() != null
                     && !b.getBuilding().getFloors().isEmpty())
-                for (Floor f : b.getBuilding().getFloors())
+                for (Floor f : b.getBuilding().getFloors()) {
+                    LOG.debug("Base floor: " + f.getNumber());
                     if (f.getNumber() == -1) {
                         String basementFootPrint = layerNames.getLayerName("LAYER_NAME_BLOCK_NAME_PREFIX") + b.getNumber()
-                                + "_"+ layerNames.getLayerName("LAYER_NAME_LEVEL_NAME_PREFIX") + f.getNumber()
-                                + "_"+ layerNames.getLayerName("LAYER_NAME_BSMNT_FOOT_PRINT");
+                                + "_" + layerNames.getLayerName("LAYER_NAME_LEVEL_NAME_PREFIX") + f.getNumber()
+                                + "_" + layerNames.getLayerName("LAYER_NAME_BSMNT_FOOT_PRINT");
                         /*
                          * height from the floor to the soffit of the roof slab or ceiling
                          */
@@ -38,7 +40,7 @@ public class BasementExtract extends FeatureExtract {
                                         b.getNumber()),
                                 basementFeaturesColor.get(layerNames
                                         .getLayerName("LAYER_NAME_HEIGHT_FROM_THE_FLOOR_TO_CEILING_COLOUR_CODE"))));
-                        
+
                         /*
                          * minimum height of the ceiling of upper basement above ground level
                          */
@@ -47,7 +49,7 @@ public class BasementExtract extends FeatureExtract {
                                         b.getNumber()),
                                 basementFeaturesColor.get(layerNames.getLayerName(
                                         "LAYER_NAME_HEIGHT_OF_THE_CEILING_OF_UPPER_BASEMENT_COLOUR_CODE"))));
-                        
+
                         /*
                          * Level of basement under the ground
                          */
@@ -56,7 +58,7 @@ public class BasementExtract extends FeatureExtract {
                                         b.getNumber()),
                                 basementFeaturesColor.get(layerNames.getLayerName(
                                         "LAYER_NAME_COLOUR_CODE_LEVEL_OF_BASEMENT_UNDER_GROUND"))));
-                        
+
                         /*
                          * Split Level Mechanised Basement Parking Height
                          */
@@ -67,7 +69,8 @@ public class BasementExtract extends FeatureExtract {
 
 
                     }
-
+                }
+        LOG.debug("Ending of BasementExtract extract method");
         return pl;
     }
 

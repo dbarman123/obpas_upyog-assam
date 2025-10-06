@@ -29,6 +29,7 @@ public class BathRoomExtract extends FeatureExtract {
 
     @Override
     public PlanDetail extract(PlanDetail planDetail) {
+        LOG.debug("Starting of BathRoomExtract extract method");
         List<DXFLWPolyline> rooms;
         List<Measurement> roomMeasurements;
         List<BigDecimal> roomHeights;
@@ -77,6 +78,8 @@ public class BathRoomExtract extends FeatureExtract {
 
                     if (f.getUnits() != null || !f.getUnits().isEmpty())
                         for (FloorUnit floorUnit : f.getUnits()) {
+                            LOG.debug("Processing BathRoom for Block: " + block.getNumber() + " Floor: " + f.getNumber()
+                                    + " Unit: " + floorUnit.getUnitNumber());
                             String layerName = String.format(layerNames.getLayerName("LAYER_NAME_BLK_FLR_UNIT_BATH"), block.getNumber(),
                                     f.getNumber(), floorUnit.getUnitNumber());
 
@@ -115,6 +118,7 @@ public class BathRoomExtract extends FeatureExtract {
                         }
                 }
 
+        LOG.debug("End of BathRoomExtract extract method");
         return planDetail;
     }
 

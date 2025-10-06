@@ -25,6 +25,7 @@ public class BalconyExtract extends FeatureExtract {
 
     @Override
     public PlanDetail extract(PlanDetail planDetail) {
+        LOG.debug("Starting of BalconyExtract extract method");
         for (Block block : planDetail.getBlocks())
             for (Floor floor : block.getBuilding().getFloors()) {
 
@@ -58,6 +59,8 @@ public class BalconyExtract extends FeatureExtract {
                 for (FloorUnit floorUnit : floor.getUnits()) {
                     List<Balcony> balconies = new ArrayList<>();
 
+                    LOG.debug("Processing Balcony for Block: " + block.getNumber() + " Floor: " + floor.getNumber()
+                            + " Unit: " + floorUnit.getUnitNumber());
                     String balconylayerPattern = "BLK_" + block.getNumber() + "_FLR_" + floor.getNumber() + "_UNIT_" + floorUnit.getUnitNumber() + "_BALCONY_" + "\\d{1,2}";
                     List<String> balconyLayers = Util.getLayerNamesLike(planDetail.getDoc(), balconylayerPattern);
 
@@ -85,6 +88,7 @@ public class BalconyExtract extends FeatureExtract {
                 }
             }
 
+        LOG.debug("End of BalconyExtract extract method");
         return planDetail;
     }
 
