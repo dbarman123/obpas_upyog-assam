@@ -72,6 +72,7 @@ public class LandUserService {
 					OwnerInfo ownerInfo = convertToOwnerInfo(owner);
 					log.info("ownerInfo-->" + ownerInfo);
 					userDetailResponse = userCall(new CreateUserRequest(requestInfo, ownerInfo), uri);
+					owner.setUuid(userDetailResponse.getUser().get(0).getUuid());
 					log.debug("owner created --> " + userDetailResponse.getUser().get(0).getUuid());
 				}
 
@@ -178,7 +179,7 @@ public class LandUserService {
 		if(isCreate){
 			userSearchRequest.setMobileNumber(owner.getMobileNumber());
 			userSearchRequest.setUserType("CITIZEN");
-			userSearchRequest.setPan(owner.getAadhaarNumber());
+			userSearchRequest.setPan(owner.getPanNumber());
 			userSearchRequest.setAadhaarNumber(owner.getAadhaarNumber());
 			userSearchRequest.setActive(true);
 			userSearchRequest.setName(owner.getName());
@@ -208,7 +209,7 @@ public class LandUserService {
 	 *
 	 */
 	private void setUserName(OwnerInfoV2 owner, LandInfo landInfo) {
-		owner.setUserName(LandUtil.getRandonUUID());
+		owner.setUserName(landInfo.getId());
 	}
 
 	/**

@@ -2,6 +2,7 @@ package org.egov.user.domain.model;
 
 import lombok.*;
 import org.egov.user.domain.exception.InvalidUserSearchCriteriaException;
+import org.egov.user.domain.model.enums.GuardianRelation;
 import org.egov.user.domain.model.enums.UserType;
 import org.springframework.util.CollectionUtils;
 
@@ -21,6 +22,12 @@ public class UserSearchCriteria {
     private List<String> uuid;
     private String userName;
     private String name;
+    private String pan;
+    private String guardian;
+    private String gender;
+    private GuardianRelation guardianRelation;
+    private String altContactNumber;
+    private String aadhaarNumber;
     private String mobileNumber;
     private String emailId;
     private boolean fuzzyLogic;
@@ -51,11 +58,13 @@ public class UserSearchCriteria {
                 at least one is compulsory --> 'userName' or 'name' or 'mobileNumber' or 'emailId' or 'uuid'
          */
         if (isInterServiceCall)
-            return isEmpty(userName) && isEmpty(name) && isEmpty(mobileNumber) && isEmpty(emailId) &&
+            return isEmpty(userName) && isEmpty(name) && isEmpty(mobileNumber) && isEmpty(emailId) && isEmpty(aadhaarNumber) && isEmpty(pan) &&
+                    isEmpty(altContactNumber) && isEmpty(guardian) && isEmpty(guardianRelation.toString()) && isEmpty(gender) &&
                     CollectionUtils.isEmpty(uuid) && CollectionUtils.isEmpty(id) && CollectionUtils.isEmpty(roleCodes);
         else
             return isEmpty(userName) && isEmpty(name) && isEmpty(mobileNumber) && isEmpty(emailId) &&
-                    CollectionUtils.isEmpty(uuid);
+                    isEmpty(altContactNumber) && isEmpty(guardian) && isEmpty(guardianRelation.toString()) && isEmpty(gender) &&
+                    CollectionUtils.isEmpty(uuid) && isEmpty(aadhaarNumber) && isEmpty(pan);
     }
 
     private boolean validateIfTenantIdExists(boolean isInterServiceCall) {
@@ -66,11 +75,13 @@ public class UserSearchCriteria {
                 tenantId is compulsory if one of these is non empty --> 'userName' or 'name' or 'mobileNumber'
          */
         if (isInterServiceCall)
-            return (!isEmpty(userName) || !isEmpty(name) || !isEmpty(mobileNumber) ||
+            return (!isEmpty(userName) || !isEmpty(name) || !isEmpty(mobileNumber) || !isEmpty(aadhaarNumber) || !isEmpty(pan) ||
+                    isEmpty(altContactNumber) || !isEmpty(guardian) || !isEmpty(guardianRelation.toString()) || !isEmpty(gender) ||
                     !CollectionUtils.isEmpty(roleCodes))
                     && isEmpty(tenantId);
         else
-            return (!isEmpty(userName) || !isEmpty(name) || !isEmpty(mobileNumber))
+            return (!isEmpty(userName) || !isEmpty(name) || !isEmpty(mobileNumber) || !isEmpty(aadhaarNumber) || !isEmpty(pan) ||
+                    isEmpty(altContactNumber) || !isEmpty(guardian) || !isEmpty(guardianRelation.toString()) || !isEmpty(gender))
                     && isEmpty(tenantId);
 
     }
