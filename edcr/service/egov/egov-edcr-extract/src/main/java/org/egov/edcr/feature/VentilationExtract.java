@@ -32,84 +32,6 @@ public class VentilationExtract extends FeatureExtract {
 			if (b.getBuilding() != null && b.getBuilding().getFloors() != null
 					&& !b.getBuilding().getFloors().isEmpty()) {
 				for (Floor f : b.getBuilding().getFloors()) {
-
-//					/*
-//					 * Adding general light and ventilation at floor level
-//					 */
-//					List<DXFLWPolyline> lightAndVentilations = Util.getPolyLinesByLayer(pl.getDoc(), String.format(
-//							layerNames.getLayerName("LAYER_NAME_LIGHT_VENTILATION"), b.getNumber(), f.getNumber()));
-//					if (!lightAndVentilations.isEmpty()) {
-//						List<Measurement> lightAndventilationMeasurements = lightAndVentilations.stream()
-//								.map(polyline -> new MeasurementDetail(polyline, true)).collect(Collectors.toList());
-//						f.getLightAndVentilation().setMeasurements(lightAndventilationMeasurements);
-//
-//						f.getLightAndVentilation()
-//								.setHeightOrDepth((Util.getListOfDimensionValueByLayer(pl,
-//										String.format(layerNames.getLayerName("LAYER_NAME_LIGHT_VENTILATION"),
-//												b.getNumber(), f.getNumber()))));
-//
-//					}
-//					/*
-//					 * Adding regular room wise light and ventilation
-//					 */
-//					for (Room room : f.getRegularRooms()) {
-//						String regularRoomLayerName = String.format(
-//								layerNames.getLayerName("LAYER_NAME_ROOM_LIGHT_VENTILATION"), b.getNumber(),
-//								f.getNumber(), room.getNumber(), "+\\d");
-//
-//						List<String> regularRoomLayers = Util.getLayerNamesLike(pl.getDoc(), regularRoomLayerName);
-//						if (!regularRoomLayers.isEmpty()) {
-//							for (String regularRoomLayer : regularRoomLayers) {
-//								List<DXFLWPolyline> lightAndventilations = Util.getPolyLinesByLayer(pl.getDoc(),
-//										regularRoomLayer);
-//								if (!lightAndventilations.isEmpty()) {
-//									List<Measurement> lightAndventilationMeasurements = lightAndventilations.stream()
-//											.map(polyline -> new MeasurementDetail(polyline, true))
-//											.collect(Collectors.toList());
-//									room.getLightAndVentilation().setMeasurements(lightAndventilationMeasurements);
-//
-//									room.getLightAndVentilation().setHeightOrDepth(
-//											(Util.getListOfDimensionValueByLayer(pl, regularRoomLayer)));
-//								}
-//							}
-//						}
-//					}
-//					/*
-//					 * Adding AC room wise light and ventilation
-//					 */
-//					for (Room room : f.getAcRooms()) {
-//						String acRoomLayerName = String.format(
-//								layerNames.getLayerName("LAYER_NAME_ACROOM_LIGHT_VENTILATION"), b.getNumber(),
-//								f.getNumber(), room.getNumber(), "+\\d");
-//
-//						List<String> acRoomLayers = Util.getLayerNamesLike(pl.getDoc(), acRoomLayerName);
-//						if (!acRoomLayers.isEmpty()) {
-//							for (String acRoomLayer : acRoomLayers) {
-//
-//								List<DXFLWPolyline> lightAndventilations = Util.getPolyLinesByLayer(pl.getDoc(),
-//										acRoomLayer);
-//								if (!lightAndventilations.isEmpty()) {
-//									List<Measurement> lightAndventilationMeasurements = lightAndventilations.stream()
-//											.map(polyline -> new MeasurementDetail(polyline, true))
-//											.collect(Collectors.toList());
-//									room.getLightAndVentilation().setMeasurements(lightAndventilationMeasurements);
-//
-//									room.getLightAndVentilation()
-//											.setHeightOrDepth((Util.getListOfDimensionValueByLayer(pl, acRoomLayer)));
-//
-//								}
-//
-//							}
-//						}
-//					}
-//
-//					// Kitchen and dining ventilation handling via new method
-//                    handleKitchenDiningVentilation(pl, b, f);
-//
-//                    // Laundry and recreation ventilation handling via new method
-//                    handleLaundryRecreationVentilation(pl, b, f);
-
-
                     if(f.getUnits() != null && !f.getUnits().isEmpty())
                         for(FloorUnit floorUnit : f.getUnits()) {
                             LOG.info("Processing Ventilation for Block: " + b.getNumber() + " Floor: " + f.getNumber()
@@ -305,6 +227,7 @@ public class VentilationExtract extends FeatureExtract {
     }
 
     private void handleLaundryRecreationVentilation(PlanDetail pl, Block b, Floor f, FloorUnit floorUnit) {
+        LOG.info("Starting of LaundryRecreationVentilation extract method...");
         MeasurementWithHeight laundryVentilation = floorUnit.getLaundryOrRecreationalVentilation();
         if (laundryVentilation != null) {
             String laundryVentLayerPattern = String.format(
@@ -333,6 +256,7 @@ public class VentilationExtract extends FeatureExtract {
                 laundryVentilation.setHeightOrDepth(heightsOrDepths);
             }
         }
+        LOG.info("Ending of LaundryRecreationVentilation extract method.");
     }
 
 	@Override

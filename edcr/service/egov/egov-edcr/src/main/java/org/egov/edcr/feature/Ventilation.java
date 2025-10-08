@@ -108,7 +108,6 @@ public class Ventilation extends FeatureProcess {
                     if(f.getUnits() != null && !f.getUnits().isEmpty())
                         for(FloorUnit floorUnit : f.getUnits()) {
                             processGeneralVentilation(f, floorUnit, ventilationValues[0], generalScrutiny, pl);
-                            // processBathroomVentilation(f, ventilationValues[1], bathScrutiny, pl); // Uncomment if needed
                         }
 	            }
 	        }

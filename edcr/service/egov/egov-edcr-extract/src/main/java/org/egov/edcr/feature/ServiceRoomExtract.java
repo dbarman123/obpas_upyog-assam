@@ -35,25 +35,6 @@ public class ServiceRoomExtract extends FeatureExtract {
         for (Block block : pl.getBlocks()) {
             if (block.getBuilding() != null && !block.getBuilding().getFloors().isEmpty())
                 for (Floor floor : block.getBuilding().getFloors()) {
-/*
-                    List<ServiceRoom> serviceRooms = new ArrayList<>();
-
-                    String serviceroomlayerPattern = "BLK_" + block.getNumber() + "_SERVICEROOM";
-//          List<String> serviceroomLayers = Util.getLayerNamesLike(planDetail.getDoc(), serviceroomlayerPattern);
-                    String serviceLayer = String.format(layerNames.getLayerName(serviceroomlayerPattern), block.getNumber());
-                    List<DXFLWPolyline> serviceRoomPolyLines = Util.getPolyLinesByLayer(planDetail.getDoc(), serviceLayer);
-                    List<BigDecimal> dimensions = Util.getListOfDimensionValueByLayer(planDetail, serviceLayer);
-                    if (!dimensions.isEmpty() || !serviceRoomPolyLines.isEmpty()) {
-                        ServiceRoom serviceRoom = new ServiceRoom();
-                        serviceRoom.setNumber("1");
-                        serviceRoom.setName("acroom");
-                        serviceRoom.setHeight(BigDecimal.valueOf(3));
-                    }
-//                block.getBuilding().setServiceRoom(serviceRooms);
-                }
-
-            return planDetail;
-*/
                     if(floor.getUnits() != null && !floor.getUnits().isEmpty())
                         for (FloorUnit floorUnit : floor.getUnits()) {
                             LOG.info("Processing ServiceRoom for Block: " + block.getNumber() + " Floor: " + floor.getNumber() + " Unit: " + floorUnit.getUnitNumber());

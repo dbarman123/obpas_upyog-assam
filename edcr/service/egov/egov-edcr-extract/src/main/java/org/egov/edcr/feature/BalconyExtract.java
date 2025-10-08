@@ -28,64 +28,37 @@ public class BalconyExtract extends FeatureExtract {
         LOG.info("Starting of BalconyExtract extract method");
         for (Block block : planDetail.getBlocks())
             for (Floor floor : block.getBuilding().getFloors()) {
-/*
-                List<Balcony> balconies = new ArrayList<>();
-                String balconylayerPattern = "BLK_" + block.getNumber() + "_FLR_" + floor.getNumber() + "_BALCONY_"
-                        + "\\d{1,2}";
+                if (floor.getUnits() != null && !floor.getUnits().isEmpty())
+                    for (FloorUnit floorUnit : floor.getUnits()) {
+                        List<Balcony> balconies = new ArrayList<>();
 
-                List<String> balconyLayers = Util.getLayerNamesLike(planDetail.getDoc(), balconylayerPattern);
+                        LOG.info("Processing Balcony for Block: " + block.getNumber() + " Floor: " + floor.getNumber()
+                                + " Unit: " + floorUnit.getUnitNumber());
+                        String balconylayerPattern = "BLK_" + block.getNumber() + "_FLR_" + floor.getNumber() + "_UNIT_" + floorUnit.getUnitNumber() + "_BALCONY_" + "\\d{1,2}";
+                        List<String> balconyLayers = Util.getLayerNamesLike(planDetail.getDoc(), balconylayerPattern);
 
-                for (String balconyLayer : balconyLayers) {
-                    List<DXFLWPolyline> balconyPolyLines = Util.getPolyLinesByLayer(planDetail.getDoc(), balconyLayer);
-                    List<BigDecimal> dimensions = Util.getListOfDimensionValueByLayer(planDetail, balconyLayer);
-                    String[] split = balconyLayer.split("_");
-                    String balconyNo = split[5];
-                    if (!dimensions.isEmpty() || !balconyPolyLines.isEmpty()) {
-                        Balcony balcony = new Balcony();
+                        for (String balconyLayer : balconyLayers) {
+                            List<DXFLWPolyline> balconyPolyLines = Util.getPolyLinesByLayer(planDetail.getDoc(), balconyLayer);
+                            List<BigDecimal> dimensions = Util.getListOfDimensionValueByLayer(planDetail, balconyLayer);
+                            String[] split = balconyLayer.split("_");
+                            String balconyNo = split[5];
+                            if (!dimensions.isEmpty() || !balconyPolyLines.isEmpty()) {
+                                Balcony balcony = new Balcony();
 
-                        List<Measurement> balconyMeasurements = balconyPolyLines.stream()
-                                .map(balconyPolyLine -> new MeasurementDetail(balconyPolyLine, true))
-                                .collect(Collectors.toList());
+                                List<Measurement> balconyMeasurements = balconyPolyLines.stream()
+                                        .map(balconyPolyLine -> new MeasurementDetail(balconyPolyLine, true))
+                                        .collect(Collectors.toList());
 
-                        balcony.setMeasurements(balconyMeasurements);
-                        balcony.setWidths(dimensions);
-                        balcony.setNumber(balconyNo);
-                        balconies.add(balcony);
-                    }
-                }
-                floor.setBalconies(balconies);
-*/
-
-                for (FloorUnit floorUnit : floor.getUnits()) {
-                    List<Balcony> balconies = new ArrayList<>();
-
-                    LOG.info("Processing Balcony for Block: " + block.getNumber() + " Floor: " + floor.getNumber()
-                            + " Unit: " + floorUnit.getUnitNumber());
-                    String balconylayerPattern = "BLK_" + block.getNumber() + "_FLR_" + floor.getNumber() + "_UNIT_" + floorUnit.getUnitNumber() + "_BALCONY_" + "\\d{1,2}";
-                    List<String> balconyLayers = Util.getLayerNamesLike(planDetail.getDoc(), balconylayerPattern);
-
-                    for (String balconyLayer : balconyLayers) {
-                        List<DXFLWPolyline> balconyPolyLines = Util.getPolyLinesByLayer(planDetail.getDoc(), balconyLayer);
-                        List<BigDecimal> dimensions = Util.getListOfDimensionValueByLayer(planDetail, balconyLayer);
-                        String[] split = balconyLayer.split("_");
-                        String balconyNo = split[5];
-                        if (!dimensions.isEmpty() || !balconyPolyLines.isEmpty()) {
-                            Balcony balcony = new Balcony();
-
-                            List<Measurement> balconyMeasurements = balconyPolyLines.stream()
-                                    .map(balconyPolyLine -> new MeasurementDetail(balconyPolyLine, true))
-                                    .collect(Collectors.toList());
-
-                            balcony.setMeasurements(balconyMeasurements);
-                            balcony.setWidths(dimensions);
-                            balcony.setNumber(balconyNo);
-                            balconies.add(balcony);
+                                balcony.setMeasurements(balconyMeasurements);
+                                balcony.setWidths(dimensions);
+                                balcony.setNumber(balconyNo);
+                                balconies.add(balcony);
+                            }
                         }
+                        floorUnit.setBalconies(balconies);
+                        LOG.info("Total balconies found for block " + block.getNumber() + " floor " + floor.getNumber()
+                                + " unit " + floorUnit.getUnitNumber() + " : " + balconies.size());
                     }
-                    floorUnit.setBalconies(balconies);
-                    LOG.info("Total balconies found for block " + block.getNumber() + " floor " + floor.getNumber()
-                            + " unit " + floorUnit.getUnitNumber() + " : " + balconies.size());
-                }
             }
 
         LOG.info("End of BalconyExtract extract method");
