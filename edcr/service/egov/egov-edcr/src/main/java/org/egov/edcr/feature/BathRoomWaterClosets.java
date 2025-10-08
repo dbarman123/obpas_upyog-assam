@@ -179,7 +179,11 @@ public class BathRoomWaterClosets extends FeatureProcess {
         if (block.getBuilding() == null || block.getBuilding().getFloors() == null) return;
 
         for (Floor floor : block.getBuilding().getFloors()) {
-            processFloor(plan, floor, reqArea, reqWidth, reqHeight, scrutinyDetail);
+            if(floor.getUnits() != null && !floor.getUnits().isEmpty())
+                for (FloorUnit floorUnit : floor.getUnits()) {
+                    LOG.info("Processing Floor Number: {} and Unit Number: {} in Block Number: {}", floor.getNumber(), floorUnit.getUnitNumber(), block.getNumber());
+                    processFloor(plan, floor, floorUnit, reqArea, reqWidth, reqHeight, scrutinyDetail);
+                }
         }
     }
 
@@ -194,9 +198,9 @@ public class BathRoomWaterClosets extends FeatureProcess {
      * @param reqHeight      required minimum height
      * @param scrutinyDetail the scrutiny detail to collect validation output
      */
-    private void processFloor(Plan plan, Floor floor, BigDecimal reqArea, BigDecimal reqWidth, BigDecimal reqHeight,
+    private void processFloor(Plan plan, Floor floor, FloorUnit floorUnit, BigDecimal reqArea, BigDecimal reqWidth, BigDecimal reqHeight,
                               ScrutinyDetail scrutinyDetail) {
-        org.egov.common.entity.edcr.Room bathWC = floor.getBathRoomWaterClosets();
+        org.egov.common.entity.edcr.Room bathWC = floorUnit.getBathRoomWaterClosets();
         if (bathWC == null || bathWC.getHeights() == null || bathWC.getHeights().isEmpty()
                 || bathWC.getRooms() == null || bathWC.getRooms().isEmpty()) return;
 

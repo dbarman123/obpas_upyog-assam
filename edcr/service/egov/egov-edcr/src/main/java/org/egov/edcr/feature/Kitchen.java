@@ -101,21 +101,35 @@ public class Kitchen extends FeatureProcess {
      */
     @Override
     public Plan process(Plan pl) {
+        LOG.info("Starting Plan processing for Plan ID");
         validate(pl);
         Map<String, Integer> heightOfRoomFeaturesColor = pl.getSubFeatureColorCodesMaster().get(HEIGHT_OF_ROOM);
+        LOG.info("Retrieved heightOfRoomFeaturesColor map with {} entries",
+                heightOfRoomFeaturesColor != null ? heightOfRoomFeaturesColor.size() : 0);
 
-        if (pl == null || pl.getBlocks() == null) return pl;
+        if (pl == null || pl.getBlocks() == null){
+            LOG.warn("Plan or Plan blocks are null, returning plan as is");
+            return pl;
+        }
 
         OccupancyTypeHelper mostRestrictiveOccupancy = pl.getVirtualBuilding() != null
                 ? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
                 : null;
+        LOG.info("Most restrictive occupancy determined: {}",
+                mostRestrictiveOccupancy != null ? mostRestrictiveOccupancy.getType().getCode() : "null");
 
-        if (mostRestrictiveOccupancy == null || mostRestrictiveOccupancy.getSubtype() == null)
+        if (mostRestrictiveOccupancy == null || mostRestrictiveOccupancy.getSubtype() == null){
+            LOG.warn("Most restrictive occupancy or its subtype is null, returning plan as is");
             return pl;
+        }
 
         String occupancyCode = mostRestrictiveOccupancy.getType().getCode();
-        if (!(A.equalsIgnoreCase(occupancyCode) || F.equalsIgnoreCase(occupancyCode)))
+        LOG.info("Occupancy code of most restrictive occupancy: {}", occupancyCode);
+
+        if (!(A.equalsIgnoreCase(occupancyCode) || F.equalsIgnoreCase(occupancyCode))) {
+            LOG.warn("Occupancy code {} is not A or F, skipping processing", occupancyCode);
             return pl;
+        }
 
         for (Block block : pl.getBlocks()) {
             processKitchenForBlock(block, pl, mostRestrictiveOccupancy, heightOfRoomFeaturesColor);
@@ -140,13 +154,16 @@ public class Kitchen extends FeatureProcess {
         scrutinyDetail.addColumnHeading(1, RULE_NO);
         scrutinyDetail.addColumnHeading(2, DESCRIPTION);
         scrutinyDetail.addColumnHeading(3, FLOOR);
-        scrutinyDetail.addColumnHeading(4, REQUIRED);
-        scrutinyDetail.addColumnHeading(5, PROVIDED);
-        scrutinyDetail.addColumnHeading(6, STATUS);
+        scrutinyDetail.addColumnHeading(4, UNIT);
+        scrutinyDetail.addColumnHeading(5, REQUIRED);
+        scrutinyDetail.addColumnHeading(6, PROVIDED);
+        scrutinyDetail.addColumnHeading(7, STATUS);
         scrutinyDetail.setKey(BLOCK + block.getNumber() + U_KITCHEN);
 
         for (Floor floor : block.getBuilding().getFloors()) {
-            processKitchenForFloor(floor, block, pl, occupancy, heightColors);
+            if (floor.getUnits() != null && !floor.getUnits().isEmpty())
+                for (FloorUnit floorUnit : floor.getUnits())
+                    processKitchenForFloor(floor, floorUnit, block, pl, occupancy, heightColors);
         }
 
         pl.getReportOutput().getScrutinyDetails().add(scrutinyDetail);
@@ -162,8 +179,8 @@ public class Kitchen extends FeatureProcess {
      * @param occupancy     The most restrictive occupancy type.
      * @param heightColors  Map of height feature color codes for different room types.
      */
-    private void processKitchenForFloor(Floor floor, Block block, Plan pl, OccupancyTypeHelper occupancy, Map<String, Integer> heightColors) {
-        if (floor.getKitchen() == null) return;
+    private void processKitchenForFloor(Floor floor, FloorUnit floorUnit, Block block, Plan pl, OccupancyTypeHelper occupancy, Map<String, Integer> heightColors) {
+        if (floorUnit.getKitchen() == null) return;
 
         // Room Color Codes
         String occ = occupancy.getType().getCode();
@@ -172,8 +189,8 @@ public class Kitchen extends FeatureProcess {
         String kitchenDiningColor = A.equalsIgnoreCase(occ) ? DxfFileConstants.RESIDENTIAL_KITCHEN_DINING_ROOM_COLOR : DxfFileConstants.COMMERCIAL_KITCHEN_DINING_ROOM_COLOR;
 
         // Extract rooms and heights
-        List<Measurement> rooms = floor.getKitchen().getRooms();
-        List<RoomHeight> heights = floor.getKitchen().getHeights();
+        List<Measurement> rooms = floorUnit.getKitchen().getRooms();
+        List<RoomHeight> heights = floorUnit.getKitchen().getHeights();
         List<BigDecimal> kitchenHeights = heights.stream().map(RoomHeight::getHeight).collect(Collectors.toList());
 
         // Extract feature rules
@@ -188,16 +205,16 @@ public class Kitchen extends FeatureProcess {
         // Validate height
         if (!kitchenHeights.isEmpty()) {
             BigDecimal minHeight = kitchenHeights.stream().min(Comparator.naturalOrder()).get().setScale(2, BigDecimal.ROUND_HALF_UP);
-            buildResult(pl, floor, rule.getKitchenHeight(), SUBRULE_41_III, SUBRULE_41_III_DESC, minHeight, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
+            buildResult(pl, floor, floorUnit, rule.getKitchenHeight(), SUBRULE_41_III, SUBRULE_41_III_DESC, minHeight, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
         } else {
-            String layerName = String.format(LAYER_ROOM_HEIGHT, block.getNumber(), floor.getNumber(), "KITCHEN");
+            String layerName = String.format(LAYER_ROOM_HEIGHT, block.getNumber(), floor.getNumber(), floorUnit.getUnitNumber(), "KITCHEN");
             pl.addError(layerName, ROOM_HEIGHT_NOTDEFINED + layerName);
         }
 
         // Process Room Types
-        processRoomType(rooms, heightColors, kitchenColor, rule.getKitchenArea(), rule.getKitchenWidth(), KITCHEN, floor, block, pl);
-        processRoomType(rooms, heightColors, kitchenStoreColor, rule.getKitchenStoreArea(), rule.getKitchenStoreWidth(), KITCHEN_STORE, floor, block, pl);
-        processRoomType(rooms, heightColors, kitchenDiningColor, rule.getKitchenDiningArea(), rule.getKitchenDiningWidth(), KITCHEN_DINING, floor, block, pl);
+        processRoomType(rooms, heightColors, kitchenColor, rule.getKitchenArea(), rule.getKitchenWidth(), KITCHEN, floor, floorUnit, block, pl);
+        processRoomType(rooms, heightColors, kitchenStoreColor, rule.getKitchenStoreArea(), rule.getKitchenStoreWidth(), KITCHEN_STORE, floor, floorUnit, block, pl);
+        processRoomType(rooms, heightColors, kitchenDiningColor, rule.getKitchenDiningArea(), rule.getKitchenDiningWidth(), KITCHEN_DINING, floor, floorUnit, block, pl);
     }
 
     /**
@@ -215,7 +232,7 @@ public class Kitchen extends FeatureProcess {
      * @param pl            The Plan object.
      */
     private void processRoomType(List<Measurement> rooms, Map<String, Integer> heightColors, String color, BigDecimal minArea,
-                                 BigDecimal minWidth, String roomName, Floor floor, Block block, Plan pl) {
+                                 BigDecimal minWidth, String roomName, Floor floor, FloorUnit floorUnit, Block block, Plan pl) {
 
         List<BigDecimal> areas = new ArrayList<>();
         List<BigDecimal> widths = new ArrayList<>();
@@ -229,12 +246,12 @@ public class Kitchen extends FeatureProcess {
 
         if (!areas.isEmpty()) {
             BigDecimal totalArea = areas.stream().reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, BigDecimal.ROUND_HALF_UP);
-            buildResult(pl, floor, minArea, SUBRULE_41_III, String.format(SUBRULE_41_III_AREA_DESC, roomName), totalArea, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
+            buildResult(pl, floor, floorUnit, minArea, SUBRULE_41_III, String.format(SUBRULE_41_III_AREA_DESC, roomName), totalArea, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
         }
 
         if (!widths.isEmpty()) {
             BigDecimal minRoomWidth = widths.stream().min(Comparator.naturalOrder()).get().setScale(2, BigDecimal.ROUND_HALF_UP);
-            buildResult(pl, floor, minWidth, SUBRULE_41_III, String.format(SUBRULE_41_III_TOTAL_WIDTH, roomName), minRoomWidth, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
+            buildResult(pl, floor, floorUnit, minWidth, SUBRULE_41_III, String.format(SUBRULE_41_III_TOTAL_WIDTH, roomName), minRoomWidth, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
         }
     }
 
@@ -252,7 +269,7 @@ public class Kitchen extends FeatureProcess {
      * @param valid                Boolean flag representing whether the value is valid.
      * @param typicalFloorValues   Map containing information about typical floor applicability.
      */
-    private void buildResult(Plan pl, Floor floor, BigDecimal expected, String subRule, String subRuleDesc,
+    private void buildResult(Plan pl, Floor floor, FloorUnit floorUnit, BigDecimal expected, String subRule, String subRuleDesc,
             BigDecimal actual, boolean valid, Map<String, Object> typicalFloorValues) {
         if (!(Boolean) typicalFloorValues.get(IS_TYPICAL_REP_FLOOR)
                 && expected.compareTo(BigDecimal.valueOf(0)) > 0 &&
@@ -264,11 +281,11 @@ public class Kitchen extends FeatureProcess {
                     ? (String) typicalFloorValues.get(TYPICAL_FLOOR)
                     : FLOOR_SPACED + floor.getNumber();
             if (valid) {
-                setReportOutputDetails(pl, subRule, subRuleDesc, value,
+                setReportOutputDetails(pl, subRule, subRuleDesc, value, floorUnit,
                         expected + DcrConstants.IN_METER,
                         actual + DcrConstants.IN_METER, Result.Accepted.getResultVal());
             } else {
-                setReportOutputDetails(pl, subRule, subRuleDesc, value,
+                setReportOutputDetails(pl, subRule, subRuleDesc, value, floorUnit,
                         expected + DcrConstants.IN_METER,
                         actual + DcrConstants.IN_METER, Result.Not_Accepted.getResultVal());
             }
@@ -286,12 +303,13 @@ public class Kitchen extends FeatureProcess {
      * @param actual     Actual value found in the Plan.
      * @param status     Result of the validation ("Accepted" or "Not Accepted").
      */
-    private void setReportOutputDetails(Plan pl, String ruleNo, String ruleDesc, String floor, String expected, String actual,
+    private void setReportOutputDetails(Plan pl, String ruleNo, String ruleDesc, String floor, FloorUnit floorUnit, String expected, String actual,
             String status) {
         ReportScrutinyDetail detail = new ReportScrutinyDetail();
         detail.setRuleNo(ruleNo);
         detail.setDescription(ruleDesc);
         detail.setFloorNo(floor);
+        detail.setUnitNumber(floorUnit.getUnitNumber());
         detail.setRequired(expected);
         detail.setProvided(actual);
         detail.setStatus(status);

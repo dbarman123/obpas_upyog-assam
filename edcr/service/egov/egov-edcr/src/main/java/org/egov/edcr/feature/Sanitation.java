@@ -304,6 +304,7 @@ public class Sanitation extends FeatureProcess {
                     count++;
                 }
             }
+
             if (count > 0) {
                 pl.addError(SANITY_PREFIX + BLDG_PART_WATER_CLOSET + b.getNumber(), count + NUMBER_OF
                         + BLDG_PART_WATER_CLOSET + POLYLINE_ERROR_SUFFIX + b.getNumber());
@@ -793,11 +794,17 @@ public class Sanitation extends FeatureProcess {
         }
         Set<String> ruleNo = new HashSet<>();
         ruleNo.add(RULE_40_A_4);
+
+        /*
+        // Condition removed because one water closet is not must according to rules
         if (notFound) {
             actualResult.append(NOT_FOUND);
             addReportDetail(ruleNo, BLDG_PART_SPECIAL_WATER_CLOSET + MINUS_MIN_ONE_GROUND_FLOOR,
                     String.valueOf(required), String.valueOf(provided), Result.Not_Accepted.getResultVal(), detail);
-        } else {
+        } else
+        */
+
+        if (!notFound) {
             actualResult.append(FOUND);
             addReportDetail(ruleNo, BLDG_PART_SPECIAL_WATER_CLOSET + MINUS_MIN_ONE_GROUND_FLOOR,
                     String.valueOf(required), String.valueOf(provided), Result.Accepted.getResultVal(), detail);
@@ -1065,7 +1072,7 @@ public class Sanitation extends FeatureProcess {
                 m.setIsValid(false);
                 m.appendInvalidReason(String.format(MINIMUM_AREA_DIMENSION_VIOLATED, minValue));
                 failedCount++;
-                LOG.debug("Area not matching is " + m.getArea());
+                LOG.info("Area not matching is " + m.getArea());
             }
         }
         return failedCount;

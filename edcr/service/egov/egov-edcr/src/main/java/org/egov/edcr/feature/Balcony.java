@@ -125,11 +125,13 @@ public class Balcony extends FeatureProcess {
 
         ScrutinyDetail scrutinyDetail = createScrutinyDetail(
                 BLOCK + block.getNumber() + UNDERSCORE + MdmsFeatureConstants.BALCONY,
-                RULE_NO, FLOOR, DESCRIPTION, PERMISSIBLE, PROVIDED, STATUS);
+                RULE_NO, FLOOR, UNIT, DESCRIPTION, PERMISSIBLE, PROVIDED, STATUS);
 
         for (Floor floor : block.getBuilding().getFloors()) {
-            log.info("Processing Floor {} of Block {}", floor.getNumber(), block.getNumber());
-            processFloorBalconies(plan, block, floor, scrutinyDetail);
+            for (FloorUnit floorUnit : floor.getUnits()) {
+                log.info("Processing Floor Unit {} of Floor {} in Block {}", floorUnit.getUnitNumber(), floor.getNumber(), block.getNumber());
+                processFloorBalconies(plan, block, floor, scrutinyDetail, floorUnit);
+            }
         }
 
         log.info("Adding scrutiny details for Block {} to plan report.", block.getNumber());
@@ -148,18 +150,18 @@ public class Balcony extends FeatureProcess {
 	 * @param floor          the floor to process
 	 * @param scrutinyDetail the scrutiny detail object to which validation results are added
 	 */
-	private void processFloorBalconies(Plan plan, Block block, Floor floor, ScrutinyDetail scrutinyDetail) {
+	private void processFloorBalconies(Plan plan, Block block, Floor floor, ScrutinyDetail scrutinyDetail, FloorUnit floorUnit) {
         log.info("Processing balconies for Floor {} in Block {}", floor.getNumber(), block.getNumber());
 
         boolean isTypicalRepititiveFloor = false;
         Map<String, Object> typicalFloorValues = Util.getTypicalFloorValues(block, floor, isTypicalRepititiveFloor);
 
-        List<org.egov.common.entity.edcr.Balcony> balconies = floor.getBalconies();
+        List<org.egov.common.entity.edcr.Balcony> balconies = floorUnit.getBalconies();
         if (balconies != null && !balconies.isEmpty()) {
             log.info("Found {} balconies in Floor {} of Block {}", balconies.size(), floor.getNumber(), block.getNumber());
             for (org.egov.common.entity.edcr.Balcony balcony : balconies) {
                 log.info("Validating Balcony {}", balcony.getNumber());
-                validateBalcony(plan, floor, balcony, typicalFloorValues, scrutinyDetail);
+                validateBalcony(plan, floor, balcony, typicalFloorValues, scrutinyDetail, floorUnit);
             }
         } else {
             log.info("No balconies found in Floor {} of Block {}", floor.getNumber(), block.getNumber());
@@ -184,7 +186,7 @@ public class Balcony extends FeatureProcess {
 	 *                           result is added
 	 */
 	private void validateBalcony(Plan plan, Floor floor, org.egov.common.entity.edcr.Balcony balcony,
-			Map<String, Object> typicalFloorValues, ScrutinyDetail scrutinyDetail) {
+			Map<String, Object> typicalFloorValues, ScrutinyDetail scrutinyDetail, FloorUnit floorUnit) {
 
 		BigDecimal balconyValue = BigDecimal.ZERO;
 		log.info("Validating balcony widths for Balcony {}", balcony.getNumber());
@@ -227,6 +229,7 @@ public class Balcony extends FeatureProcess {
 		detail.setProvided(minWidth.toString());
 		detail.setStatus(isAccepted ? Result.Accepted.getResultVal() : Result.Not_Accepted.getResultVal());
 		detail.setFloorNo(floorLabel);
+        detail.setUnitNumber(floorUnit.getUnitNumber());
 
 		Map<String, String> details = mapReportDetails(detail);
 		scrutinyDetail.getDetail().add(details);

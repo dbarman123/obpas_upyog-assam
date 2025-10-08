@@ -142,17 +142,20 @@ public class BathRoom_Assam extends BathRoom {
                 permittedArea, permittedMinWidth, block.getNumber());
 
         for (Floor floor : block.getBuilding().getFloors()) {
-            LOG.info("Processing Floor Number: {} in Block ID: {}", floor.getNumber(), block.getNumber());
-            processFloor(plan, floor, permittedArea, permittedMinWidth, scrutinyDetail);
+            if (floor.getUnits() != null || !floor.getUnits().isEmpty())
+                for(FloorUnit floorUnit : floor.getUnits()) {
+                LOG.info("Processing Floor Number: {} in Block ID: {}", floor.getNumber(), block.getNumber());
+                processFloor(plan, floor, floorUnit, permittedArea, permittedMinWidth, scrutinyDetail);
+            }
         }
     }
 
     /**
      * Processes an individual floor to extract bathroom measurements and perform validations.
      */
-    private void processFloor(Plan plan, Floor floor, BigDecimal permittedArea, BigDecimal permittedMinWidth,
+    private void processFloor(Plan plan, Floor floor, FloorUnit floorUnit, BigDecimal permittedArea, BigDecimal permittedMinWidth,
                               ScrutinyDetail scrutinyDetail) {
-        Room bathRoom = floor.getBathRoom();
+        Room bathRoom = floorUnit.getBathRoom();
         if (bathRoom == null || bathRoom.getRooms() == null || bathRoom.getHeights() == null) {
             LOG.info("Skipping Floor Number: {} due to missing bathroom details", floor.getNumber());
             return;
@@ -166,14 +169,14 @@ public class BathRoom_Assam extends BathRoom {
             return;
         }
 
-        validateBathroom(plan, floor, rooms, heights, permittedArea, permittedMinWidth, scrutinyDetail);
-        validateBathroomVentilation(floor, scrutinyDetail, plan);
+        validateBathroom(plan, floor, floorUnit, rooms, heights, permittedArea, permittedMinWidth, scrutinyDetail);
+        validateBathroomVentilation(floor, floorUnit, scrutinyDetail, plan);
     }
 
     /**
      * Validates the area, width, and height of bathroom rooms on a floor against the permitted values.
      */
-    private void validateBathroom(Plan plan, Floor floor, List<Measurement> rooms, List<RoomHeight> heights,
+    private void validateBathroom(Plan plan, Floor floor, FloorUnit floorUnit, List<Measurement> rooms, List<RoomHeight> heights,
                                   BigDecimal permittedArea, BigDecimal permittedMinWidth, ScrutinyDetail scrutinyDetail) {
 
         BigDecimal totalArea = BigDecimal.ZERO;
@@ -195,26 +198,26 @@ public class BathRoom_Assam extends BathRoom {
 
         boolean isAccepted = totalArea.compareTo(permittedArea) >= 0 && minWidth.compareTo(permittedMinWidth) >= 0;
 
-        LOG.info("Validating bathroom for Floor Number: {} - Total Area: {}, Min Width: {}, Min Height: {}, " +
+        LOG.info("Validating bathroom for Floor Number: {} and Unit number : {} - Total Area: {}, Min Width: {}, Min Height: {}, " +
                   "Permitted Area: {}, Permitted Min Width: {}, Accepted: {}",
-                floor.getNumber(), totalArea, minWidth, minHeight, permittedArea, permittedMinWidth, isAccepted);
+                floor.getNumber(), floorUnit.getUnitNumber(), totalArea, minWidth, minHeight, permittedArea, permittedMinWidth, isAccepted);
 
         Map<String, String> resultRow = createResultRow(floor, permittedArea, permittedMinWidth, totalArea, minWidth, isAccepted);
         scrutinyDetail.getDetail().add(resultRow);
     }
 
-    private void validateBathroomVentilation(Floor floor, ScrutinyDetail scrutinyDetail, Plan pl) {
-        if (floor.getBathRoom() == null ||
-            floor.getBathRoom().getBathVentilation() == null ||
-            floor.getBathRoom().getBathVentilation().isEmpty()) {
+    private void validateBathroomVentilation(Floor floor, FloorUnit floorUnit, ScrutinyDetail scrutinyDetail, Plan pl) {
+        if (floorUnit.getBathRoom() == null ||
+            floorUnit.getBathRoom().getBathVentilation() == null ||
+            floorUnit.getBathRoom().getBathVentilation().isEmpty()) {
 
-            LOG.warn("Bathroom ventilation measurements missing on Floor Number: {}", floor.getNumber());
+            LOG.warn("Bathroom ventilation measurements missing on Floor Number: {} and Unit number: {}", floor.getNumber(), floorUnit.getUnitNumber());
 
             ReportScrutinyDetail detail = new ReportScrutinyDetail();
             detail.setRuleNo("91 d");
             detail.setDescription("Bathroom - Ventilation Area");
             detail.setRequired("Not defined");
-            detail.setProvided("Bath ventilation measurements not available on floor " + floor.getNumber());
+            detail.setProvided("Bath ventilation measurements not available on floor " + floor.getNumber() + " and Unit number: " + floorUnit.getUnitNumber());
             detail.setStatus(Result.Not_Accepted.getResultVal());
 
             scrutinyDetail.getDetail().add(mapReportDetails(detail));
@@ -260,7 +263,7 @@ public class BathRoom_Assam extends BathRoom {
             detail.setRuleNo("91 d");
             detail.setDescription("Bathroom - Ventilation Area");
             detail.setRequired(requiredArea + " sqm");
-            detail.setProvided(providedArea + " sqm at floor " + floor.getNumber());
+            detail.setProvided(providedArea + " sqm at floor " + floor.getNumber() + " and Unit number: " + floorUnit.getUnitNumber());
             detail.setStatus(acceptedArea ? Result.Accepted.getResultVal() : Result.Not_Accepted.getResultVal());
 
             scrutinyDetail.getDetail().add(mapReportDetails(detail));
@@ -275,7 +278,7 @@ public class BathRoom_Assam extends BathRoom {
             detail.setRuleNo("91 d");
             detail.setDescription("Bathroom - Ventilation Width");
             detail.setRequired(requiredWidth + " m");
-            detail.setProvided(providedWidth + " m at floor " + floor.getNumber());
+            detail.setProvided(providedWidth + " m at floor " + floor.getNumber() + " and Unit number: " + floorUnit.getUnitNumber());
             detail.setStatus(acceptedWidth ? Result.Accepted.getResultVal() : Result.Not_Accepted.getResultVal());
 
             scrutinyDetail.getDetail().add(mapReportDetails(detail));

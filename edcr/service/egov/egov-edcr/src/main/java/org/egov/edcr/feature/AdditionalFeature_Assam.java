@@ -590,6 +590,7 @@ public class AdditionalFeature_Assam extends FeatureProcess {
             if (!pl.getParkingDetails().getStilts().isEmpty() && pl.getPlanInformation().isEarthquakeResistant()) {
                 BigDecimal parkingHeight = pl.getParkingDetails().getStilts().get(0).getHeight();
                 if (parkingHeight.compareTo(additionalFeatureBuildingHeightStiltParking) <= 0) {
+                    LOG.info("Excluding stilt parking height: " + parkingHeight);
                     totalHeight = totalHeight.subtract(parkingHeight);
                 }
             }
@@ -600,6 +601,7 @@ public class AdditionalFeature_Assam extends FeatureProcess {
             } else {
                 BigDecimal maxTankHeight = block.getRoofTanks().stream().reduce(BigDecimal::max).get();
                 if (maxTankHeight.compareTo(additionalFeatureBuildingHeightRoofTanks) <= 0) {
+                    LOG.info("Excluding roof tank height: " + maxTankHeight);
                     totalHeight = totalHeight.subtract(maxTankHeight);
                 }
             }
@@ -612,18 +614,25 @@ public class AdditionalFeature_Assam extends FeatureProcess {
                 if (!floor.getArchitecturalFeature().isEmpty())
                     for (ArchitecturalFeature architecturalFeature : floor.getArchitecturalFeature()) {
                         for (RoomHeight roomHeight : architecturalFeature.getHeights()) {
-                            if (maxArchitectureHeight.compareTo(roomHeight.getHeight()) < 0)
+                            if (maxArchitectureHeight.compareTo(roomHeight.getHeight()) < 0) {
+                                LOG.info("Found architectural feature height: " + roomHeight.getHeight());
                                 maxArchitectureHeight = roomHeight.getHeight();
-                        }
-                    }
-                if (!floor.getServiceRooms().isEmpty())
-                    for (ServiceRoom serviceRoom : floor.getServiceRooms()) {
-                        for (RoomHeight roomHeight : serviceRoom.getHeights()) {
-                            if (maxServiceRoomHeight.compareTo(roomHeight.getHeight()) < 0) {
-                                maxServiceRoomHeight = roomHeight.getHeight();
                             }
                         }
                     }
+                if (floor.getUnits() != null && !floor.getUnits().isEmpty()) {
+                    for (FloorUnit floorUnit : floor.getUnits())
+                        if (!floorUnit.getServiceRooms().isEmpty())
+                            for (ServiceRoom serviceRoom : floorUnit.getServiceRooms()) {
+                                for (RoomHeight roomHeight : serviceRoom.getHeights()) {
+                                    if (maxServiceRoomHeight.compareTo(roomHeight.getHeight()) < 0) {
+                                        LOG.info("Found service room height: " + roomHeight.getHeight());
+                                        maxServiceRoomHeight = roomHeight.getHeight();
+                                    }
+                                }
+                            }
+                }
+
             }
 
             // Chimneys and architectural features ≤ 1.5 m height.
@@ -632,22 +641,30 @@ public class AdditionalFeature_Assam extends FeatureProcess {
             } else {
                 if(!block.getChimneys().isEmpty()) {
                     BigDecimal maxChimneyHeight = block.getChimneys().stream().reduce(BigDecimal::max).get();
-                    if (maxChimneyHeight.compareTo(additionalFeatureBuildingHeightChimney) <= 0)
+                    if (maxChimneyHeight.compareTo(additionalFeatureBuildingHeightChimney) <= 0) {
+                        LOG.info("Excluding chimney height: " + maxChimneyHeight);
                         totalHeight = totalHeight.subtract(maxChimneyHeight);
+                    }
                 }
 
-                if (maxArchitectureHeight.compareTo(additionalFeatureBuildingHeightChimney) <= 0)
+                if (maxArchitectureHeight.compareTo(additionalFeatureBuildingHeightChimney) <= 0) {
+                    LOG.info("Excluding chimney height: " + maxArchitectureHeight);
                     totalHeight = totalHeight.subtract(maxArchitectureHeight);
+                }
                 // Subtracting servicerooms heights such as ventilation, ac and lift rooms
-                if (maxServiceRoomHeight.compareTo(additionalFeatureBuildingHeightServiceRooms) <= 0)
+                if (maxServiceRoomHeight.compareTo(additionalFeatureBuildingHeightServiceRooms) <= 0) {
+                    LOG.info("Excluding service room height: " + maxServiceRoomHeight);
                     totalHeight = totalHeight.subtract(maxServiceRoomHeight);
+                }
             }
 
             // Subtracting staircovers height if less than or equalto 3.0
             if(!block.getStairCovers().isEmpty()) {
                 BigDecimal maxStairCoverHeight = block.getStairCovers().stream().reduce(BigDecimal::max).get();
-                if (maxStairCoverHeight.compareTo(additionalFeatureBuildingHeightStairCovers) <= 0)
+                if (maxStairCoverHeight.compareTo(additionalFeatureBuildingHeightStairCovers) <= 0) {
+                    LOG.info("Excluding stair cover height: " + maxStairCoverHeight);
                     totalHeight = totalHeight.subtract(maxStairCoverHeight);
+                }
             }
 
             // Rooftop Assam Type structures (e.g., rainwater harvesting) covering ≤ 50% of roof area, restricted to 2.1 m height.
@@ -657,8 +674,10 @@ public class AdditionalFeature_Assam extends FeatureProcess {
                 for (RainWaterHarvesting rwh : pl.getUtility().getRainWaterHarvest()) {
                     if(rwh.getArea() != null) {
                         rainWaterHarvestArea = rainWaterHarvestArea.add(rwh.getArea());
-                        if (rwhHeight.compareTo(rwh.getHeight()) < 0)
+                        if (rwhHeight.compareTo(rwh.getHeight()) < 0) {
+                            LOG.info("Found RWH structure height: " + rwh.getHeight());
                             rwhHeight = rwh.getHeight();
+                        }
                     }
                 }
 
@@ -666,8 +685,10 @@ public class AdditionalFeature_Assam extends FeatureProcess {
                 for (Floor floor : block.getBuilding().getFloors()) {
                     if(floor.getRoofAreas() != null) {
                         for (RoofArea roofArea : floor.getRoofAreas()) {
-                            if (maxRoofArea.compareTo(roofArea.getArea()) < 0)
+                            if (maxRoofArea.compareTo(roofArea.getArea()) < 0) {
+                                LOG.info("Found roof area: " + roofArea.getArea());
                                 maxRoofArea = roofArea.getArea();
+                            }
                         }
                     }
                 }
@@ -681,6 +702,7 @@ public class AdditionalFeature_Assam extends FeatureProcess {
                             .allMatch(rwh -> rwh.getHeight().compareTo(additionalFeatureBuildingHeightRWH) <= 0);
 
                     if (roofAreaCheck && rwhHeightCheck) {
+                        LOG.info("Found roof area: " + coverageRatio + " and RWH height: " + rwhHeight);
                         totalHeight = totalHeight.subtract(rwhHeight);
                     }
                 }
@@ -719,6 +741,7 @@ public class AdditionalFeature_Assam extends FeatureProcess {
 
         // Cap front setback at 16m as per regulations
         BigDecimal cappedFrontSetback = frontSetback.min(additionalFeatureBuildingHeightCappedPermitted);
+        LOG.info("Capped front setback: " + cappedFrontSetback);
         BigDecimal maxHeight = additionalFeatureBuildingHeightMaxPermitted.multiply(roadWidth.add(cappedFrontSetback));
 
         return maxHeight.setScale(DECIMALDIGITS_MEASUREMENTS, ROUNDMODE_MEASUREMENTS);
@@ -743,6 +766,7 @@ public class AdditionalFeature_Assam extends FeatureProcess {
         }
 
         if (!hasLift) {
+            LOG.info("Lift not found in building requiring lift.");
             errors.put(LIFT_ERROR, LIFT_ERROR_DESC);
             pl.addErrors(errors);
         }

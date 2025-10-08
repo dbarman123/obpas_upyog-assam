@@ -279,7 +279,7 @@ public class EgovMicroServiceStore implements FileStoreService {
             LOG.error(String.format("Error occurred while fetching file %s", e.getMessage()));
         }
 
-        LOG.debug("fetch completed....   ");
+        LOG.info("fetch completed....   ");
         return path.toFile();
 
     }
@@ -331,7 +331,7 @@ public class EgovMicroServiceStore implements FileStoreService {
         } catch (RestClientException e) {
             LOG.error(String.format("Error occurred while fetching file %s", e.getMessage()));
         }
-        LOG.debug("fetch completed....   ");
+        LOG.info("fetch completed....   ");
         return path.toFile();
     }
 }

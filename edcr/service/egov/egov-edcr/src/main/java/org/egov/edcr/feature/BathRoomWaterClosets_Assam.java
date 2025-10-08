@@ -153,31 +153,34 @@ public class BathRoomWaterClosets_Assam extends BathRoomWaterClosets {
         }
 
         for (Floor floor : block.getBuilding().getFloors()) {
-            LOG.info("Processing Floor Number: {} in Block Number: {}", floor.getNumber(), block.getNumber());
-            processFloor(plan, floor, reqArea, reqWidth, reqHeight, scrutinyDetail);
+            if(floor.getUnits() != null && !floor.getUnits().isEmpty())
+                for (FloorUnit floorUnit : floor.getUnits()) {
+                    LOG.info("Processing Floor Number: {} and Unit Number: {} in Block Number: {}", floor.getNumber(), floorUnit.getUnitNumber(), block.getNumber());
+                    processFloor(plan, floor, floorUnit, reqArea, reqWidth, reqHeight, scrutinyDetail);
+                }
         }
     }
 
     /**
      * Processes each floor of a block and validates bathroom WC measurements.
      */
-    private void processFloor(Plan plan, Floor floor, BigDecimal reqArea, BigDecimal reqWidth, BigDecimal reqHeight,
+    private void processFloor(Plan plan, Floor floor, FloorUnit floorUnit, BigDecimal reqArea, BigDecimal reqWidth, BigDecimal reqHeight,
                               ScrutinyDetail scrutinyDetail) {
-        org.egov.common.entity.edcr.Room bathWC = floor.getBathRoomWaterClosets();
+        org.egov.common.entity.edcr.Room bathWC = floorUnit.getBathRoomWaterClosets();
         if (bathWC == null || bathWC.getHeights() == null || bathWC.getHeights().isEmpty()
             || bathWC.getRooms() == null || bathWC.getRooms().isEmpty()) {
-            LOG.info("Skipping Floor Number: {} due to missing bathroom WC room or height details", floor.getNumber());
+            LOG.info("Skipping Unit Number: {} in Floor Number: {} due to missing bathroom WC room or height details", floorUnit.getUnitNumber(), floor.getNumber());
             return;
         }
 
         LOG.info("Validating bathroom water closet on Floor Number: {}", floor.getNumber());
-        validateBathroomWaterCloset(plan, floor, bathWC.getRooms(), bathWC.getHeights(), reqArea, reqWidth, reqHeight, scrutinyDetail);
+        validateBathroomWaterCloset(plan, floor, floorUnit, bathWC.getRooms(), bathWC.getHeights(), reqArea, reqWidth, reqHeight, scrutinyDetail);
     }
 
     /**
      * Validates the area, width, and height of bathroom water closets on a given floor.
      */
-    private void validateBathroomWaterCloset(Plan plan, Floor floor, List<Measurement> rooms, List<RoomHeight> heights,
+    private void validateBathroomWaterCloset(Plan plan, Floor floor, FloorUnit floorUnit, List<Measurement> rooms, List<RoomHeight> heights,
                                              BigDecimal reqArea, BigDecimal reqWidth, BigDecimal reqHeight,
                                              ScrutinyDetail scrutinyDetail) {
 
@@ -202,9 +205,9 @@ public class BathRoomWaterClosets_Assam extends BathRoomWaterClosets {
                 && totalArea.compareTo(reqArea) >= 0
                 && minWidth.compareTo(reqWidth) >= 0;
 
-        LOG.info("Bathroom WC validation on Floor Number: {} - Min Height: {}, Total Area: {}, Min Width: {}, " +
+        LOG.info("Bathroom WC validation on Floor Number: {} and Unit Number: {} - Min Height: {}, Total Area: {}, Min Width: {}, " +
                   "Required Height: {}, Required Area: {}, Required Width: {}, Accepted: {}",
-                floor.getNumber(), minHeight, totalArea, minWidth, reqHeight, reqArea, reqWidth, isAccepted);
+                floor.getNumber(), floorUnit.getUnitNumber(), minHeight, totalArea, minWidth, reqHeight, reqArea, reqWidth, isAccepted);
 
         Map<String, String> resultRow = createResultRow(floor, reqArea, reqWidth, reqHeight, totalArea, minWidth, minHeight, isAccepted);
         scrutinyDetail.getDetail().add(resultRow);

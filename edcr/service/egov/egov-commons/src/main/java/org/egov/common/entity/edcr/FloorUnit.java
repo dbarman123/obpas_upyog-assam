@@ -56,8 +56,22 @@ public class FloorUnit extends Measurement {
     private static final long serialVersionUID = 27L;
 
     private Occupancy occupancy;
+    private List<Occupancy> occupancies = new ArrayList<>();
     private List<Measurement> deductions = new ArrayList<>();
     private BigDecimal totalUnitDeduction;
+    private List<Balcony> balconies = new ArrayList<>();
+    private Integer number;
+    private MeasurementWithHeight lightAndVentilation = new MeasurementWithHeight();
+    private MeasurementWithHeight laundryOrRecreationalVentilation = new MeasurementWithHeight();
+    private Room kitchen;
+    private Room bathRoom;
+    private List<Room> regularRooms = new ArrayList<>();
+    private List<Room> acRooms = new ArrayList<>();
+    private Room commonRoom;
+    private Room bathRoomWaterClosets;
+    private List<ServiceRoom> serviceRooms = new ArrayList<>();
+    private Room waterClosets;
+
 
     public Occupancy getOccupancy() {
         return occupancy;
@@ -83,4 +97,111 @@ public class FloorUnit extends Measurement {
         this.deductions = deductions;
     }
 
+    public List<Balcony> getBalconies() {
+        return balconies;
+    }
+
+    public void setBalconies(List<Balcony> balconies) {
+        this.balconies = balconies;
+    }
+
+    public Room getKitchen() {
+        return kitchen;
+    }
+
+    public void setKitchen(Room kitchen) {
+        this.kitchen = kitchen;
+    }
+
+    public Room getBathRoom() {
+        return bathRoom;
+    }
+
+    public void setBathRoom(Room bathRoom) {
+        this.bathRoom = bathRoom;
+    }
+
+    public Integer getNumber() {
+        return number;
+    }
+
+    public void setNumber(Integer number) {
+        this.number = number;
+    }
+
+    public MeasurementWithHeight getLightAndVentilation() {
+        return lightAndVentilation;
+    }
+
+    public void setLightAndVentilation(MeasurementWithHeight lightAndVentilation) {
+        this.lightAndVentilation = lightAndVentilation;
+    }
+
+    public MeasurementWithHeight getLaundryOrRecreationalVentilation() {
+        return laundryOrRecreationalVentilation;
+    }
+
+    public void setLaundryOrRecreationalVentilation(MeasurementWithHeight laundryOrRecreationalVentilation) {
+        this.laundryOrRecreationalVentilation = laundryOrRecreationalVentilation;
+    }
+
+    public List<Room> getRegularRooms() {
+        return regularRooms;
+    }
+
+    public void setRegularRooms(List<Room> regularRooms) {
+        this.regularRooms = regularRooms;
+    }
+
+    public List<Room> getAcRooms() {
+        return acRooms;
+    }
+
+    public void setAcRooms(List<Room> acRooms) {
+        this.acRooms = acRooms;
+    }
+
+    public List<Occupancy> getOccupancies() {
+        return occupancies;
+    }
+
+    public void setOccupancies(List<Occupancy> occupancies) {
+        this.occupancies = occupancies;
+    }
+
+    public Room getCommonRoom() {
+        return commonRoom;
+    }
+
+    public void setCommonRoom(Room commonRoom) {
+        this.commonRoom = commonRoom;
+    }
+
+    public Room getBathRoomWaterClosets() {
+        return bathRoomWaterClosets;
+    }
+
+    public void setBathRoomWaterClosets(Room bathRoomWaterClosets) {
+        this.bathRoomWaterClosets = bathRoomWaterClosets;
+    }
+
+    public List<ServiceRoom> getServiceRooms() {
+        return serviceRooms;
+    }
+
+    public void setServiceRooms(List<ServiceRoom> serviceRooms) {
+        this.serviceRooms = serviceRooms;
+    }
+
+    public void addServiceRoom(ServiceRoom serviceRoom) {
+        this.serviceRooms.add(serviceRoom);
+    }
+
+    public Room getWaterClosets() {
+        return waterClosets;
+    }
+
+    public void setWaterClosets(Room waterClosets) {
+        this.waterClosets = waterClosets;
+    }
 }

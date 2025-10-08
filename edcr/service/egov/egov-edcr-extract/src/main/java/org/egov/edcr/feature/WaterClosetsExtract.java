@@ -7,11 +7,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.egov.common.entity.edcr.Block;
-import org.egov.common.entity.edcr.Floor;
-import org.egov.common.entity.edcr.Measurement;
-import org.egov.common.entity.edcr.Room;
-import org.egov.common.entity.edcr.RoomHeight;
+import org.egov.common.entity.edcr.*;
 import org.egov.edcr.entity.blackbox.MeasurementDetail;
 import org.egov.edcr.entity.blackbox.PlanDetail;
 import org.egov.edcr.service.LayerNames;
@@ -33,6 +29,7 @@ public class WaterClosetsExtract extends FeatureExtract {
 
     @Override
     public PlanDetail extract(PlanDetail planDetail) {
+        LOG.info("Starting of WaterClosetsExtract extract method");
         List<DXFLWPolyline> rooms;
         List<DXFLWPolyline> ventilationWC;
         List<Measurement> roomMeasurements;
@@ -43,36 +40,45 @@ public class WaterClosetsExtract extends FeatureExtract {
         for (Block block : planDetail.getBlocks())
             if (block.getBuilding() != null && block.getBuilding().getFloors() != null)
                 for (Floor f : block.getBuilding().getFloors()) {
-//                    String layerName = String.format(layerNames.getLayerName("LAYER_NAME_BLK_FLR_WC"), block.getNumber(),
-//                            f.getNumber());
-                    String layerName = layerNames.getLayerName("LAYER_NAME_BLOCK_NAME_PREFIX") + block.getNumber() + "_"
-                            + layerNames.getLayerName("LAYER_NAME_FLOOR_NAME_PREFIX") + f.getNumber() + "_"
-                            + layerNames.getLayerName("LAYER_NAME_WATER_CLOSET");
-                    String ventilationLayerName = layerNames.getLayerName("LAYER_NAME_BLOCK_NAME_PREFIX") + block.getNumber() + "_"
-                    		+ layerNames.getLayerName("LAYER_NAME_FLOOR_NAME_PREFIX") + f.getNumber() + "_"
-                    		+ layerNames.getLayerName("LAYER_NAME_WATER_CLOSET_VENTILATION");
-                    rooms = Util.getPolyLinesByLayer(planDetail.getDoc(), layerName);
-                    ventilationWC = Util.getPolyLinesByLayer(planDetail.getDoc(), ventilationLayerName);
-                    roomMeasurements = rooms.stream()
-                            .map(flightPolyLine -> new MeasurementDetail(flightPolyLine, true)).collect(Collectors.toList());
-                    ventilationMeasurements = ventilationWC.stream()
-                    		.map(flightPolyLine -> new MeasurementDetail(flightPolyLine, true)).collect(Collectors.toList());
-                    f.setWaterClosets(new Room());
-                    
-//                    f.setVentilation(ventilationMeasurements);
-                    f.getWaterClosets().setRooms(roomMeasurements);
-                    f.getWaterClosets().setWaterClosetVentilation(ventilationMeasurements);
-                    roomHeights = Util.getListOfDimensionValueByLayer(planDetail,
-                            String.format(layerNames.getLayerName("LAYER_NAME_BLK_FLR_WC_HT"), block.getNumber(), f.getNumber()));
-                    roomHeightsList = new ArrayList<>();
-                    for (BigDecimal h : roomHeights) {
-                        height = new RoomHeight();
-                        height.setHeight(h);
-                        roomHeightsList.add(height);
-                    }
-                    f.getWaterClosets().setHeights(roomHeightsList);
+                    if(f.getUnits() != null && !f.getUnits().isEmpty())
+                        for(FloorUnit floorUnit : f.getUnits()) {
+                            LOG.info("Processing WaterCloset for Block: " + block.getNumber() + " Floor: " + f.getNumber() + " Unit: " + floorUnit.getUnitNumber());
+
+                            String layerName = layerNames.getLayerName("LAYER_NAME_BLOCK_NAME_PREFIX") + block.getNumber() + "_"
+                                    + layerNames.getLayerName("LAYER_NAME_FLOOR_NAME_PREFIX") + f.getNumber() + "_"
+                                    + layerNames.getLayerName("LAYER_NAME_UNIT_NAME_PREFIX") + floorUnit.getUnitNumber() + "_"
+                                    + layerNames.getLayerName("LAYER_NAME_WATER_CLOSET");
+                            String ventilationLayerName = layerNames.getLayerName("LAYER_NAME_BLOCK_NAME_PREFIX") + block.getNumber() + "_"
+                                    + layerNames.getLayerName("LAYER_NAME_FLOOR_NAME_PREFIX") + f.getNumber() + "_"
+                                    + layerNames.getLayerName("LAYER_NAME_UNIT_NAME_PREFIX") + floorUnit.getUnitNumber() + "_"
+                                    + layerNames.getLayerName("LAYER_NAME_WATER_CLOSET_VENTILATION");
+
+                            LOG.info("Water Closet Layer Name: " + layerName);
+                            LOG.info("Water Closet Ventilation Layer Name: " + ventilationLayerName);
+                            rooms = Util.getPolyLinesByLayer(planDetail.getDoc(), layerName);
+                            ventilationWC = Util.getPolyLinesByLayer(planDetail.getDoc(), ventilationLayerName);
+                            roomMeasurements = rooms.stream()
+                                    .map(flightPolyLine -> new MeasurementDetail(flightPolyLine, true)).collect(Collectors.toList());
+                            ventilationMeasurements = ventilationWC.stream()
+                                    .map(flightPolyLine -> new MeasurementDetail(flightPolyLine, true)).collect(Collectors.toList());
+                            floorUnit.setWaterClosets(new Room());
+
+                            floorUnit.getWaterClosets().setRooms(roomMeasurements);
+                            floorUnit.getWaterClosets().setWaterClosetVentilation(ventilationMeasurements);
+                            roomHeights = Util.getListOfDimensionValueByLayer(planDetail,
+                                    String.format(layerNames.getLayerName("LAYER_NAME_BLK_FLR_UNIT_WC_HT"), block.getNumber(), f.getNumber(), floorUnit.getUnitNumber()));
+                            roomHeightsList = new ArrayList<>();
+                            for (BigDecimal h : roomHeights) {
+                                height = new RoomHeight();
+                                height.setHeight(h);
+                                roomHeightsList.add(height);
+                            }
+                            floorUnit.getWaterClosets().setHeights(roomHeightsList);
+                            LOG.info("Added WaterCloset with " + floorUnit.getWaterClosets().getRooms().size() + " rooms and " + floorUnit.getWaterClosets().getHeights().size() + " heights to Unit: " + floorUnit.getUnitNumber());
+                        }
                 }
 
+        LOG.info("Ending of WaterClosetsExtract extract method");
         return planDetail;
     }
 

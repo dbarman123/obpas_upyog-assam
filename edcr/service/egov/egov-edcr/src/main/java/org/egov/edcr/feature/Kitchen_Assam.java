@@ -84,17 +84,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.egov.common.entity.edcr.Block;
-import org.egov.common.entity.edcr.FeatureEnum;
-import org.egov.common.entity.edcr.Floor;
-import org.egov.common.entity.edcr.KitchenRequirement;
-import org.egov.common.entity.edcr.Measurement;
-import org.egov.common.entity.edcr.OccupancyTypeHelper;
-import org.egov.common.entity.edcr.Plan;
-import org.egov.common.entity.edcr.ReportScrutinyDetail;
-import org.egov.common.entity.edcr.Result;
-import org.egov.common.entity.edcr.RoomHeight;
-import org.egov.common.entity.edcr.ScrutinyDetail;
+import org.egov.common.entity.edcr.*;
 import org.egov.edcr.constants.DxfFileConstants;
 import org.egov.edcr.service.MDMSCacheManager;
 import org.egov.edcr.service.ProcessHelper;
@@ -187,14 +177,17 @@ public class Kitchen_Assam extends Kitchen {
 		scrutinyDetail.addColumnHeading(1, RULE_NO);
 		scrutinyDetail.addColumnHeading(2, DESCRIPTION);
 		scrutinyDetail.addColumnHeading(3, FLOOR);
-		scrutinyDetail.addColumnHeading(4, REQUIRED);
-		scrutinyDetail.addColumnHeading(5, PROVIDED);
-		scrutinyDetail.addColumnHeading(6, STATUS);
+        scrutinyDetail.addColumnHeading(4, UNIT);
+		scrutinyDetail.addColumnHeading(5, REQUIRED);
+		scrutinyDetail.addColumnHeading(6, PROVIDED);
+		scrutinyDetail.addColumnHeading(7, STATUS);
 		scrutinyDetail.setKey(BLOCK + block.getNumber() + U_KITCHEN);
 
 		for (Floor floor : block.getBuilding().getFloors()) {
-			processKitchenForFloor(floor, block, pl, occupancy, heightColors);
-		}
+            if (floor.getUnits() != null && !floor.getUnits().isEmpty())
+                for (FloorUnit floorUnit : floor.getUnits())
+                    processKitchenForFloor(floor, floorUnit, block, pl, occupancy, heightColors);
+        }
 
 		pl.getReportOutput().getScrutinyDetails().add(scrutinyDetail);
 	}
@@ -211,9 +204,11 @@ public class Kitchen_Assam extends Kitchen {
 	 * @param heightColors Map of height feature color codes for different room
 	 *                     types.
 	 */
-	private void processKitchenForFloor(Floor floor, Block block, Plan pl, OccupancyTypeHelper occupancy,
+	private void processKitchenForFloor(Floor floor, FloorUnit floorUnit, Block block, Plan pl, OccupancyTypeHelper occupancy,
 			Map<String, Integer> heightColors) {
-		if (floor.getKitchen() == null)
+        LOG.info("Processing kitchen for Floor: {}, FloorUnit: {}, Block: {}", floor.getNumber(), floorUnit.getUnitNumber(), block.getNumber());
+
+		if (floorUnit.getKitchen() == null)
 			return;
 
 		// Room Color Codes
@@ -225,12 +220,12 @@ public class Kitchen_Assam extends Kitchen {
 		String kitchenDiningColor = A.equalsIgnoreCase(occ) ? DxfFileConstants.RESIDENTIAL_KITCHEN_DINING_ROOM_COLOR
 				: DxfFileConstants.COMMERCIAL_KITCHEN_DINING_ROOM_COLOR;
 
-		LOG.info("Processing kitchen for Floor: {}, Block: {}, Occupancy: {}", floor.getNumber(), block.getNumber(),
+		LOG.info("Processing kitchen for Floor: {}, FloorUnit: {}, Block: {}, Occupancy: {}", floor.getNumber(), floorUnit.getUnitNumber(), block.getNumber(),
 				occ);
 
 		// Extract rooms and heights
-		List<Measurement> rooms = floor.getKitchen().getRooms();
-		List<RoomHeight> heights = floor.getKitchen().getHeights();
+		List<Measurement> rooms = floorUnit.getKitchen().getRooms();
+		List<RoomHeight> heights = floorUnit.getKitchen().getHeights();
 		List<BigDecimal> kitchenHeights = heights.stream().map(RoomHeight::getHeight).collect(Collectors.toList());
 
 		LOG.info("Kitchen heights extracted: {}", kitchenHeights);
@@ -240,7 +235,7 @@ public class Kitchen_Assam extends Kitchen {
 		Optional<KitchenRequirement> matchedRule = rules.stream().filter(KitchenRequirement.class::isInstance)
 				.map(KitchenRequirement.class::cast).findFirst();
 		if (!matchedRule.isPresent()) {
-			LOG.warn("No KitchenRequirement rule found for Floor: {}, Block: {}", floor.getNumber(), block.getNumber());
+			LOG.warn("No KitchenRequirement rule found for Floor: {}, FloorUnit: {}, Block: {}", floor.getNumber(), floorUnit.getUnitNumber(), block.getNumber());
 			return;
 		}
 		KitchenRequirement rule = matchedRule.get();
@@ -250,28 +245,28 @@ public class Kitchen_Assam extends Kitchen {
         // Validate height
         if (!kitchenHeights.isEmpty()) {
             BigDecimal minHeight = kitchenHeights.stream().min(Comparator.naturalOrder()).get().setScale(2, BigDecimal.ROUND_HALF_UP);
-            buildResult(pl, floor, rule.getKitchenHeight(), SUBRULE_41_III, SUBRULE_41_III_DESC, minHeight, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
+            buildResult(pl, floor, floorUnit, rule.getKitchenHeight(), SUBRULE_41_III, SUBRULE_41_III_DESC, minHeight, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
         } else {
-            String layerName = String.format(LAYER_ROOM_HEIGHT, block.getNumber(), floor.getNumber(), "KITCHEN");
+            String layerName = String.format(LAYER_ROOM_HEIGHT, block.getNumber(), floor.getNumber(), floorUnit.getUnitNumber(), "KITCHEN");
             pl.addError(layerName, ROOM_HEIGHT_NOTDEFINED + layerName);
         }
         
      // Validate door width
-        if (floor.getKitchen().getKitchenDoorWidth() != null && !floor.getKitchen().getKitchenDoorWidth().isEmpty()) {
-            BigDecimal minDoorWidth = floor.getKitchen().getKitchenDoorWidth()
+        if (floorUnit.getKitchen().getKitchenDoorWidth() != null && !floorUnit.getKitchen().getKitchenDoorWidth().isEmpty()) {
+            BigDecimal minDoorWidth = floorUnit.getKitchen().getKitchenDoorWidth()
                 .stream().min(Comparator.naturalOrder()).get().setScale(2, BigDecimal.ROUND_HALF_UP);
 
-            buildResult(pl, floor, rule.getKitchenDoorWidth(), SUBRULE_41_III,
+            buildResult(pl, floor, floorUnit, rule.getKitchenDoorWidth(), SUBRULE_41_III,
             		KITCHEN_DOOR_WIDTH, minDoorWidth, false,
                 ProcessHelper.getTypicalFloorValues(block, floor, false));
         }
 
         // Validate door height
-        if (floor.getKitchen().getKitchenDoorHeight() != null && !floor.getKitchen().getKitchenDoorHeight().isEmpty()) {
-            BigDecimal minDoorHeight = floor.getKitchen().getKitchenDoorHeight()
+        if (floorUnit.getKitchen().getKitchenDoorHeight() != null && !floorUnit.getKitchen().getKitchenDoorHeight().isEmpty()) {
+            BigDecimal minDoorHeight = floorUnit.getKitchen().getKitchenDoorHeight()
                 .stream().min(Comparator.naturalOrder()).get().setScale(2, BigDecimal.ROUND_HALF_UP);
 
-            buildResult(pl, floor, rule.getKitchenDoorHeight(), SUBRULE_41_III,
+            buildResult(pl, floor, floorUnit, rule.getKitchenDoorHeight(), SUBRULE_41_III,
             		KITCHEN_DOOR_HEIGHT, minDoorHeight, false,
                 ProcessHelper.getTypicalFloorValues(block, floor, false));
         }
@@ -279,19 +274,19 @@ public class Kitchen_Assam extends Kitchen {
         // Process Room Types
 		LOG.info("Processing Kitchen room type with color: {}", kitchenColor);
 
-        processRoomType(rooms, heightColors, kitchenColor, rule.getKitchenArea(), rule.getKitchenWidth(), KITCHEN, floor, block, pl);
+        processRoomType(rooms, heightColors, kitchenColor, rule.getKitchenArea(), rule.getKitchenWidth(), KITCHEN, floor, floorUnit, block, pl);
         
 		LOG.info("Processing Kitchen Store room type with color: {}", kitchenStoreColor);
 
-        processRoomType(rooms, heightColors, kitchenStoreColor, rule.getKitchenStoreArea(), rule.getKitchenStoreWidth(), KITCHEN_STORE, floor, block, pl);
+        processRoomType(rooms, heightColors, kitchenStoreColor, rule.getKitchenStoreArea(), rule.getKitchenStoreWidth(), KITCHEN_STORE, floor, floorUnit, block, pl);
         
 		LOG.info("Processing Kitchen Dining room type with color: {}", kitchenDiningColor);
 
-        processRoomType(rooms, heightColors, kitchenDiningColor, rule.getKitchenDiningArea(), rule.getKitchenDiningWidth(), KITCHEN_DINING, floor, block, pl);
+        processRoomType(rooms, heightColors, kitchenDiningColor, rule.getKitchenDiningArea(), rule.getKitchenDiningWidth(), KITCHEN_DINING, floor, floorUnit, block, pl);
         
 		LOG.info("Processing kitchen and dining ventilation for Floor: {}", floor.getNumber());
 
-        evaluateKitchenVentilation(pl, floor, block, rooms);
+        evaluateKitchenVentilation(pl, floor, floorUnit, block, rooms);
 
     }
 
@@ -312,13 +307,13 @@ public class Kitchen_Assam extends Kitchen {
 	 * @param pl           The Plan object.
 	 */
 	private void processRoomType(List<Measurement> rooms, Map<String, Integer> heightColors, String color,
-			BigDecimal minArea, BigDecimal minWidth, String roomName, Floor floor, Block block, Plan pl) {
+			BigDecimal minArea, BigDecimal minWidth, String roomName, Floor floor, FloorUnit floorUnit, Block block, Plan pl) {
 
 		LOG.info("Processing room type: {} for Floor: {} in Block: {}", roomName, floor.getNumber(), block.getNumber());
 
 		List<BigDecimal> areas = new ArrayList<>();
 		List<BigDecimal> widths = new ArrayList<>();
-		List<BigDecimal> kitchenWidth = floor.getKitchen().getKitchenWidth();
+		List<BigDecimal> kitchenWidth = floorUnit.getKitchen().getKitchenWidth();
 
 		for (Measurement room : rooms) {
 			if (heightColors.get(color) != null && heightColors.get(color) == room.getColorCode()) {
@@ -335,13 +330,13 @@ public class Kitchen_Assam extends Kitchen {
 			BigDecimal totalArea = areas.stream().reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2,
 					BigDecimal.ROUND_HALF_UP);
 			LOG.info("Total area calculated for room type {}: {}", roomName, totalArea);
-			buildResult(pl, floor, minArea, SUBRULE_41_III, String.format(SUBRULE_41_III_AREA_DESC, roomName),
+			buildResult(pl, floor, floorUnit, minArea, SUBRULE_41_III, String.format(SUBRULE_41_III_AREA_DESC, roomName),
 					totalArea, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
 		}
 
         if (!widths.isEmpty()) {
             BigDecimal minRoomWidth = widths.stream().min(Comparator.naturalOrder()).get().setScale(2, BigDecimal.ROUND_HALF_UP);
-            buildResult(pl, floor, minWidth, SUBRULE_41_III, String.format(SUBRULE_41_III_TOTAL_WIDTH, roomName), minRoomWidth, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
+            buildResult(pl, floor, floorUnit, minWidth, SUBRULE_41_III, String.format(SUBRULE_41_III_TOTAL_WIDTH, roomName), minRoomWidth, false, ProcessHelper.getTypicalFloorValues(block, floor, false));
         }
     }
 
@@ -359,7 +354,7 @@ public class Kitchen_Assam extends Kitchen {
      * @param valid                Boolean flag representing whether the value is valid.
      * @param typicalFloorValues   Map containing information about typical floor applicability.
      */
-    private void buildResult(Plan pl, Floor floor, BigDecimal expected, String subRule, String subRuleDesc,
+    private void buildResult(Plan pl, Floor floor, FloorUnit floorUnit, BigDecimal expected, String subRule, String subRuleDesc,
             BigDecimal actual, boolean valid, Map<String, Object> typicalFloorValues) {
         if (!(Boolean) typicalFloorValues.get(IS_TYPICAL_REP_FLOOR)
                 && expected.compareTo(BigDecimal.valueOf(0)) > 0 &&
@@ -371,11 +366,11 @@ public class Kitchen_Assam extends Kitchen {
                     ? (String) typicalFloorValues.get(TYPICAL_FLOOR)
                     : FLOOR_SPACED + floor.getNumber();
             if (valid) {
-                setReportOutputDetails(pl, subRule, subRuleDesc, value,
+                setReportOutputDetails(pl, subRule, subRuleDesc, value, floorUnit,
                         expected + DcrConstants.IN_METER,
                         actual + DcrConstants.IN_METER, Result.Accepted.getResultVal());
             } else {
-                setReportOutputDetails(pl, subRule, subRuleDesc, value,
+                setReportOutputDetails(pl, subRule, subRuleDesc, value, floorUnit,
                         expected + DcrConstants.IN_METER,
                         actual + DcrConstants.IN_METER, Result.Not_Accepted.getResultVal());
             }
@@ -403,11 +398,11 @@ public class Kitchen_Assam extends Kitchen {
      * @param rooms list of {@link Measurement} objects representing kitchen rooms and their areas
      */
     
-    private void evaluateKitchenVentilation(Plan pl, Floor floor, Block block, List<Measurement> rooms) {
-        if (floor.getKitchen() == null
-                || floor.getKitchen().getKitchenWindowWidth() == null
-                || floor.getKitchen().getKitchenWindowWidth().isEmpty()
-                || floor.getKitchen().getKitchenWindowHeight() == null) {
+    private void evaluateKitchenVentilation(Plan pl, Floor floor, FloorUnit floorUnit, Block block, List<Measurement> rooms) {
+        if (floorUnit.getKitchen() == null
+                || floorUnit.getKitchen().getKitchenWindowWidth() == null
+                || floorUnit.getKitchen().getKitchenWindowWidth().isEmpty()
+                || floorUnit.getKitchen().getKitchenWindowHeight() == null) {
             return;
         }
         
@@ -418,10 +413,10 @@ public class Kitchen_Assam extends Kitchen {
                 .setScale(2, RoundingMode.HALF_UP);
 
         // Get kitchen window height
-        BigDecimal windowHeight = floor.getKitchen().getKitchenWindowHeight().setScale(2, RoundingMode.HALF_UP);
+        BigDecimal windowHeight = floorUnit.getKitchen().getKitchenWindowHeight().setScale(2, RoundingMode.HALF_UP);
 
         // Provided window area = sum of (each window width × window height)
-        BigDecimal providedKitchenArea = floor.getKitchen().getKitchenWindowWidth().stream()
+        BigDecimal providedKitchenArea = floorUnit.getKitchen().getKitchenWindowWidth().stream()
                 .map(width -> width.multiply(windowHeight))
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
@@ -432,7 +427,7 @@ public class Kitchen_Assam extends Kitchen {
         LOG.info("Evaluating kitchen ventilation for Floor: {}. KitchenFloorArea: {}, RequiredVentilationArea: {}, ProvidedWindowArea: {}",
                 floor.getNumber(), kitchenArea, requiredVentilationArea, providedKitchenArea);
 
-        buildResult(pl, floor, requiredVentilationArea, SUBRULE_41_III,
+        buildResult(pl, floor, floorUnit, requiredVentilationArea, SUBRULE_41_III,
                 KICTHEN_VENT_DESC,
                 providedKitchenArea,
                 providedKitchenArea.compareTo(requiredVentilationArea) >= 0,
@@ -451,12 +446,15 @@ public class Kitchen_Assam extends Kitchen {
      * @param actual     Actual value found in the Plan.
      * @param status     Result of the validation ("Accepted" or "Not Accepted").
      */
-    private void setReportOutputDetails(Plan pl, String ruleNo, String ruleDesc, String floor, String expected, String actual,
+    private void setReportOutputDetails(Plan pl, String ruleNo, String ruleDesc, String floor, FloorUnit floorUnit, String expected, String actual,
             String status) {
+        LOG.info("Setting report details: RuleNo={}, RuleDesc={}, Floor={}, Unit={}, Expected={}, Actual={}, Status={}",
+                ruleNo, ruleDesc, floor, floorUnit.getUnitNumber(), expected, actual, status);
         ReportScrutinyDetail detail = new ReportScrutinyDetail();
         detail.setRuleNo(ruleNo);
         detail.setDescription(ruleDesc);
         detail.setFloorNo(floor);
+        detail.setUnitNumber(floorUnit.getUnitNumber());
         detail.setRequired(expected);
         detail.setProvided(actual);
         detail.setStatus(status);

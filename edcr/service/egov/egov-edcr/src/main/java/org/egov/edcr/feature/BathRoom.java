@@ -127,7 +127,11 @@ public class BathRoom extends FeatureProcess {
         BigDecimal permittedMinWidth = rule.getBathroomMinWidth() != null ? rule.getBathroomMinWidth() : BigDecimal.ZERO;
 
         for (Floor floor : block.getBuilding().getFloors()) {
-            processFloor(plan, floor, permittedArea, permittedMinWidth, scrutinyDetail);
+            if (floor.getUnits() != null || !floor.getUnits().isEmpty())
+                for (FloorUnit floorUnit : floor.getUnits()) {
+                    LOG.info("Processing Floor Unit: {} in Floor Number: {} in Block ID: {}", floorUnit.getUnitNumber(), floor.getNumber(), block.getNumber());
+                    processFloor(plan, floor, floorUnit, permittedArea, permittedMinWidth, scrutinyDetail);
+                }
         }
     }
 
@@ -141,9 +145,9 @@ public class BathRoom extends FeatureProcess {
      * @param scrutinyDetail    The scrutiny detail object to populate with validation results.
      */
     
-    private void processFloor(Plan plan, Floor floor, BigDecimal permittedArea, BigDecimal permittedMinWidth,
+    private void processFloor(Plan plan, Floor floor, FloorUnit floorUnit, BigDecimal permittedArea, BigDecimal permittedMinWidth,
                               ScrutinyDetail scrutinyDetail) {
-        Room bathRoom = floor.getBathRoom();
+        Room bathRoom = floorUnit.getBathRoom();
         if (bathRoom == null || bathRoom.getRooms() == null || bathRoom.getHeights() == null) return;
 
         List<Measurement> rooms = bathRoom.getRooms();
@@ -151,7 +155,7 @@ public class BathRoom extends FeatureProcess {
 
         if (rooms.isEmpty() || heights.isEmpty()) return;
 
-        validateBathroom(plan, floor, rooms, heights, permittedArea, permittedMinWidth, scrutinyDetail);
+        validateBathroom(plan, floor, floorUnit, rooms, heights, permittedArea, permittedMinWidth, scrutinyDetail);
     }
 
     
@@ -167,7 +171,7 @@ public class BathRoom extends FeatureProcess {
      * @param permittedMinWidth The minimum permissible bathroom width.
      * @param scrutinyDetail    The scrutiny detail object to update.
      */
-    private void validateBathroom(Plan plan, Floor floor, List<Measurement> rooms, List<RoomHeight> heights,
+    private void validateBathroom(Plan plan, Floor floor, FloorUnit floorUnit, List<Measurement> rooms, List<RoomHeight> heights,
                                   BigDecimal permittedArea, BigDecimal permittedMinWidth, ScrutinyDetail scrutinyDetail) {
 
         BigDecimal totalArea = BigDecimal.ZERO;
@@ -186,8 +190,12 @@ public class BathRoom extends FeatureProcess {
                 minHeight = rh.getHeight();
             }
         }
-
         boolean isAccepted = totalArea.compareTo(permittedArea) >= 0 && minWidth.compareTo(permittedMinWidth) >= 0;
+
+        LOG.info("Validating bathroom for Floor Number: {} and Unit number : {} - Total Area: {}, Min Width: {}, Min Height: {}, " +
+                        "Permitted Area: {}, Permitted Min Width: {}, Accepted: {}",
+                floor.getNumber(), floorUnit.getUnitNumber(), totalArea, minWidth, minHeight, permittedArea, permittedMinWidth, isAccepted);
+
         Map<String, String> resultRow = createResultRow(floor, permittedArea, permittedMinWidth, totalArea, minWidth, isAccepted);
         scrutinyDetail.getDetail().add(resultRow);
     }

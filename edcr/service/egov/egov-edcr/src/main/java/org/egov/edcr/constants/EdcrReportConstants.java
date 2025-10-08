@@ -337,7 +337,7 @@ public class EdcrReportConstants {
     public static final BigDecimal MAXIMUM_AREA_46_45 = BigDecimal.valueOf(46.45);
     public static final BigDecimal VENTILATION_PERCENTAGE = BigDecimal.valueOf(20); // 20% ventilation requirement
     public static final String ROOM_HEIGHT_NOTDEFINED = "Room height is not defined in layer ";
-    public static final String LAYER_ROOM_HEIGHT = "BLK_%s_FLR_%s_%s";
+    public static final String LAYER_ROOM_HEIGHT = "BLK_%s_FLR_%s_UNIT_%s_%s";
 
     public static final BigDecimal MIN_WINDOW_HEIGHT = BigDecimal.valueOf(0.50);
     public static final BigDecimal MIN_DOOR_HEIGHT = BigDecimal.valueOf(2.0);
@@ -596,6 +596,7 @@ public class EdcrReportConstants {
     public static final String WC_VENTILATION_AREA_UNIT = " sqm";
     public static final String WC_VENTILATION_WIDTH_UNIT = " m";
     public static final String WC_VENTILATION_AT_FLOOR = " at floor ";
+    public static final String WC_VENTILATION_FLOOR_UNIT = "'s FloorUnit ";
  // Rule Numbers
     public static final String RULE_VENT_01 = "Clause 55";
     public static final String SUB_RULE_SIDE_YARD = "83b (ii)";
