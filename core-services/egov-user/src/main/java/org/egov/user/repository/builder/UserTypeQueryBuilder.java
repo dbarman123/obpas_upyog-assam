@@ -183,30 +183,35 @@ public class UserTypeQueryBuilder {
             preparedStatementValues.add(userSearchCriteria.getEmailId().trim());
         }
 
+        // Search based on aadhaar number
         if (userSearchCriteria.getAadhaarNumber() != null) {
             isAppendAndClause = addAndClauseIfRequired(isAppendAndClause, selectQuery);
             selectQuery.append(" userdata.aadhaarnumber = ?");
             preparedStatementValues.add(userSearchCriteria.getAadhaarNumber().trim());
         }
 
+        // Search based on guardian name
         if(userSearchCriteria.getGuardian() != null) {
         	isAppendAndClause = addAndClauseIfRequired(isAppendAndClause, selectQuery);
             selectQuery.append(" userdata.guardian = ?");
             preparedStatementValues.add(userSearchCriteria.getGuardian().trim());
         }
 
+        // Search based on guardian relation
         if(userSearchCriteria.getGuardianRelation() != null) {
         	isAppendAndClause = addAndClauseIfRequired(isAppendAndClause, selectQuery);
             selectQuery.append(" userdata.guardianrelation = ?");
             preparedStatementValues.add(userSearchCriteria.getGuardianRelation().toString());
         }
 
+        // Search based on gender of user
         if(userSearchCriteria.getGender() != null) {
         	isAppendAndClause = addAndClauseIfRequired(isAppendAndClause, selectQuery);
             selectQuery.append(" userdata.gender = ?");
             preparedStatementValues.add(userSearchCriteria.getGender().toString());
         }
 
+        // Search based on alternate contact number
         if(userSearchCriteria.getAltContactNumber() != null) {
         	isAppendAndClause = addAndClauseIfRequired(isAppendAndClause, selectQuery);
             selectQuery.append(" userdata.altcontactnumber = ?");
@@ -227,6 +232,7 @@ public class UserTypeQueryBuilder {
             preparedStatementValues.add(userSearchCriteria.getMobileNumber().trim());
         }
 
+        // Search based on PAN number
         if (userSearchCriteria.getPan() != null) {
             isAppendAndClause = addAndClauseIfRequired(isAppendAndClause, selectQuery);
             selectQuery.append(" userdata.pan = ?");

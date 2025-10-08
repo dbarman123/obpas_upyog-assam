@@ -52,10 +52,10 @@ public class UserSearchCriteria {
     private boolean validateIfEmptySearch(boolean isInterServiceCall) {
         /*
             for "InterServiceCall" ->
-                at least one is compulsory --> 'userName' or 'name' or 'mobileNumber' or 'emailId' or 'uuid' or 'id' or 'roleCodes'
+                at least one is compulsory --> id, uuid, userName, name, pan, guardian, gender, guardianRelation, altContactNumber, aadhaarNumber, mobileNumber, emailId, fuzzyLogic, active, offset, limit, sort, type, tenantId, roleCodes, alternatemobilenumber, excludeAddressDetails, addressId, addressStatus
 
             and for calls from outside->
-                at least one is compulsory --> 'userName' or 'name' or 'mobileNumber' or 'emailId' or 'uuid'
+                at least one is compulsory --> id, uuid, userName, name, pan, guardian, gender, guardianRelation, altContactNumber, aadhaarNumber, mobileNumber, emailId, fuzzyLogic, active, offset, limit, sort, type, tenantId, roleCodes, alternatemobilenumber, excludeAddressDetails, addressId, addressStatus
          */
         if (isInterServiceCall)
             return isEmpty(userName) && isEmpty(name) && isEmpty(mobileNumber) && isEmpty(emailId) && isEmpty(aadhaarNumber) && isEmpty(pan) &&
@@ -69,10 +69,22 @@ public class UserSearchCriteria {
 
     private boolean validateIfTenantIdExists(boolean isInterServiceCall) {
         /*
-            for calls from outside->
-                tenantId is compulsory if one of these is non empty--> 'userName' or 'name', 'mobileNumber'  or 'roleCodes'
-            and for "InterServiceCall" ->
-                tenantId is compulsory if one of these is non empty --> 'userName' or 'name' or 'mobileNumber'
+         * Validates if tenantId is compulsory and missing, based on the type of call.
+         *
+         * Rules:
+         * 1. For InterServiceCall (internal service-to-service calls):
+         *    - tenantId is required if ANY of these fields are provided:
+         *        userName, name, mobileNumber, aadhaarNumber, pan,
+         *        altContactNumber, guardian, guardianRelation, gender, roleCodes
+         *
+         * 2. For external calls (from outside):
+         *    - tenantId is required if ANY of these fields are provided:
+         *        userName, name, mobileNumber, aadhaarNumber, pan,
+         *        altContactNumber, guardian, guardianRelation, gender
+         *    - (Note: roleCodes is NOT considered here)
+         *
+         * @param isInterServiceCall true if request is from another service, false if external call
+         * @return true if tenantId is compulsory but missing, otherwise false
          */
         if (isInterServiceCall)
             return (!isEmpty(userName) || !isEmpty(name) || !isEmpty(mobileNumber) || !isEmpty(aadhaarNumber) || !isEmpty(pan) ||
