@@ -62,13 +62,14 @@ public class RampServiceExtract extends FeatureExtract {
                         daRamp.setMeasurements(convertedPolyLines);
                         daRamp.setPresentInDxf(true);
                         daRamp.setSlope(slope);
-                        block.addDARamps(daRamp);
+                        if (daRampWidth != null && !daRampWidth.isEmpty()) {
+                            daRamp.setDaRampWidth(daRampWidth);
+                        }
+                    	block.addDARamps(daRamp);
                     	String landingNamePattern = String.format(layerNames.getLayerName("LAYER_NAME_DA_RAMP_LANDING"),
     							block.getNumber(), "+\\d");
 
-                    	if(daRampWidth != null) {
-                        	daRamp.setDaRampWidth(daRampWidth);
-                        }
+                    	
     					addRampLanding(pl, landingNamePattern, daRamp);
                         
                     }
