@@ -111,6 +111,7 @@ import org.egov.edcr.utility.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
+import static org.egov.edcr.constants.CommonFeatureConstants.RAMP_HT;
 
 @Service
 public class RampService_Assam extends RampService {
@@ -392,11 +393,11 @@ public class RampService_Assam extends RampService {
                 ScrutinyDetail scrutinyDetail = createScrutinyDetail(DA_RAMP_DEFINED, block.getNumber(), false);
                 ScrutinyDetail scrutinyDetail1 = createScrutinyDetail(DA_RAMP_SLOPE, block.getNumber(), false);
                 ScrutinyDetail scrutinyDetail2 = createScrutinyDetail(DA_RAMP_MAX_SLOPE, block.getNumber(), false);
-                ScrutinyDetail scrutinyDetail3 = createScrutinyDetail(DA_ROOM, block.getNumber(), true);
+                ScrutinyDetail scrutinyDetail3 = createScrutinyDetail(DA_ROOM, block.getNumber(), false);
                 ScrutinyDetail scrutinyDetail4 = createScrutinyDetail(RAMP_MIN_WIDTH, block.getNumber(), true);
                 ScrutinyDetail scrutinyDetail5 = createScrutinyDetail(RAMP_MAX_SLOPE, block.getNumber(), true);
-                ScrutinyDetail scrutinyDetail7 = createScrutinyDetail(RAMP_LENGTH_WIDTH, block.getNumber(), true);
-                ScrutinyDetail scrutinyDetail6 = createScrutinyDetail("Ramp - Minimum Entrance Height", block.getNumber(), true);
+                ScrutinyDetail scrutinyDetail7 = createScrutinyDetail(RAMP_LENGTH_WIDTH, block.getNumber(), false);
+                ScrutinyDetail scrutinyDetail6 = createScrutinyDetail(RAMP_HT, block.getNumber(), false);
 
 
                 List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.RAMP_SERVICE.getValue(), false);
