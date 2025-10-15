@@ -70,8 +70,8 @@ public class EPramaanRequestService {
     private static final String CLIENT_ID = "10*****1523";
     private static final String AES_KEY = "68*********9e" ;
     //private static final String REDIRECT_URI = "https://assamuat.niua.in/upyog-ui/ePramaan-login/";
-    private static final String REDIRECT_URI = "http://localhost:3000/upyog-ui/citizen/";//"http://localhost:8082/Epramaan/ProcessAuthCodeAndGetToken";
-    private static final String SERVICE_LOGOUT_URI = "http://localhost:3000/upyog-ui/citizen/";
+    private static final String REDIRECT_URI = "http://localhost:3000/upyog-ui/citizen";//"http://localhost:8082/Epramaan/ProcessAuthCodeAndGetToken";
+    private static final String SERVICE_LOGOUT_URI = "http://localhost:3000/upyog-ui/citizen";
     private static final String CERTIFICATE_PATH = "certificates/epramaan_staging.crt";
     private static final String CUSTOM_PARAMETER = "WhateverValueServiceWant";
 
