@@ -711,7 +711,7 @@ public class NotificationUtil {
                 messageCode = BPAConstants.BUILDING_PAYMENT_LINK;
                 break;
 
-            case "APPLICATION_COMPLETED":
+            case "PENDING_DD_AD_DEVELOPMENT_AUTHORITY":
                 messageCode = BPAConstants.POST_PAYMENT_BUILDING_PERMIT;
                 break;
 
