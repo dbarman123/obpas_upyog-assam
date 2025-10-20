@@ -1954,8 +1954,8 @@ public class Far_Assam extends Far {
         detail.setAreaType(typeOfArea);
         detail.setRoadWidth(roadWidth.toString());
         detail.setPermissible(expectedResult
-                + (mixedUseFAR != null && mixedUseFAR.compareTo(BigDecimal.ZERO) > 0 ? (" (other uses FAR: " + mixedUseFAR) : "")
-                + (additionalEWSLIGFar != null && additionalEWSLIGFar.compareTo(BigDecimal.ZERO) > 0 ? (" , EWS/LIG FAR: " + additionalEWSLIGFar) : "")
+                + (mixedUseFAR != null && mixedUseFAR.compareTo(BigDecimal.ZERO) > 0 ? (" (Other uses FAR: " + mixedUseFAR) : "")
+                + (additionalEWSLIGFar != null && additionalEWSLIGFar.compareTo(BigDecimal.ZERO) > 0 ? (" (EWS/LIG FAR: " + additionalEWSLIGFar) : "")
                 + ")");
         detail.setProvided(actualResult);
         detail.setStatus(isAccepted ? Result.Accepted.getResultVal() : Result.Not_Accepted.getResultVal());
