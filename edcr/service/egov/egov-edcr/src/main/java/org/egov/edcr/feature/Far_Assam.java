@@ -509,7 +509,10 @@ public class Far_Assam extends Far {
         if (!occupancies.isEmpty())
             for (Occupancy occupancyD : occupancies) {
                 occupancyD.addDeduction(totalAreaToDeduct);
+                occupancyD.subtractFloorArea(totalAreaToDeduct);
             }
+
+        pl.getVirtualBuilding().subtractFloorArea(totalAreaToDeduct);
 
         return totalAreaToDeduct;
     }
@@ -1962,18 +1965,6 @@ public class Far_Assam extends Far {
 
         Map<String, String> details = mapReportDetails(detail);
         addScrutinyDetailtoPlan(scrutinyDetail, pl, details);
-    }
-
-    private ScrutinyDetail getFarScrutinyDetail(String key) {
-        ScrutinyDetail scrutinyDetail = new ScrutinyDetail();
-        scrutinyDetail.addColumnHeading(1, RULE_NO);
-        scrutinyDetail.addColumnHeading(2, AREA_TYPE);
-        scrutinyDetail.addColumnHeading(3, ROAD_WIDTH);
-        scrutinyDetail.addColumnHeading(4, PERMISSIBLE);
-        scrutinyDetail.addColumnHeading(5, PROVIDED);
-        scrutinyDetail.addColumnHeading(6, STATUS);
-        scrutinyDetail.setKey(key);
-        return scrutinyDetail;
     }
 
     @Override

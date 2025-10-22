@@ -181,6 +181,12 @@ public class Occupancy extends Measurement {
         return floorArea;
     }
 
+    // To subtract floor area values coming from different sources
+    public void subtractFloorArea(BigDecimal areaToDelete) {
+        if (areaToDelete != null)
+            this.floorArea = this.floorArea.subtract(areaToDelete);
+    }
+
     public BigDecimal getCarpetArea() {
         return carpetArea;
     }
