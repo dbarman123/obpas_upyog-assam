@@ -157,6 +157,11 @@ public class VirtualBuilding implements Serializable {
         return totalFloorArea;
     }
 
+    public void subtractFloorArea(BigDecimal floorArea) {
+        if (floorArea != null)
+            this.totalFloorArea = this.totalFloorArea.subtract(floorArea);
+    }
+
     public void setTotalFloorArea(BigDecimal totalFloorArea) {
         this.totalFloorArea = totalFloorArea;
     }
