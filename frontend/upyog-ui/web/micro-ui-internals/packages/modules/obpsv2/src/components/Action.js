@@ -89,7 +89,8 @@ const Action = ({ selectedAction, applicationNo, closeModal, setSelectedAction, 
           setPopup(true);
           break;
         case "SUBMIT_REPORT":
-          setPopup(true);
+          const submitReportUrl = `${window.location.origin}/upyog-ui/employee/obpsv2/application/${applicationNo}/${tenantId}`;
+          redirectToPage(submitReportUrl);
           break;
         case "RECOMMEND_TO_CEO":
           setPopup(true);
@@ -112,6 +113,15 @@ const Action = ({ selectedAction, applicationNo, closeModal, setSelectedAction, 
           let scrutinyurl = window.location.href;
           let scrutinyRedirectingUrl = scrutinyurl.split("/inbox")[0] + `/apply/home?applicationNo=${applicationNo}`;
           redirectToPage(scrutinyRedirectingUrl);
+          break;
+        case "RECOMMEND_TO_CHAIRMAN_DA":
+          setPopup(true);
+          break;
+        case "SEND_BACK_TO_DA":
+          setPopup(true);
+          break;
+        case "FORWARD":
+          setPopup(true);
           break;
         default:
           setPopup(false);
@@ -380,9 +390,11 @@ const Action = ({ selectedAction, applicationNo, closeModal, setSelectedAction, 
                 selectedAction === "SEND" ||
                 selectedAction === "REJECT" ||
                 selectedAction === "SEND_BACK_TO_RTP" ||
-                selectedAction === "SUBMIT_REPORT" ||
                 selectedAction === "RECOMMEND_TO_CEO" ||
-                selectedAction === "SEND_BACK_TO_GMDA"
+                selectedAction === "SEND_BACK_TO_GMDA" ||
+                selectedAction === "RECOMMEND_TO_CHAIRMAN_DA" ||
+                selectedAction === "SEND_BACK_TO_DA" ||
+                selectedAction === "FORWARD"
               ) {
                 await onAssign(selectedAction, comments);
               }
@@ -402,9 +414,11 @@ const Action = ({ selectedAction, applicationNo, closeModal, setSelectedAction, 
                 selectedAction === "SEND" ||
                 selectedAction === "REJECT" ||
                 selectedAction === "SEND_BACK_TO_RTP" ||
-                selectedAction === "SUBMIT_REPORT" ||
                 selectedAction === "RECOMMEND_TO_CEO" ||
-                selectedAction === "SEND_BACK_TO_GMDA") && (
+                selectedAction === "SEND_BACK_TO_GMDA" ||
+                selectedAction === "RECOMMEND_TO_CHAIRMAN_DA" ||
+                selectedAction === "SEND_BACK_TO_DA" ||
+                selectedAction === "FORWARD") && (
                 <div>
                   <CardLabel>{t("COMMENTS")}</CardLabel>
                   <TextArea name="reason" onChange={addComment} value={comments} maxLength={500} />
