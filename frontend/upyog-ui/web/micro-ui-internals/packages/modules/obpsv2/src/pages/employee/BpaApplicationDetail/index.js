@@ -114,6 +114,8 @@ const BPAEmployeeDetails = () => {
               onHeadClick={() => setShowOptions(!showOptions)}
               displayOptions={showOptions}
               options={downloadOptions}
+              downloadBtnClassName={"employee-download-btn-className"}
+              optionsClassName={"employee-options-btn-className"}
             />
           )}
           </div>
