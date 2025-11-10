@@ -134,21 +134,22 @@ public class BPANotificationService {
 		Map<String, String> mobileNumberToOwner = getUserList(bpaRequest);
 		String localizationMessages = util.getLocalizationMessages(bpaRequest.getBPA().getTenantId(),
 				bpaRequest.getRequestInfo());
-		String message = util.getCustomizedMsg(bpaRequest.getRequestInfo(), bpaRequest.getBPA(), localizationMessages);
-
-		if (StringUtils.isBlank(message)) {
+		List<String> messages = util.getCustomizedMsg(bpaRequest.getRequestInfo(), bpaRequest.getBPA(), localizationMessages);
+		log.info("messages :"+messages.toString());
+		if (messages.isEmpty()) {
 			return;
 		}
 
 		List<SMSRequest> smsRequests = new LinkedList<>();
-		smsRequests.addAll(util.createSMSRequest(bpaRequest, message, mobileNumberToOwner));
-
+		for (String message : messages) {
+			smsRequests.addAll(util.createSMSRequest(bpaRequest, message, mobileNumberToOwner));
+		}
+		
 		if (configuredChannelNames.contains(CHANNEL_NAME_SMS)) {
 			if (null != config.getIsSMSEnabled()) {
 				if (config.getIsSMSEnabled()) {
 					if (!CollectionUtils.isEmpty(smsRequests)) {
-						System.out.println("SMS Requests : " + smsRequests);
-						util.sendSMS(smsRequests, config.getIsSMSEnabled(), "");
+						util.sendSMS(smsRequests, config.getIsSMSEnabled(), tenantId);
 					}
 				}
 			}
@@ -159,8 +160,7 @@ public class BPANotificationService {
 				if (config.getIsUserEventsNotificationEnabled()) {
 					EventRequest eventRequest = getEventNotification(bpaRequest, smsRequests);
 					if (null != eventRequest) {
-						System.out.println("Event Requests : " + eventRequest);
-						util.sendEventNotification(eventRequest, "");
+						util.sendEventNotification(eventRequest, tenantId);
 					}
 				}
 			}
@@ -177,10 +177,13 @@ public class BPANotificationService {
 					Map<String, String> mapOfPhnoAndEmail = util.fetchUserEmailIds(mobileNumbers, requestInfo,
 							tenantId);
 
-					List<EmailRequest> emailRequests = util.createEmailRequest(bpaRequest, message, mapOfPhnoAndEmail,
-							mobileNumberToOwner);
+					List<EmailRequest> emailRequests = new LinkedList<>();
+					for (String message : messages) {
+						emailRequests.addAll(
+								util.createEmailRequest(bpaRequest, message, mapOfPhnoAndEmail, mobileNumberToOwner));
+					}
+					
 					if (!CollectionUtils.isEmpty(emailRequests)) {
-						System.out.println("Email Requests : " + emailRequests);
 						util.sendEmail(emailRequests, tenantId);
 					}
 				}
@@ -365,10 +368,14 @@ public class BPANotificationService {
 	 */
 	private void enrichSMSRequest(BPARequest bpaRequest, List<SMSRequest> smsRequests) {
 
-		String localizationMessages = util.getLocalizationMessages(bpaRequest.getBPA().getTenantId(), bpaRequest.getRequestInfo());
-		String message = util.getCustomizedMsg(bpaRequest.getRequestInfo(), bpaRequest.getBPA(), localizationMessages);
+		String localizationMessages = util.getLocalizationMessages(bpaRequest.getBPA().getTenantId(),
+				bpaRequest.getRequestInfo());
+		List<String> messages = util.getCustomizedMsg(bpaRequest.getRequestInfo(), bpaRequest.getBPA(),
+				localizationMessages);
 		Map<String, String> mobileNumberToOwner = getUserList(bpaRequest);
-		smsRequests.addAll(util.createSMSRequest(bpaRequest,message, mobileNumberToOwner));
+		for (String message : messages) {
+			smsRequests.addAll(util.createSMSRequest(bpaRequest, message, mobileNumberToOwner));
+		}
 
 	}
 

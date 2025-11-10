@@ -111,12 +111,18 @@ public class NotificationUtil {
 	 * @return customized message based on bpa
 	 */
 	@SuppressWarnings("unchecked")
-	public String getCustomizedMsg(RequestInfo requestInfo, BPA bpa, String localizationMessage) {
+	public List<String> getCustomizedMsg(RequestInfo requestInfo, BPA bpa, String localizationMessage) {
 
-//		Map<String, String> edcrResponse = edcrService.getEDCRDetails(requestInfo, bpa);
-//		String applicationType = edcrResponse.get(BPAConstants.APPLICATIONTYPE);
-//		String serviceType = edcrResponse.get(BPAConstants.SERVICETYPE);
-		String messageCode = getMessageCode(bpa.getStatus(), bpa.getWorkflow().getAction());
+		List<String> messageCodes = getMessageCode(bpa.getStatus(), bpa.getWorkflow().getAction());
+		List<String> messageList = new ArrayList<>();
+		for (String messageCode : messageCodes) {
+			messageList.add(fetchMsgData(requestInfo, bpa, localizationMessage, messageCode));
+		}
+		return messageList;
+	}
+
+	private String fetchMsgData(RequestInfo requestInfo, BPA bpa, String localizationMessage, String messageCode) {
+
 		String message = getMessageTemplate(messageCode, localizationMessage);
 
 		if (!StringUtils.isEmpty(message)) {
@@ -640,92 +646,83 @@ public class NotificationUtil {
 	 * @param action 
      * @return The corresponding constant from BPAConstants, or a default error code.
      */
-    private String getMessageCode(String status, String action) {
-    	
-		String messageCode;
+	private List<String> getMessageCode(String status, String action) {
+
+		List<String> messageCode = new ArrayList<>();
 		StringBuilder status_action = new StringBuilder();
 		status_action.append(status.toUpperCase()).append("_").append(action.toUpperCase());
 
-        switch (status_action.toString()) {
-            case "INITIATED_APPLY":
-                messageCode = BPAConstants.APPLICATION_SUBMISSION;
-                break;
+		switch (status_action.toString()) {
 
-            case "PENDING_RTP_APPROVAL_ACCEPT":
-                messageCode = BPAConstants.RTP_ACCEPTANCE;
-                break;
+		case "PENDING_RTP_APPROVAL_APPLY":
+			messageCode.add(BPAConstants.APPLICATION_SUBMISSION);
+			break;
 
-            case "PENDING_FOR_SCRUTINY_APPLY_FOR_SCRUTINY":
-                messageCode = BPAConstants.DOCUMENT_UPLOAD_BY_RTP;
-                break;
+		case "EDIT_APPLICATION_ACCEPT":
+			messageCode.add(BPAConstants.RTP_ACCEPTANCE);
+			break;
 
-            case "CITIZEN_APPROVAL_APPROVE":
-                messageCode = BPAConstants.SCRUTINY_PASS;
-                break;
+		case "GIS_VALIDATION_EDIT":
+			messageCode.add(BPAConstants.DOCUMENT_UPLOAD_BY_RTP);
+			break;
 
-            case "CITIZEN_APPROVAL_SEND_BACK_TO_RTP":
-                messageCode = BPAConstants.SCRUTINY_FAIL;
-                break;
+		case "CITIZEN_APPROVAL_APPLY_FOR_SCRUTINY":
+			messageCode.add(BPAConstants.SCRUTINY_PASS);
+			break;
 
-            case "SITE_VISIT_VERIFICATION":
-                messageCode = BPAConstants.SITE_VISIT_VERIFICATION;
-                break;
+//		case "":
+//			messageCode.add(BPAConstants.SCRUTINY_FAIL);
+//			break;
 
-            case "MEMBER_SECRETARY_NOT_RECOMMENDED":
-                messageCode = BPAConstants.MEMBER_SECRETARY_NOT_RECOMMENDED;
-                break;
+		case "PENDING_DD_AD_DEVELOPMENT_AUTHORITY_SUBMIT_REPORT":
+			messageCode.add(BPAConstants.SITE_VISIT_VERIFICATION);
+			break;
 
-            case "MEMBER_SECRETARY_RECOMMENDED":
-                messageCode = BPAConstants.MEMBER_SECRETARY_RECOMMENDED;
-                break;
+		case "PENDING_DA_ENGINEER_SEND_BACK_TO_DA":
+			messageCode.add(BPAConstants.MEMBER_SECRETARY_NOT_RECOMMENDED);
+			break;
 
-            case "CHAIRMAN_APPROVAL":
-                messageCode = BPAConstants.CHAIRMAN_APPROVAL;
-                break;
+		case "PENDING_CHAIRMAN_DA_RECOMMEND_TO_CHAIRMAN_DA":
+			messageCode.add(BPAConstants.MEMBER_SECRETARY_RECOMMENDED);
+			break;
 
-            case "PLANNING_PAYMENT_LINK":
-                messageCode = BPAConstants.PLANNING_PAYMENT_LINK;
-                break;
+		case "PAYMENT_PENDING_APPROVE":
+			messageCode.add(BPAConstants.CHAIRMAN_APPROVAL);
+			messageCode.add(BPAConstants.PLANNING_PAYMENT_LINK);
+			break;
 
-            case "POST_PAYMENT_PLANNING_PERMIT":
-                messageCode = BPAConstants.POST_PAYMENT_PLANNING_PERMIT;
-                break;
+		case "FORWARDED_TO_TECHNICAL_ENGINEER_GP_PAY":
+			messageCode.add(BPAConstants.POST_PAYMENT_PLANNING_PERMIT);
+			break;
 
-            case "TECHNICAL_VERIFICATION":
-                messageCode = BPAConstants.TECHNICAL_VERIFICATION;
-                break;
+		case "FORWARDED_TO_DD_AD_TCP_FORWARD":
+			messageCode.add(BPAConstants.TECHNICAL_VERIFICATION);
+			break;
 
-            case "PENDING_DA_ENGINEER":
-                messageCode = BPAConstants.DD_AD_NOT_RECOMMENDED;
-                break;
+//		case "":
+//			messageCode.add(BPAConstants.DD_AD_NOT_RECOMMENDED);
+//			break;
 
-            case "PENDING_CHAIRMAN_DA":
-                messageCode = BPAConstants.DD_AD_RECOMMENDED;
-                break;
+		case "PENDING_CHAIRMAN_PRESIDENT_GP_FORWARD":
+			messageCode.add(BPAConstants.DD_AD_RECOMMENDED);
+			break;
 
-            case "PAYMENT_PENDING":
-                messageCode = BPAConstants.MB_GP_CHAIRMAN_APPROVAL;
-                break;
+		case "CITIZEN_FINAL_PAYMENT_APPROVE":
+			messageCode.add(BPAConstants.MB_GP_CHAIRMAN_APPROVAL);
+			messageCode.add(BPAConstants.BUILDING_PAYMENT_LINK);
+			break;
 
-            case "CITIZEN_FINAL_PAYMENT":
-                messageCode = BPAConstants.BUILDING_PAYMENT_LINK;
-                break;
+		case "APPLICATION_COMPLETED_PAY":
+			messageCode.add(BPAConstants.POST_PAYMENT_BUILDING_PERMIT);
+			messageCode.add(BPAConstants.COMPLETION);
+			break;
 
-            case "PENDING_DD_AD_DEVELOPMENT_AUTHORITY":
-                messageCode = BPAConstants.POST_PAYMENT_BUILDING_PERMIT;
-                break;
+		default:
+			log.info("Unknown status provided: " + status);
+			break;
+		}
 
-            case "APPLICATION_COMPLETED":
-                messageCode = BPAConstants.COMPLETION;
-                break;
-
-            default:
-                messageCode = "UNKNOWN_STATUS_ERROR";
-                System.err.println("Unknown status provided: " + status);
-                break;
-        }
-
-        return messageCode;
-    }
+		return messageCode;
+	}
 
 }
