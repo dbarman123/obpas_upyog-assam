@@ -12,7 +12,6 @@ import {
 } from "react-router-dom";
 import { editApplicationConfig } from "../../../config/editApplicationConfig";
 import { Loader } from "@upyog/digit-ui-react-components";
-import useBPAV2Search from "../../../../../../libraries/src/hooks/obpsv2/useBPAV2Search";
 
 const Edit = () => {
   const queryClient = useQueryClient();
@@ -22,9 +21,9 @@ const Edit = () => {
   const { pathname } = useLocation();
   const history = useHistory();
   const stateId = Digit.ULBService.getStateId();
+  const tenantId = Digit.ULBService.getCitizenCurrentTenant(true) || Digit.ULBService.getCurrentTenantId();
 
   const [params, setParams, clearParams] = Digit.Hooks.useSessionStorage("OBPSV2_CREATE", {});
-  const tenantId = "pg.citya";
   const { isLoading, isError, error, data, refetch } =Digit.Hooks.obpsv2.useBPASearchApi({
     tenantId,
     filters: { applicationNo },
