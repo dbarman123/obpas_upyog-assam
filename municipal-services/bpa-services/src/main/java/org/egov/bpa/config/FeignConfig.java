@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FeignConfig {
 
-    @Value("${property.service.username}")
+    @Value("${sumato.property.service.username}")
     private String username;
 
-    @Value("${property.service.password}")
+    @Value("${sumato.property.service.password}")
     private String password;
 
     @Bean

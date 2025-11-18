@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
         name = "property-service",
-        url = "${property.service.url}",
+        url = "${sumato.property.service.url}",
         configuration = FeignConfig.class
 )
 public interface PropertyServiceClient {
