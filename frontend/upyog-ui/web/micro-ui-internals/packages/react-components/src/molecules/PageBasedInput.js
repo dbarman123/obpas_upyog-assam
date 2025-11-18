@@ -7,6 +7,7 @@ const PageBasedInput = ({ children, texts, onSubmit }) => {
   const wrapperStyle = useMemo(() => ({
     paddingBottom: `${barHeight}px`,
   }), [barHeight]);
+  // This styling keeps the submit button fixed at the bottom of the viewport, ensuring it stays visible and accessible as the user scrolls.
   const buttonStyle = useMemo(() => ({
     position: "fixed",
     bottom: 0,

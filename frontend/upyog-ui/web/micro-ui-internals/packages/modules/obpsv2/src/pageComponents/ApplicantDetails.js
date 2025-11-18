@@ -115,7 +115,12 @@ const ApplicantDetails = ({ t, config, onSelect, formData, searchResult }) => {
             placeholder="Enter Email Id"
             onChange={(e) => {
               const value = e.target.value;
-              const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-z.-]+\.(com|org|in|co)$/;
+              {/* // This regex validates email addresses with the following rules:
+              - Username: allows letters, numbers, dots, underscores, percent, plus, and hyphen
+              - Must contain a single '@'
+              - Domain name: allows only lowercase letters, dots, and hyphens
+              - TLD must be exactly one of: .com, .org, .in, .co */}
+              const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-z.-]+\.(com|org|in|co)$/;  
               if (value === "" || emailRegex.test(value)) {
                 setEmail(value);          
                 setError("");            
