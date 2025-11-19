@@ -217,7 +217,7 @@ public class RearYardService_Assam extends RearYardService {
 		                     setback.getRearYard().getMean().compareTo(BigDecimal.ZERO) <= 0)
 		                    continue;
 
-		                
+		                Occupancy occupancy = null;
 
 		                if (block.getBuilding() != null &&
 		                    block.getBuilding().getTotalArea() != null &&
