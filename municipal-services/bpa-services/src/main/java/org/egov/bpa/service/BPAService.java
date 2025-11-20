@@ -60,6 +60,8 @@ import com.itextpdf.layout.properties.VerticalAlignment;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 
+import javax.validation.Valid;
+
 @Service
 @Slf4j
 public class BPAService {
@@ -147,7 +149,7 @@ public class BPAService {
         //bpaValidator.validateCreate(bpaRequest, mdmsData, values);
 
         //TODO : Need to remove after getting land info
-        landService.addLandInfoToBPA(bpaRequest);
+//        landService.addLandInfoToBPA(bpaRequest);
         enrichmentService.enrichBPACreateRequest(bpaRequest, mdmsData, null);
 
         wfIntegrator.callWorkFlow(bpaRequest);
@@ -493,8 +495,7 @@ public class BPAService {
 		switch (action.toUpperCase()) {
 
 		case "RTP_IS_CHANGED":
-			enrichmentService.enrichBPAUpdateRequest(bpaRequest, null);
-			repository.update(bpaRequest, BPAConstants.RTP_UPDATE);
+			reassignRTP(bpaRequest);
 			log.info("RTP details updated successfully without workflow for citizen application: {}",
 					bpa.getApplicationNo());
 			break;
@@ -940,5 +941,18 @@ public class BPAService {
         userSearchRequest.setRoleCodes(userSearchRequest.getRoleCodes());
         StringBuilder uri = new StringBuilder(config.getUserHost()).append(config.getUserSearchEndpoint());
         return userService.userCall(userSearchRequest, uri);
+    }
+
+    /**
+     * Reassigns the RTP for a BPA application and updates the application in the repository
+     * New RTP details are enriched, workflow is called for reassignment, and the application is updated
+     * @param bpaRequest The BPARequest containing the BPA application details and new RTP information
+     * @return Updated BPA application with reassigned RTP
+    * */
+    public BPA reassignRTP(@Valid BPARequest bpaRequest) {
+        enrichmentService.enrichBPAUpdateRequest(bpaRequest, null);
+        wfIntegrator.reassignRTP(bpaRequest);
+        repository.update(bpaRequest, BPAConstants.RTP_UPDATE);
+        return bpaRequest.getBPA();
     }
 }

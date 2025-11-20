@@ -113,7 +113,7 @@ public class BPAController {
 	 * Wrapper API to bpa-calculator /_estimate API as
 	 * cannot access bpa-calculator APIs from UI directly
 	 * 
-	 * @param bpaReq The calculation Request
+	 * @param bpaRequest The calculation Request
 	 * @return Calculation Response
 	 */
 	@PostMapping(value = { "/_estimate" })
@@ -126,6 +126,23 @@ public class BPAController {
 	public ResponseEntity<UserDetailResponse> rtpSearch(@Valid @RequestBody UserSearchRequest userSearchRequest) {
 		
 		UserDetailResponse response = bpaService.searchRTP(userSearchRequest);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	/**
+	*
+	 * Reassign the application to another RTP
+	 * @param bpaRequest The BPA Request with reassignment details
+	 * @return The updated BPA after reassignment
+	* */
+	@PostMapping(value = { "/_reassignrtp" })
+	public ResponseEntity<BPAResponse> reassignRTP(@Valid @RequestBody BPARequest bpaRequest) {
+		BPA bpa = bpaService.reassignRTP(bpaRequest);
+		List<BPA> bpas = new ArrayList<BPA>();
+		bpas.add(bpa);
+		BPAResponse response = BPAResponse.builder().BPA(bpas)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(bpaRequest.getRequestInfo(), true))
+				.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 

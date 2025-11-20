@@ -201,6 +201,93 @@ public class WorkflowValidator {
         return transitionRoles;
     }
 
+    /**
+     * Validates the reassignment request
+     * Ensures that:
+     * 1. Module name is 'bpa-services' (reassign is only allowed for bpa-services module)
+     * 2. The user has permission to reassign (has role to take action on current state)
+     * 3. The new assignees have roles allowed for the current state
+     * 
+     * @param requestInfo The RequestInfo of the incoming request
+     * @param processStateAndActions The processStateAndActions containing processInstances to be validated
+     */
+    public void validateReassignRequest(RequestInfo requestInfo, List<ProcessStateAndAction> processStateAndActions) {
+        String tenantId = processStateAndActions.get(0).getProcessInstanceFromRequest().getTenantId();
+        String businessServiceCode = processStateAndActions.get(0).getProcessInstanceFromRequest().getBusinessService();
+        BusinessService businessService = businessUtil.getBusinessService(tenantId,businessServiceCode);
+        
+        Map<String,List<String>> tenantIdToRoles = util.getTenantIdToUserRolesMap(requestInfo);
+        Map<String,String> errorMap = new HashMap<>();
+        
+        for(ProcessStateAndAction processStateAndAction : processStateAndActions) {
+            ProcessInstance processInstanceFromDb = processStateAndAction.getProcessInstanceFromDb();
+            ProcessInstance processInstanceFromRequest = processStateAndAction.getProcessInstanceFromRequest();
+            
+            // Validate that process instance exists in DB
+            if(processInstanceFromDb == null) {
+                errorMap.put("INVALID_BUSINESS_ID", 
+                    "Process instance not found in database for businessId: " 
+                    + processInstanceFromRequest.getBusinessId());
+                continue;
+            }
+            
+            // Validate module name - reassign is only allowed for bpa-services module
+            String moduleName = processInstanceFromDb.getModuleName();
+            if(moduleName == null || !moduleName.equals("bpa-services")) {
+                errorMap.put("INVALID_MODULE_NAME", 
+                    "Reassign is only allowed for 'bpa-services' module. Found module: " + moduleName 
+                    + " for businessId: " + processInstanceFromDb.getBusinessId());
+            }
+            String currentTenantId = processStateAndAction.getProcessInstanceFromRequest().getTenantId();
+            List<String> roles = new LinkedList<>();
+            
+            // Adding tenant level roles
+            if(!CollectionUtils.isEmpty(tenantIdToRoles.get(currentTenantId)))
+                roles.addAll(tenantIdToRoles.get(currentTenantId));
+            
+            // Adding the state level roles
+            if(!CollectionUtils.isEmpty(tenantIdToRoles.get(currentTenantId.split("\\.")[0]))) {
+                String stateLevelTenant = currentTenantId.split("\\.")[0];
+                List<String> stateLevelRoles = tenantIdToRoles.get(stateLevelTenant);
+                roles.addAll(stateLevelRoles);
+            }
+            
+            State currentState = processStateAndAction.getCurrentState();
+            if(currentState == null) {
+                errorMap.put("INVALID_STATE", "Process instance does not have a valid state for businessId: " 
+                    + processStateAndAction.getProcessInstanceFromRequest().getBusinessId());
+                continue;
+            }
+            
+            // Check if user has role to reassign (has role to take action on current state)
+            List<String> transitionRoles = getRolesFromState(currentState);
+            Boolean isRoleAvailableForReassign = util.isRoleAvailable(roles, transitionRoles) 
+                    || util.isRoleAvailable(roles, util.rolesAllowedInService(businessService));
+            
+            if(!isRoleAvailableForReassign) {
+                errorMap.put("INVALID_ROLE", "User is not authorized to reassign application with businessId: " 
+                    + processStateAndAction.getProcessInstanceFromRequest().getBusinessId());
+            }
+            
+            // Validate that new assignees have roles allowed for current state
+            if(!CollectionUtils.isEmpty(processStateAndAction.getProcessInstanceFromRequest().getAssignes())) {
+                List<String> currentStateRoles = getRolesFromState(currentState);
+                
+                processStateAndAction.getProcessInstanceFromRequest().getAssignes().forEach(assignee -> {
+                    List<Role> assigneeRoles = assignee.getRoles();
+                    Boolean isRoleAvailableInCurrentState = util.isRoleAvailable(currentTenantId, assigneeRoles, currentStateRoles);
+                    
+                    if(!isRoleAvailableInCurrentState) {
+                        errorMap.put("INVALID_ASSIGNEE", "Cannot assign to user: " + assignee.getUuid() 
+                            + " - user does not have required roles for current state");
+                    }
+                });
+            }
+        }
+        
+        if(!errorMap.isEmpty())
+            throw new CustomException(errorMap);
+    }
 
     /**
      * Validates if the citizen is in list of assignes

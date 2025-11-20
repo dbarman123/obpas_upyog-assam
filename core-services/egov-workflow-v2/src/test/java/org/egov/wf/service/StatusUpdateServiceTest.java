@@ -19,25 +19,34 @@ import org.egov.wf.web.models.Document;
 import org.egov.wf.web.models.ProcessInstance;
 import org.egov.wf.web.models.ProcessStateAndAction;
 import org.egov.wf.web.models.State;
+import org.egov.wf.util.WorkflowUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-@ContextConfiguration(classes = {StatusUpdateService.class})
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class StatusUpdateServiceTest {
-    @MockBean
+    @Mock
     private Producer producer;
 
-    @Autowired
+    @Mock
+    private WorkflowConfig workflowConfig;
+
+    @Mock
+    private WorkflowUtil workflowUtil;
+
     private StatusUpdateService statusUpdateService;
 
-    @MockBean
-    private WorkflowConfig workflowConfig;
+    @BeforeEach
+    void setUp() {
+        statusUpdateService = new StatusUpdateService(producer, workflowConfig, workflowUtil);
+    }
 
 
     @Test
