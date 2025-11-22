@@ -45,7 +45,7 @@ public class FarExemptions extends FeatureProcess {
         LOG.info("Processing Far Exemptions");
 
         for (Block block : plan.getBlocks()) {
-            ScrutinyDetail scrutinyDetail = createScrutinyDetail(BLOCK + block.getNumber() + UNDERSCORE, FAR_EXEMPTIONS, DESCRIPTION, PROVIDED, STATUS);
+            ScrutinyDetail scrutinyDetail = createScrutinyDetail(BLOCK + block.getNumber() + UNDERSCORE + FAR_EXEMPTIONS, DESCRIPTION, PROVIDED, STATUS);
             createReportDetails(plan, block, scrutinyDetail);
         }
         return plan;

@@ -100,6 +100,7 @@ public class Floor extends Measurement {
     private List<ServiceRoom> serviceRooms = new ArrayList<>();
     private List<ArchitecturalFeature> architecturalFeature = new ArrayList<>();
     private List<EntranceLobby> entranceLobbies = new ArrayList<>();
+    private List<Lobby> lobbies = new ArrayList<>();
     private List<Window> windows = new ArrayList<>();
     private Corridor corridor = new Corridor();
     private List<BigDecimal> balconyDistanceFromPlotBoundary = new ArrayList<>();
@@ -583,6 +584,10 @@ public class Floor extends Measurement {
         this.entranceLobbies.add(lobby);
     }
 
+    public void addLobby(Lobby lobby) {
+        this.lobbies.add(lobby);
+    }
+
     /**
      * @param regularRooms the regularRooms to set
      */
@@ -825,5 +830,13 @@ public class Floor extends Measurement {
 
     public void setBalconyDistanceFromPlotBoundary(List<BigDecimal> balconyDistanceFromPlotBoundary) {
         this.balconyDistanceFromPlotBoundary = balconyDistanceFromPlotBoundary;
+    }
+
+    public List<Lobby> getLobby() {
+        return lobbies;
+    }
+
+    public void setLobby(List<Lobby> lobby) {
+        this.lobbies = lobby;
     }
 }

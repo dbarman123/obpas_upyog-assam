@@ -78,6 +78,8 @@ public class HeightOfRoomExtract extends FeatureExtract {
                             
                             extractWindowsForUnitLevel(pl, block, floor, unit, layerNames);
 
+                            extractWindowsForFloor(pl, block, floor, layerNames);
+
                             extractProjectionForUnitLevel(pl, block, floor, unit);
 
                         }
@@ -1053,6 +1055,69 @@ public class HeightOfRoomExtract extends FeatureExtract {
 
         LOG.debug("Completed window extraction for Unit Level - Block [{}], Floor [{}], Unit [{}]", 
                   block.getNumber(), floor.getNumber(), unit.getUnitNumber());
+    }
+
+
+    private void extractWindowsForFloor(PlanDetail pl, Block block, Floor floor, LayerNames layerNames){
+        LOG.debug("Starting window extraction for Unit Level - Block [{}], Floor [{}]",
+                block.getNumber(), floor.getNumber());
+
+        String windowLayerName = String.format(
+                layerNames.getLayerName("LAYER_NAME_FLOOR_WINDOWS"),
+                block.getNumber(),
+                floor.getNumber()
+        );
+        LOG.debug("Generated window layer name pattern: {}", windowLayerName);
+
+        List<String> windowLayers = Util.getLayerNamesLike(pl.getDoc(), windowLayerName);
+        LOG.debug("Found [{}] window layers matching pattern [{}]", windowLayers.size(), windowLayerName);
+
+        if (!windowLayers.isEmpty()) {
+            for (String windowLayer : windowLayers) {
+                LOG.debug("Processing window layer: {}", windowLayer);
+
+                String windowHeight = Util.getMtextByLayerName(pl.getDoc(), windowLayer);
+                LOG.debug("Extracted window height text: {}", windowHeight);
+
+                List<DXFDimension> dimensionList = Util.getDimensionsByLayer(pl.getDoc(), windowLayer);
+                LOG.debug("Found [{}] dimensions for window layer [{}]",
+                        dimensionList != null ? dimensionList.size() : 0, windowLayer);
+
+                if (dimensionList != null && !dimensionList.isEmpty()) {
+                    Window window = new Window();
+
+                    BigDecimal windowHeight1 = windowHeight != null
+                            ? BigDecimal.valueOf(Double.valueOf(windowHeight.replaceAll("WINDOW_HT_M=", "")))
+                            : BigDecimal.ZERO;
+                    window.setWindowHeight(windowHeight1);
+                    LOG.debug("Set window height to [{}]", windowHeight1);
+
+                    for (Object dxfEntity : dimensionList) {
+                        DXFDimension dimension = (DXFDimension) dxfEntity;
+                        List<BigDecimal> values = new ArrayList<>();
+                        Util.extractDimensionValue(pl, values, dimension, windowLayer);
+                        LOG.debug("Extracted dimension values: {}", values);
+
+                        if (!values.isEmpty()) {
+                            for (BigDecimal minDis : values) {
+                                window.setWindowWidth(minDis);
+                                LOG.debug("Set window width to [{}]", minDis);
+                            }
+                        } else {
+                            window.setWindowWidth(BigDecimal.ZERO);
+                            LOG.debug("No dimension values found; setting window width to 0");
+                        }
+                        floor.addWindow(window);
+                        LOG.debug("Added windows to floor [{}]", floor.getNumber());
+                    }
+                }
+            }
+        } else {
+            LOG.debug("No window layers found for Floor [{}]", floor.getNumber());
+        }
+
+        LOG.debug("Completed window extraction for Unit Level - Block [{}], Floor [{}]",
+                block.getNumber(), floor.getNumber());
     }
 
     /**

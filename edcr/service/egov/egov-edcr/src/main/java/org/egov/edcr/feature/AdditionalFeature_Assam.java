@@ -223,8 +223,32 @@ public class AdditionalFeature_Assam extends FeatureProcess {
                 afGreenBuildingValueD
         );
         validateFireDeclaration(pl, errors);
+        // Addition of Lobby details in report
+        lobbyReportDetails(pl);
 
         return pl;
+    }
+
+    private void lobbyReportDetails(Plan pl){
+        for (Block block : pl.getBlocks()) {
+            ScrutinyDetail scrutinyDetail = getNewScrutinyDetailsForLobby(BLOCK + block.getNumber() + UNDERSCORE + "Lobby");
+
+            if (block.getBuilding() != null && !block.getBuilding().getFloors().isEmpty())
+                for(Floor floor: block.getBuilding().getFloors()){
+                    for(Lobby lobby: floor.getLobby()){
+                        BigDecimal lobbyWidth = lobby.getLobbyWidths().stream().reduce(BigDecimal::max).get();
+
+                        ReportScrutinyDetail detail = new ReportScrutinyDetail();
+                        detail.setFloorNo(floor.getNumber().toString());
+                        detail.setDescription("Width of Lobby " + lobby.getNumber());
+                        detail.setProvided(lobbyWidth.toString());
+                        detail.setStatus(Result.Accepted.getResultVal());
+
+                        Map<String, String> details = mapReportDetails(detail);
+                        addScrutinyDetailtoPlan(scrutinyDetail, pl, details);
+                    }
+                }
+        }
     }
 
     /**
@@ -606,7 +630,7 @@ public class AdditionalFeature_Assam extends FeatureProcess {
                 }
             }
 
-            // Calulating maximum architecture's height as well as service room's height also
+            // Calculating maximum architecture's height as well as service room's height also
             BigDecimal maxArchitectureHeight = BigDecimal.ZERO;
             BigDecimal maxServiceRoomHeight = BigDecimal.ZERO;
 
@@ -1111,6 +1135,17 @@ public class AdditionalFeature_Assam extends FeatureProcess {
         scrutinyDetail.addColumnHeading(3, PERMISSIBLE);
         scrutinyDetail.addColumnHeading(4, PROVIDED);
         scrutinyDetail.addColumnHeading(5, STATUS);
+        scrutinyDetail.setKey(key);
+        return scrutinyDetail;
+    }
+
+
+    private ScrutinyDetail getNewScrutinyDetailsForLobby(String key) {
+        ScrutinyDetail scrutinyDetail = new ScrutinyDetail();
+        scrutinyDetail.addColumnHeading(1, FLOOR_NO);
+        scrutinyDetail.addColumnHeading(2, DESCRIPTION);
+        scrutinyDetail.addColumnHeading(3, PROVIDED);
+        scrutinyDetail.addColumnHeading(4, STATUS);
         scrutinyDetail.setKey(key);
         return scrutinyDetail;
     }
