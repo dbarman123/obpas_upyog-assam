@@ -135,6 +135,7 @@ import org.egov.edcr.feature.WaterTankCapacity;
 import org.egov.edcr.feature.WaterTreatmentPlant;
 import org.egov.edcr.feature.Well;
 import org.egov.edcr.feature.FarExemptions;
+import org.egov.edcr.feature.EntranceLobby;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -388,6 +389,9 @@ public class PlanFeatureRepository {
         features.add(pf);
 
         pf = new PlanFeature(FarExemptions.class);
+        features.add(pf);
+
+        pf = new PlanFeature(EntranceLobby.class);
         features.add(pf);
         
         pf = new PlanFeature(BiodegradableWaste.class);

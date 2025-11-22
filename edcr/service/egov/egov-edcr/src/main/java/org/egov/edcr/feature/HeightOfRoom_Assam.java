@@ -572,8 +572,15 @@ public class HeightOfRoom_Assam extends HeightOfRoom {
 	 * @param scrutinyDetail  The scrutiny detail to record the results.
 	 */
 	private void evaluateWindows(Plan pl, Floor floor, FloorUnit unit, ScrutinyDetail scrutinyDetail) {
-	    if (unit.getWindows() == null || unit.getWindows().isEmpty()) return;
+        if(floor.getWindows() != null || !floor.getWindows().isEmpty()) {
+            for (Window window : floor.getWindows()) {
+                if (window != null) {
+                    evaluateSingleWindowForFloor(pl, floor, window, scrutinyDetail);
+                }
+            }
+        }
 
+        if (unit.getWindows() == null || unit.getWindows().isEmpty()) return;
 	    for (Window window : unit.getWindows()) {
 	        if (window != null) {
 	            evaluateSingleWindow(pl, floor, unit, window, scrutinyDetail);
@@ -708,6 +715,38 @@ public class HeightOfRoom_Assam extends HeightOfRoom {
 	    }
 	}
 
+    private void evaluateSingleWindowForFloor(Plan pl, Floor floor, Window window, ScrutinyDetail scrutinyDetail) {
+        BigDecimal windowHeight = window.getWindowHeight().setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal windowWidth = window.getWindowWidth().setScale(2, BigDecimal.ROUND_HALF_UP);
+
+        BigDecimal minWindowHeight = BigDecimal.ZERO;
+        BigDecimal minWindowWidth = BigDecimal.ZERO;
+
+        Optional<WindowsRequirement> matchedRule = getMinimumWidowsRequirement(pl);
+
+        BigDecimal minDoorWidth = BigDecimal.ZERO;
+        if (matchedRule.isPresent()) {
+            WindowsRequirement rule = matchedRule.get();
+            minWindowWidth = rule.getMinWindowWidth();
+            minWindowHeight = rule.getMinWindowHeight();
+            LOG.info("Matched minimum door width from rules: {}", minDoorWidth);
+        } else {
+            LOG.warn("No minimum door width rule found, defaulting to {}", minDoorWidth);
+        }
+
+        LOG.info("Evaluating single window on Floor: {} - Height: {}, Width: {}, MinHeight: {}, MinWidth: {}",
+                floor.getNumber(), windowHeight, windowWidth, minWindowHeight, minWindowWidth);
+
+        String subRuleDesc3 = SUB_RULE_DESC_3;
+
+        String requirement = "-";
+
+        String provided = HEIGHT_STRING + IS_EQUAL_TO + windowHeight + COMMA_WIDTH_STRING + IS_EQUAL_TO + windowWidth;
+
+        String result = Result.Accepted.getResultVal();
+        setReportOutputDetails(pl, EMPTY_STRING, subRuleDesc3, floor.getNumber().toString(),
+                null, "-", requirement, provided, result, scrutinyDetail);
+    }
 
 
 	/**
@@ -1011,8 +1050,6 @@ public class HeightOfRoom_Assam extends HeightOfRoom {
 	 * @param color                      color code used for identification
 	 * @param mostRestrictiveOccupancy  most restrictive occupancy type
 	 * @param heightOfRoomFeaturesColor map linking feature types to color codes
-	 * @param roomAreas                  list to store collected room areas
-	 * @param roomWidths                 list to store collected room widths
 	 * @param pl                         the Plan object
 	 * @param errors                     map to record any processing errors
 	 */
