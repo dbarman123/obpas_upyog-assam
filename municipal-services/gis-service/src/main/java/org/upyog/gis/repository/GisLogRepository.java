@@ -54,6 +54,22 @@ public class GisLogRepository {
         }
     }
 
+    /**
+     * Searches GIS logs from the database based on provided criteria.
+     * 
+     * <p>This method constructs a dynamic SQL query using the QueryBuilder based on the search criteria,
+     * executes it using JdbcTemplate with prepared statements for SQL injection prevention, and maps
+     * the results to GisLog objects using the RowMapper.</p>
+     * 
+     * <p>The search supports filtering by:</p>
+     * <ul>
+     *   <li>tenantId (mandatory) - Filter by municipality/tenant</li>
+     *   <li>applicationNo (optional) - Filter by BPA application number</li>
+     *   <li>rtpId (optional) - Filter by RTPI identifier</li>
+     *   <li>status (optional) - Filter by processing status (SUCCESS, FAILURE, etc.)</li>
+     * </ul>
+
+     */
     public List<GisLog> search(GisLogSearchCriteria criteria) {
         List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getGisLogSearchQuery(criteria, preparedStmtList);
