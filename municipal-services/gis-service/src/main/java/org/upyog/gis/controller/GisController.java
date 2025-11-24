@@ -5,16 +5,18 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.http.MediaType;
-import org.upyog.gis.model.GISResponse;
-import org.upyog.gis.model.GISRequestWrapper;
-import org.upyog.gis.service.GisService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import org.egov.common.contract.response.ResponseInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.upyog.gis.model.*;
+import org.upyog.gis.service.GisService;
+import org.upyog.gis.util.ResponseInfoFactory;
+
 
 /**
  * REST controller for GIS operations
@@ -26,6 +28,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class GisController {
 
     private final GisService gisService;
+
+    @Autowired
+    private final ResponseInfoFactory responseInfoFactory;
 
     /**
      * Find zone information from polygon file
@@ -69,4 +74,47 @@ public class GisController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
+    /**
+     * Search GIS logs based on criteria.
+     * 
+     * <p>Searches GIS processing logs with filters like tenantId, applicationNo, rtpId, and status.
+     *
+     * @param searchRequest the search request containing RequestInfo and GisSearchCriteria
+     * @return response containing list of matching GIS log records
+     */
+    @ApiOperation(value = "Search GIS logs", notes = "Search GIS processing logs based on criteria")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK")
+    })
+    @PostMapping("/zone/_search")
+    public ResponseEntity<GisLogSearchResponse> searchGisLogs(
+            @ApiParam(value = "Search criteria", required = true)
+            @RequestBody GisLogSearchRequest searchRequest
+    ) {
+        try {
+            log.info("Searching GIS logs with criteria: {}", searchRequest.getCriteria());
+
+            List<GisLog> gisLogs = gisService.searchGisLog(searchRequest.getCriteria());
+
+            ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(
+                    searchRequest.getRequestInfo(), true);
+
+            GisLogSearchResponse response = GisLogSearchResponse.builder()
+                    .responseInfo(responseInfo)
+                    .gis(gisLogs)
+                    .build();
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid search request: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+
+        } catch (Exception e) {
+            log.error("Error searching GIS logs", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

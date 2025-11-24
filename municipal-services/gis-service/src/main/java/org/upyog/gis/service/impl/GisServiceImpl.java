@@ -6,11 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.upyog.gis.client.FilestoreClient;
 import org.upyog.gis.client.GistcpClient;
 import org.upyog.gis.config.GisProperties;
-import org.upyog.gis.model.GisLog;
-import org.upyog.gis.model.GISResponse;
-import org.upyog.gis.model.GISRequestWrapper;
-import org.upyog.gis.model.GISRequest;
-import org.upyog.gis.model.GistcpResponse;
+import org.upyog.gis.model.*;
 import org.egov.common.contract.response.ResponseInfo;
 import org.upyog.gis.repository.GisLogRepository;
 import org.upyog.gis.service.GisService;
@@ -22,6 +18,8 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
+import org.upyog.gis.model.GisLogSearchCriteria;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -222,4 +220,25 @@ public class GisServiceImpl implements GisService {
                 .longitude(longitude)
                 .build();
     }
+
+
+    /**
+     * Searches GIS logs based on provided search criteria.
+     * 
+     * <p>This method retrieves GIS processing logs from the database using various filter parameters
+     * such as tenant ID, application number, RTPI ID, and status. It supports pagination through
+     * limit and offset parameters in the criteria object.</p>
+     * 
+     * <p>TenantId is mandatory and validated via @NotNull annotation. Other parameters are optional.</p>
+     *
+     * @param criteria the search criteria containing filter parameters and pagination settings
+     * @return list of GisLog objects matching the search criteria
+     */
+    @Override
+    public List<GisLog> searchGisLog(GisLogSearchCriteria criteria) {
+        log.info("Searching GIS logs with criteria: {}", criteria);
+        return logRepository.search(criteria);
+    }
+
+
 }
