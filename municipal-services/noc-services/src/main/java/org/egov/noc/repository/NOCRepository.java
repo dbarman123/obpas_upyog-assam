@@ -83,7 +83,15 @@ public class NOCRepository {
 		List<Noc> nocList = jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
 		return nocList;
 	}
-
+	
+	/**
+	 * Retrieves Source reference ID and Tenant ID of NOC records from the database
+	 * based on the given search criteria. Builds a dynamic SQL query using NOC type
+	 * and application status filters.
+	 *
+	 * @param criteria search filters for NOC type and status
+	 * @return list of matching NOC records
+	 */
 	public List<Noc> getNewAAINocData(NocSearchCriteria criteria) {
 
 		StringBuilder query = new StringBuilder("SELECT NOC.SOURCEREFID, NOC.TENANTID FROM EG_NOC NOC WHERE 1=1");
