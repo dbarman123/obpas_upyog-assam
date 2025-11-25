@@ -249,7 +249,8 @@ import {
           ...data?.bpa?.[0],
           rtpDetails: {
             ...data?.bpa?.[0]?.rtpDetails,
-            rtpName: newRTPName?.code,    
+            rtpName: newRTPName?.code,
+            rtpUUID:newRTPName?.uuid,   
           },
         };
     const response = await mutation.mutateAsync({
@@ -260,7 +261,7 @@ import {
           ...applicationDetails.workflow, 
           action: "RTP_IS_CHANGED",
           comments: comments,
-            assignes: null,
+            assignes: [newRTPName?.uuid],
             varificationDocuments: uploadedFile ? [
               {
                 documentType: file.type,
@@ -1465,7 +1466,7 @@ import {
         <CardLabelDesc>{t("CS_UPLOAD_RESTRICTIONS")}</CardLabelDesc>
         <UploadFile
           id="pgr-doc"
-          accept=".jpg"
+          accept=".pdf, .jpeg, .jpg, .png"
           onUpload={selectfile}
           onDelete={() => setUploadedFile(null)}
           message={isUploading ? (
@@ -1616,7 +1617,7 @@ import {
         <CardLabelDesc>{t("CS_UPLOAD_RESTRICTIONS")}</CardLabelDesc>
         <UploadFile
           id="pgr-doc"
-          accept=".jpg"
+          accept=".pdf, .jpeg, .jpg, .png"
           onUpload={selectfile}
           onDelete={() => setUploadedFile(null)}
           message={isUploading ? (
@@ -1670,7 +1671,7 @@ import {
         <CardLabelDesc>{t("CS_UPLOAD_RESTRICTIONS")}</CardLabelDesc>
         <UploadFile
           id="pgr-doc"
-          accept=".jpg"
+          accept=".pdf, .jpeg, .jpg, .png"
           onUpload={selectfile}
           onDelete={() => setUploadedFile(null)}
           message={isUploading ? (

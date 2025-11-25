@@ -76,6 +76,15 @@ const PropertyValidation = ({ t, config, onSelect, formData, searchResult }) => 
   };
 
   const goNext = () => {
+    if (!isValidPropertyID(propertyID)) {
+      setPropertyDetails(null);
+      setError("Invalid Property ID. Please enter a valid TIN number.");
+      return;
+    }
+    if (!propertyDetails) {
+      setError("Please validate property before proceeding");
+      return;
+    }
     if (propertyDetails && !propertyDetails.taxPaid) {
       setError("Please pay the taxes to proceed");
       return; // Don't proceed if taxes are not paid
@@ -109,7 +118,7 @@ const PropertyValidation = ({ t, config, onSelect, formData, searchResult }) => 
             onChange={(e) => setPropertyID(e.target.value)}
         />
 
-        <div style={{ marginLeft: "10px" }}>
+        <div style={{ marginLeft: "10px", marginTop: "-20px"}}>
             <SubmitBar label={t("SEARCH")} onSubmit={getPropertyDetails} />
         </div>
     </div>
@@ -119,20 +128,13 @@ const PropertyValidation = ({ t, config, onSelect, formData, searchResult }) => 
 
         {/* Show loader when API is fetching */}
         {loading && (
-          <div
-            style={{
-              position: "absolute",
-              top: "40%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-            }}
-          >
+          <div style={{ position: "relative", minHeight: "80px" }}>
             <Loader />
           </div>
         )}
       </FormStep>
 
-      {/* Show error Toast */}
+      {/* Show e.rror Toast */}
       {error && <Toast error={error} label={error} onClose={() => setError(null)} />}
     </React.Fragment>
   );

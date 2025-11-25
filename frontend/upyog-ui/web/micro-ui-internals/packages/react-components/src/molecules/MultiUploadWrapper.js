@@ -146,6 +146,8 @@ const MultiUploadWrapper = ({ t, module = "PGR", tenantId = Digit.ULBService.get
                     dispatch({ type: TARGET_FILE_REMOVAL, payload: fileDetailsData })
                 }}
                 uploadedFiles={state}
+                uploadStatus={uploadStatus}
+                LoadingSpinner={LoadingSpinner}
                 multiple={true}
                 showHintBelow={showHintBelow}
                 hintText={hintText}
@@ -160,29 +162,6 @@ const MultiUploadWrapper = ({ t, module = "PGR", tenantId = Digit.ULBService.get
                     valid ? null : displayError({ t, error, name })
                 )) : null}
             </span>
-            <div>
-                {state.map(([fileName]) => {
-                    const status = uploadStatus[fileName];
-                    return (
-                        <div key={fileName}>
-                            
-                            {status === 'loading' && (
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <LoadingSpinner />
-                                    <span>{fileName} uploading...</span>
-                                </div>
-                            )}
-                            
-                            {status === 'uploaded' && (
-                                <div>{fileName} uploaded successfully!</div>
-                            )}
-                            {status === 'failed' && (
-                                <div style={{ color: 'red' }}>{fileName} failed to upload</div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
         </div>
     );
 };

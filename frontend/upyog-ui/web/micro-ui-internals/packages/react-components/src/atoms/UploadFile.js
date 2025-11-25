@@ -203,12 +203,31 @@ const UploadFile = (props) => {
             textStyles={props?.textStyles}
             type={props.buttonType}
           />
-            {props?.uploadedFiles?.map((file, index) => {
-              const fileDetailsData = file[1]
-              return <div className="tag-container" style={extraStyles ? extraStyles?.tagContainerStyles : null}>
-                <RemoveableTag extraStyles={extraStyles} key={index} text={file[0]} onClick={(e) => props?.removeTargetedFile(fileDetailsData, e)} />
+            {props?.uploadedFiles?.map(([name, details], index) => {
+              const status = props.uploadStatus?.[name];
+
+            return (
+              <div
+                key={index}
+                className="tag-container"
+                style={extraStyles ? extraStyles?.tagContainerStyles : null}
+              >
+                {status === "loading" ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <props.LoadingSpinner />
+                    <span>Uploading...</span>
+                  </div>
+                ) : (
+                  <RemoveableTag
+                    extraStyles={extraStyles}
+                    text={name}
+                    onClick={(e) => props?.removeTargetedFile(details, e)}
+                  />
+                )}
               </div>
-            })}
+            );
+          })}
+
           {!hasFile || props.error ? (
             <h2 className="file-upload-status">{props.message}</h2>
           ) : (
