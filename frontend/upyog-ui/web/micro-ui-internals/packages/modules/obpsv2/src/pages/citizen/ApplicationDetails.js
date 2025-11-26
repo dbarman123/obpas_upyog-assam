@@ -31,7 +31,8 @@ import {
   import DocumentsPreview from "../../../../templates/ApplicationDetails/components/DocumentsPreview";
   import useScrutinyFormDetails from "../../../../../libraries/src/hooks/obpsv2/useScrutinyFormDetails";
   import FormAcknowledgement from "./Create/FormAcknowledgement";
-  import Accordion from "../../../../../react-components/src/atoms/Accordion"
+  import Accordion from "../../../../../react-components/src/atoms/Accordion";
+  import { extractTenantSuffix } from "../../utils";
   // import getBPAAcknowledgementData from "../../utils/getBPAAcknowledgementData";
   
   /**
@@ -72,6 +73,7 @@ import {
     const [gisResponse, setGisResponse] = useState(null);
     const [showGisResponse, setShowGisResponse] = useState(false);
     const [gisValidationSuccess, setGisValidationSuccess] = useState(false);
+    const [gisData, setGisData] = useState(null);
     const { data: mdmsData } = Digit.Hooks.useEnabledMDMS("as", "BPA", [{ name: "PermissibleZone" }], {
     select: (data) => {
       return data?.BPA?.PermissibleZone || {};
@@ -96,7 +98,8 @@ import {
       form22: false,
       form23A: false,
       form23B: false,
-      submitReport : false
+      submitReport : false,
+      Gis: false
     });
     const toggleExpanded = (key) => {
       setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -145,6 +148,33 @@ import {
       };
       fetchUsers();
     }, [tenantId]);
+
+    useEffect(() => {
+      const fetchGisData = async () => {
+        try {
+          const fullTenantId = Digit.ULBService.getCitizenCurrentTenant(true) || Digit.ULBService.getCurrentTenantId();
+          const tenantId = extractTenantSuffix(fullTenantId);
+          console.log("TEEEE",tenantId)
+          const response = await Digit.OBPSV2Services.gisSearch({
+            GisSearchCriteria: {
+              applicationNo: acknowledgementIds,
+              tenantId: tenantId,
+              status: "SUCCESS"
+            }
+          });
+          if (response?.Gis) {
+            setGisData(response.Gis);
+          }
+        } catch (error) {
+          console.error('GIS Search Error:', error);
+        }
+      };
+      if (acknowledgementIds && tenantId) {
+        fetchGisData();
+      }
+    }, [tenantId, acknowledgementIds]);
+    
+
     useEffect(() => {
       if (bpaApplicationDetail?.[0]?.rtpDetails?.rtpName) {
         setOldRTPName(bpaApplicationDetail[0].rtpDetails.rtpName);
@@ -311,7 +341,8 @@ import {
          // Create multipart form data
          const formData = new FormData();
          formData.append("file", file);
-   
+         const fullTenantId = Digit.ULBService.getCitizenCurrentTenant(true) || Digit.ULBService.getCurrentTenantId();
+         const tenantId = extractTenantSuffix(fullTenantId);
          // Construct GIS request wrapper
          const gisRequestWrapper = {
            RequestInfo: {
@@ -321,7 +352,7 @@ import {
              },
            },
            gisRequest: {
-             tenantId: "Tinsukia",
+             tenantId: tenantId,
              applicationNo: data?.bpa?.[0]?.applicationNo,
              rtpiId: data?.bpa?.[0]?.rtpDetails?.rtpUUID,
            },
@@ -1225,6 +1256,25 @@ import {
                 onDownload={() => handleDownloadPdf("FORM_23B")}
               >
                 {getDetailsRow(form23B)}
+              </Accordion>
+            </StatusTable>
+          <StatusTable>
+            <Accordion
+              title={t("GIS_DETAILS")}
+              t={t}
+              isFlag= {false}
+            >
+              {gisData && gisData.length > 0 && (
+                <>
+                  <Row label={t("LATITUDE")} text={gisData[0].latitude?.toString() || "-"} />
+                  <Row label={t("LONGITUDE")} text={gisData[0].longitude?.toString() || "-"} />
+                  <Row label={t("DISTRICT")} text={gisData[0].details?.district || "-"} />
+                  <Row label={t("LANDUSE")} text={gisData[0].details?.landuse || "-"} />
+                  <Row label={t("VILLAGE")} text={gisData[0].details?.village || "-"} />
+                  <Row label={t("AREA_HECTARE")} text={gisData[0].details?.areaHectare || "-"} />
+                  <Row label={t("WARD_NO")} text={gisData[0].details?.ward || "-"} />
+                </>
+              )}
               </Accordion>
             </StatusTable>
           </div>
