@@ -237,7 +237,16 @@ public class GisServiceImpl implements GisService {
     @Override
     public List<GisLog> searchGisLog(GisLogSearchCriteria criteria) {
         log.info("Searching GIS logs with criteria: {}", criteria);
-        return logRepository.search(criteria);
+        List<GisLog> logs = logRepository.search(criteria);
+
+        logs.forEach(log -> {
+            if(log.getTenantId() != null && log.getTenantId().contains(".")){
+                String[] ulbName = log.getTenantId().split("\\.");
+                log.setTenantId(ulbName[ulbName.length -1]);
+            }
+        });
+
+        return logs;
     }
 
 
