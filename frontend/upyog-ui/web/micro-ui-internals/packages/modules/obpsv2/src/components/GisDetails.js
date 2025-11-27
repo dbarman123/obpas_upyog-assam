@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StatusTable, Row } from "@upyog/digit-ui-react-components";
-import Accordion from "../../../../react-components/src/atoms/Accordion";
+import { Row } from "@upyog/digit-ui-react-components";
 
 // GIS Details Component to fetch and display GIS data 
 const GisDetails = ({ acknowledgementIds, tenantId, t }) => {
@@ -29,27 +28,17 @@ const GisDetails = ({ acknowledgementIds, tenantId, t }) => {
     }
   }, [tenantId, acknowledgementIds]);
 
-  return (
-    <StatusTable>
-      <Accordion
-        title={t("GIS_DETAILS")}
-        t={t}
-        isFlag={false}
-      >
-        {gisData && gisData.length > 0 && (
-          <div>
-            <Row label={t("LATITUDE")} text={gisData[0].latitude?.toString() || "-"} />
-            <Row label={t("LONGITUDE")} text={gisData[0].longitude?.toString() || "-"} />
-            <Row label={t("DISTRICT")} text={gisData[0].details?.district || "-"} />
-            <Row label={t("LANDUSE")} text={gisData[0].details?.landuse || "-"} />
-            <Row label={t("VILLAGE")} text={gisData[0].details?.village || "-"} />
-            <Row label={t("AREA_HECTARE")} text={gisData[0].details?.areaHectare || "-"} />
-            <Row label={t("WARD_NO")} text={gisData[0].details?.ward || "-"} />
-          </div>
-        )}
-      </Accordion>
-    </StatusTable>
-  );
+  return gisData && gisData.length > 0 ? (
+    <div>
+      <Row label={t("LATITUDE")} text={gisData[0].latitude?.toString() || "-"} />
+      <Row label={t("LONGITUDE")} text={gisData[0].longitude?.toString() || "-"} />
+      <Row label={t("DISTRICT")} text={gisData[0].details?.district || "-"} />
+      <Row label={t("LANDUSE")} text={gisData[0].details?.landuse || "-"} />
+      <Row label={t("VILLAGE")} text={gisData[0].details?.village || "-"} />
+      <Row label={t("AREA_HECTARE")} text={gisData[0].details?.areaHectare || "-"} />
+      <Row label={t("WARD_NO")} text={gisData[0].details?.ward || "-"} />
+    </div>
+  ) : null;
 };
 
 export default GisDetails;

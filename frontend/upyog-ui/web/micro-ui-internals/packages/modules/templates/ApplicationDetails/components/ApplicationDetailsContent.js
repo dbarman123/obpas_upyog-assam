@@ -746,7 +746,15 @@ function ApplicationDetailsContent({
                 {getDetailsRow(detail?.additionalDetails?.form23BDetails?.[0]?.value)}
               </Accordion>
             </StatusTable>
-              <GisDetails acknowledgementIds={applicationData?.applicationNo} tenantId={applicationData?.tenantId} t={t} />
+            <StatusTable>
+              <Accordion
+                title={t("GIS_DETAILS")}
+                t={t}
+                isFlag={false}
+              >
+                <GisDetails acknowledgementIds={applicationData?.applicationNo} tenantId={applicationData?.tenantId} t={t} />
+              </Accordion>
+            </StatusTable>
             </div>
           ):null}
           

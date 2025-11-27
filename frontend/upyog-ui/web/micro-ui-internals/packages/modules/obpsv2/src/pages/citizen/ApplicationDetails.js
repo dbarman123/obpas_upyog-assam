@@ -150,30 +150,6 @@ import {
     }, [tenantId]);
 
     useEffect(() => {
-      const fetchGisData = async () => {
-        try {
-          const tenantId = Digit.ULBService.getCitizenCurrentTenant(true) || Digit.ULBService.getCurrentTenantId();
-          const response = await Digit.OBPSV2Services.gisSearch({
-            GisSearchCriteria: {
-              applicationNo: acknowledgementIds,
-              tenantId: tenantId,
-              status: "SUCCESS"
-            }
-          });
-          if (response?.Gis) {
-            setGisData(response.Gis);
-          }
-        } catch (error) {
-          console.error('GIS Search Error:', error);
-        }
-      };
-      if (acknowledgementIds && tenantId) {
-        fetchGisData();
-      }
-    }, [tenantId, acknowledgementIds]);
-    
-
-    useEffect(() => {
       if (bpaApplicationDetail?.[0]?.rtpDetails?.rtpName) {
         setOldRTPName(bpaApplicationDetail[0].rtpDetails.rtpName);
       }
@@ -1255,7 +1231,15 @@ import {
                 {getDetailsRow(form23B)}
               </Accordion>
             </StatusTable>
-            <GisDetails acknowledgementIds={acknowledgementIds} tenantId={tenantId} t={t} />
+            <StatusTable>
+              <Accordion
+                title={t("GIS_DETAILS")}
+                t={t}
+                isFlag={false}
+              >
+                <GisDetails acknowledgementIds={acknowledgementIds} tenantId={tenantId} t={t} />
+              </Accordion>
+            </StatusTable>
           </div>
           ):null}
             </StatusTable>
