@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useMemo, useReducer } from "react";
+import React, { Fragment, useCallback, useMemo, useReducer, useEffect } from "react";
 import { CaseIcon, Header } from "@upyog/digit-ui-react-components";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -46,6 +46,12 @@ const Inbox = ({ parentRoute }) => {
     }
   }
   const InboxObjectInSessionStorage = Digit.SessionStorage.get("OBPSV2.INBOX");
+  useEffect(() => {
+    sessionStorage.removeItem("OBPSV2.INBOX");
+    dispatch({ action: "mutateSearchForm", data: searchFormDefaultValues });
+    dispatch({ action: "mutateFilterForm", data: filterFormDefaultValues });
+    dispatch({ action: "mutateTableForm", data: tableOrderFormDefaultValues });
+  }, []);
   
   const onSearchFormReset = (setSearchFormValue) => {
     setSearchFormValue("mobileNumber", null);
@@ -56,7 +62,7 @@ const Inbox = ({ parentRoute }) => {
 
   const onFilterFormReset = (setFilterFormValue) => {
     setFilterFormValue("moduleName", "bpa-services");
-    setFilterFormValue("applicationStatus", "");
+    setFilterFormValue("applicationStatus", []);
     setFilterFormValue("locality", []);
     setFilterFormValue("assignee", "ASSIGNED_TO_ALL");
     setFilterFormValue("applicationType", []);
