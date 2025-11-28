@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useMemo, useReducer } from "react";
+import React, { Fragment, useCallback, useMemo, useReducer, useEffect } from "react";
 import { InboxComposer, CaseIcon, Header } from "@upyog/digit-ui-react-components";
 import { useTranslation } from "react-i18next";
 import FilterFormFieldsComponent from "./FilterFormFieldsComponent";
@@ -17,13 +17,12 @@ const Inbox = ({ parentRoute }) => {
     moduleName: "bpa-services",
     applicationStatus: [],
     locality: [],
-    assignee: "ASSIGNED_TO_ALL",
-    applicationType: [],
   };
   const tableOrderFormDefaultValues = {
     sortBy: "",
     limit: Digit.Utils.browser.isMobile() ? 50 : 10,
     offset: 0,
+    sortOrder: "DESC",
   };
   function formReducer(state, payload) {
     switch (payload.action) {
@@ -41,6 +40,12 @@ const Inbox = ({ parentRoute }) => {
     }
   }
   const InboxObjectInSessionStorage = Digit.SessionStorage.get("OBPSV2.INBOX");
+  useEffect(() => {
+    sessionStorage.removeItem("OBPSV2.INBOX");
+    dispatch({ action: "mutateSearchForm", data: searchFormDefaultValues });
+    dispatch({ action: "mutateFilterForm", data: filterFormDefaultValues });
+    dispatch({ action: "mutateTableForm", data: tableOrderFormDefaultValues });
+  }, []);
   const onSearchFormReset = (setSearchFormValue) => {
     setSearchFormValue("mobileNumber", null);
     setSearchFormValue("applicationNo", null);
@@ -50,13 +55,12 @@ const Inbox = ({ parentRoute }) => {
 
   const onFilterFormReset = (setFilterFormValue) => {
     setFilterFormValue("moduleName", "bpa-services");
-    setFilterFormValue("applicationStatus", "");
+    setFilterFormValue("applicationStatus", []);
     setFilterFormValue("locality", []);
-    setFilterFormValue("assignee", "ASSIGNED_TO_ALL");
-    setFilterFormValue("applicationType", []);
     dispatch({ action: "mutateFilterForm", data: filterFormDefaultValues });
   };
   const onSortFormReset = (setSortFormValue) => {
+    setSortFormValue("sortOrder", "DESC");
     dispatch({ action: "mutateTableForm", data: tableOrderFormDefaultValues });
   };
   const formInitValue = useMemo(() => {
@@ -108,14 +112,7 @@ const Inbox = ({ parentRoute }) => {
   );
   const { isLoading: isInboxLoading, data: { table, statuses, totalCount } = {} } = useBPAInbox({
     tenantId,
-    filters: { 
-      searchForm: formState.searchForm,
-      filterForm: formState.filterForm,
-      tableForm: {
-        limit: formState.tableForm?.limit,
-        offset: formState.tableForm?.offset
-      }
-    },
+    filters: { ...formState },
   });
 
   const PropsForInboxLinks = {

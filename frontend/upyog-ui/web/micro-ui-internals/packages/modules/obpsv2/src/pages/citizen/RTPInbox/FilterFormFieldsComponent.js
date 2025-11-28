@@ -1,7 +1,8 @@
-import React, { Fragment } from "react";
-import { FilterFormField, Dropdown } from "@upyog/digit-ui-react-components";
+import React, { Fragment, useMemo } from "react";
+import { FilterFormField, Dropdown, RemoveableTag, CheckBox, Loader, MultiSelectDropdown
+ } from "@upyog/digit-ui-react-components";
 import { useTranslation } from "react-i18next";
-
+import { Controller, useWatch } from "react-hook-form";
 const FilterFormFieldsComponent = ({
   statuses,
   isInboxLoading,
@@ -13,8 +14,17 @@ const FilterFormFieldsComponent = ({
   localitiesForEmployeesCurrentTenant,
   loadingLocalitiesForEmployeesCurrentTenant,
 }) => {
+  const selectrole = (listOfSelections, props) => {
+    const res = listOfSelections.map( (propsData) => {
+      const data = propsData[1]
+        return data
+     })
+    return props.onChange(res);
+  };
+
   const { t } = useTranslation();
 
+  const tenantId = Digit.ULBService.getCurrentTenantId();
   const { data: areaMappingData, isLoading } = Digit.Hooks.useEnabledMDMS(
     "as", 
     "BPA", 
@@ -53,37 +63,87 @@ const FilterFormFieldsComponent = ({
     name: district.districtCode,
     i18nKey: district.districtCode,
   })) || [];
+  if(!localitiesForEmployeesCurrentTenant || localitiesForEmployeesCurrentTenant?.length===0){
+    localitiesForEmployeesCurrentTenant=districtOptions
+  }
 
   return (
-    <div style={{ minHeight: "auto", height: "auto", maxHeight: "400px", overflowY: "auto", position: "relative" }} className="rtp-filter-container">
+    <Fragment>
       <FilterFormField>
-        <Dropdown
-          option={statusOptions}
-          selected={getFilterFormValue("applicationStatus")}
-          optionKey="i18nKey"
-          onAssignmentChange={(e) => setFilterFormValue("applicationStatus", e)}
-          disable={isInboxLoading}
-          optionCardStyles={{ maxHeight: "200px", zIndex: 9999 }}
-          placeholder={t("SELECT_STATUS")}
-          t={t}
+        <Controller
+          name="applicationStatus"
+          control={controlFilterForm}
+          render={(props) => {
+            const renderRemovableTokens = useMemo(()=>props?.value?.map((status, index) => {
+              return (
+                <RemoveableTag
+                key={index}
+                text={status.i18nKey}
+                onClick={() => {
+                  props.onChange(props?.value?.filter((loc) => loc.code !== status.code))
+                }}
+                />
+                );
+              }),[props?.value])
+            return  <>
+              <div className="filter-label sub-filter-label" style={{fontSize: "18px", fontWeight: "600"}}>{t("ES_APPLICATION_STATUS")}</div>
+              <MultiSelectDropdown
+              options={statusOptions ? statusOptions : []}
+              optionsKey="i18nKey"
+              props={props}
+              isPropsNeeded={true}
+              onSelect={selectrole}
+              selected={props?.value}
+              defaultLabel={t("ES_BPA_ALL_SELECTED")}
+              defaultUnit={t("BPA_SELECTED_TEXT")}
+              />
+              <div className="tag-container">
+                {renderRemovableTokens}
+              </div>
+            </>
+          }
+        }
         />
+        
       </FilterFormField>
 
       <FilterFormField>
-        <Dropdown
-          option={districtOptions}
-          selected={getFilterFormValue("district")}
-          optionKey="i18nKey"
-          onAssignmentChange={(e) => setFilterFormValue("district", e)}
-          disable={isLoading}
-          optionCardStyles={{ maxHeight: "200px", zIndex: 9999 }}
-          placeholder={t("SELECT_DISTRICT")}
-          t={t}
+         <Controller
+          name="district"
+          control={controlFilterForm}
+          render={(props) => {
+            const renderRemovableTokens = useMemo(()=>props?.value?.map((locality, index) => {
+              return (
+                <RemoveableTag
+                key={index}
+                text={locality.i18nKey}
+                onClick={() => {
+                  props.onChange(props?.value?.filter((loc) => loc.code !== locality.code))
+                }}
+                />
+                );
+              }),[props?.value])
+            return loadingLocalitiesForEmployeesCurrentTenant ? <Loader/> : <>
+              <div className="filter-label sub-filter-label" style={{fontSize: "18px", fontWeight: "600"}}>{t("ES_INBOX_LOCALITY")}</div>
+              <MultiSelectDropdown
+              options={localitiesForEmployeesCurrentTenant ? localitiesForEmployeesCurrentTenant : []}
+              optionsKey="i18nKey"
+              props={props}
+              isPropsNeeded={true}
+              onSelect={selectrole}
+              selected={props?.value}
+              defaultLabel={t("ES_BPA_ALL_SELECTED")}
+              defaultUnit={t("BPA_SELECTED_TEXT")}
+              />
+              <div className="tag-container">
+                {renderRemovableTokens}
+              </div>
+            </>
+          }
+        }
         />
       </FilterFormField>
-      <FilterFormField>
-      </FilterFormField>
-    </div>
+    </Fragment>
   );
 };
 
