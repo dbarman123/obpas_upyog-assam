@@ -332,7 +332,7 @@ import {
              },
            },
            gisRequest: {
-             tenantId: tenantId,
+             tenantId: "Tinsukia",
              applicationNo: data?.bpa?.[0]?.applicationNo,
              rtpiId: data?.bpa?.[0]?.rtpDetails?.rtpUUID,
            },

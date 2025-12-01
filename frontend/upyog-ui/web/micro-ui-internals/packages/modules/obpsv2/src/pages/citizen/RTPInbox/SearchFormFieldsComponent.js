@@ -23,7 +23,7 @@ const SearchFormFieldsComponents = ({ registerRef, searchFormState, searchFieldC
       <SearchField>
         <label>{t("APPLICANT_NAME")}</label>
         <TextInput
-          name="applicantName"
+          name="name"
           inputRef={registerRef({})}
         />
       </SearchField>

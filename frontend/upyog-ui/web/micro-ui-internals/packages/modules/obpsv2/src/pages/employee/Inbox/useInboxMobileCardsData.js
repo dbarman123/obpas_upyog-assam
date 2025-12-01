@@ -9,7 +9,7 @@ const useInboxMobileCardsData = ({parentRoute, table, getRedirectionLink}) => {
 
     const dataForMobileInboxCards = table?.map((row) => ({
             [t("BPA_APPLICATION_NUMBER_LABEL")]: row?.applicationId || "NA",
-            [t("APPLICANT_NAME")]: row?.applicantName || "NA",
+            [t("APPLICANT_NAME")]: row?.name || "NA",
             [t("DISTRICT")]: t(row?.areaMapping?.district) || "NA",
             [t("MOBILE_NUMBER")]: row?.mobileNumber || "NA",
             [t("STATUS")]: t(row?.status) || t("CS_NA")

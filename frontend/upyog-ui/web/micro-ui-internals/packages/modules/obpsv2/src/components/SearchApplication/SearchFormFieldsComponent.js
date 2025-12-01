@@ -19,23 +19,24 @@ const SearchFormFieldsComponent = ({ formState, Controller, register, control, t
     tenantId: stateTenantId,
   });
 
-    const applicationStatuses = [ { i18nKey: "Pending RTP Approval", code: "PENDING_RTP_APPROVAL", value: t("BPA_PENDING_RTP_APPROVAL") },
+    const applicationStatuses = [
+      { i18nKey: "Pending RTP Approval", code: "PENDING_RTP_APPROVAL", value: t("BPA_PENDING_RTP_APPROVAL") },
       { i18nKey: "Edit Application", code: "EDIT_APPLICATION", value: t("BPA_EDIT_APPLICATION") },
       { i18nKey: "GIS Validation", code: "GIS_VALIDATION", value: t("BPA_GIS_VALIDATION") },
       { i18nKey: "Pending For Scrutiny", code: "PENDING_FOR_SCRUTINY", value: t("BPA_PENDING_FOR_SCRUTINY") },
       { i18nKey: "Send To Citizen", code: "SEND_TO_CITIZEN", value: t("BPA_SEND_TO_CITIZEN") },
       { i18nKey: "Citizen Approval", code: "CITIZEN_APPROVAL", value: t("BPA_CITIZEN_APPROVAL") },
-      { i18nKey: "Pending GMDA Engineer", code: "PENDING_GMDA_ENGINEER", value: t("BPA_PENDING_GMDA_ENGINEER") },
-      { i18nKey: "Pending Town Planner", code: "PENDING_TOWNPLANNER", value: t("BPA_PENDING_TOWNPLANNER") },
-      { i18nKey: "Pending CEO", code: "PENDING_CEO", value: t("BPA_PENDING_CEO") },
+      { i18nKey: "Pending DA Engineer", code: "PENDING_DA_ENGINEER", value: t("BPA_PENDING_DA_ENGINEER") },
+      { i18nKey: "Pending DD AD Development Authority", code: "PENDING_DD_AD_DEVELOPMENT_AUTHORITY", value: t("BPA_PENDING_DD_AD_DEVELOPMENT_AUTHORITY") },
+      { i18nKey: "Pending Chairman DA", code: "PENDING_CHAIRMAN_DA", value: t("BPA_PENDING_CHAIRMAN_DA") },
       { i18nKey: "Payment Pending", code: "PAYMENT_PENDING", value: t("BPA_PAYMENT_PENDING") },
-      { i18nKey: "Forwarded To Zonal Officer", code: "FORWARDED_TO_ZONAL_OFFICER", value: t("BPA_FORWARDED_TO_ZONAL_OFFICER") },
-      { i18nKey: "Forwarded To Associate Planner", code: "FORWARDED_TO_ASSOCIATE_PLANNER", value: t("BPA_FORWARDED_TO_ASSOCIATE_PLANNER") },
-      { i18nKey: "Pending Commissioner", code: "PENDING_COMMISSIONER", value: t("BPA_PENDING_COMMISSIONER") },
+      { i18nKey: "Forwarded To Technical Engineer", code: "FORWARDED_TO_TECHNICAL_ENGINEER", value: t("BPA_FORWARDED_TO_TECHNICAL_ENGINEER") },
+      { i18nKey: "Forwarded To DD AD TCP", code: "FORWARDED_TO_DD_AD_TCP", value: t("BPA_FORWARDED_TO_DD_AD_TCP") },
+      { i18nKey: "Pending Chairman President", code: "PENDING_CHAIRMAN_PRESIDENT", value: t("BPA_PENDING_CHAIRMAN_PRESIDENT") },
       { i18nKey: "Citizen Final Payment", code: "CITIZEN_FINAL_PAYMENT", value: t("BPA_CITIZEN_FINAL_PAYMENT") },
       { i18nKey: "Application Completed", code: "APPLICATION_COMPLETED", value: t("BPA_APPLICATION_COMPLETED") },
-      { i18nKey: "Rejected", code: "REJECTED", value: t("BPA_REJECTED") }]; 
-
+      { i18nKey: "Rejected", code: "REJECTED", value: t("BPA_REJECTED") }
+    ].sort((a, b) => a.code.localeCompare(b.code));
   return (
     <>
       <SearchField>

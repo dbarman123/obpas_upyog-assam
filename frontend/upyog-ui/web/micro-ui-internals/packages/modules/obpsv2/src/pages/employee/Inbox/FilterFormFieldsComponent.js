@@ -66,7 +66,7 @@ const FilterFormFieldsComponent = ({
     { i18nKey: "Citizen Final Payment", code: "CITIZEN_FINAL_PAYMENT", value: t("BPA_CITIZEN_FINAL_PAYMENT") },
     { i18nKey: "Application Completed", code: "APPLICATION_COMPLETED", value: t("BPA_APPLICATION_COMPLETED") },
     { i18nKey: "Rejected", code: "REJECTED", value: t("BPA_REJECTED") }
-  ];
+  ].sort((a, b) => a.code.localeCompare(b.code));
 
   const assigneeOptions = [
     { code: "ASSIGNED_TO_ALL", i18nKey: "ES_INBOX_ASSIGNED_TO_ALL" },

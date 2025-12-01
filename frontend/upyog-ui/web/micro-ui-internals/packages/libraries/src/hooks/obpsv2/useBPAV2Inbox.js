@@ -4,7 +4,8 @@ const useBPAV2Inbox = ({ tenantId, filters, config={} }) => {
     const { filterForm, searchForm , tableForm } = filters;
     const user = Digit.UserService.getUser();
     let { applicationStatus, district, assignee, applicationType } = filterForm;
-    const { mobileNumber, applicationNo, applicantName } = searchForm;
+    const { mobileNumber, applicationNo, name } = searchForm;
+    console.log("first", name);
     const { sortBy, limit, offset, sortOrder } = tableForm;
     let _filters = {
         tenantId,
@@ -12,16 +13,16 @@ const useBPAV2Inbox = ({ tenantId, filters, config={} }) => {
           assignee : user.info.type=="EMPLOYEE"? "": user.info.uuid,
           moduleName: "bpa-services", 
           businessService: ["BPA_DA_MB","BPA_DA_GP"],
-          ...(applicationStatus?.length > 0 ? {status: applicationStatus.map((item) => item.code)} : {}),
         },
         moduleSearchCriteria: {
           ...(mobileNumber ? {mobileNumber}: {}),
-          ...(applicantName ? {applicantName}: {}),
+          ...(name ? {name}: {}),
           ...(applicationNo ? {applicationNo} : {}),
           sortOrder: sortOrder || "DESC",
           sortBy: sortBy || "createdTime",
           ...(applicationType && applicationType?.length > 0 ? {applicationType} : {}),
           ...(district?.length > 0 ? { district: district.map((item) => item.code) } : {}),
+          ...(applicationStatus?.length > 0 ? {status: applicationStatus.map((item) => item.code)} : {}),
         },
         limit
     }
@@ -39,7 +40,7 @@ const useBPAV2Inbox = ({ tenantId, filters, config={} }) => {
           data.items.map((application) => ({
             applicationId:
               application?.businessObject?.applicationNo || application?.ProcessInstance?.businessId || "NA",
-            applicantName:
+            name:
               application?.businessObject?.landInfo?.owners?.[0]?.name || "NA",
             fatherOrHusbandName:
               application?.businessObject?.landInfo?.owners?.[0]

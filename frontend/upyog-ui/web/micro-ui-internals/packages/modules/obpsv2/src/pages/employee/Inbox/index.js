@@ -49,7 +49,7 @@ const Inbox = ({ parentRoute }) => {
   const onSearchFormReset = (setSearchFormValue) => {
     setSearchFormValue("mobileNumber", null);
     setSearchFormValue("applicationNo", null);
-    setSearchFormValue("applicantName", null);
+    setSearchFormValue("name", null);
     dispatch({ action: "mutateSearchForm", data: searchFormDefaultValues });
   };
 
