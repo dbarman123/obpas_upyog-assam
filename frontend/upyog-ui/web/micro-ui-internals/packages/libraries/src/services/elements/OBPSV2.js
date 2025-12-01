@@ -533,9 +533,9 @@ export const OBPSV2Services = {
           title: "BPA_ADDRESS_LINE_2",
           value: permanentAddress?.addressLine2 || "NA",
         },
-        { title: "BPA_LANDMARK", value: permanentAddress?.landmark || "NA" },
         { title: "BPA_DISTRICT", value: permanentAddress?.district || "NA" },
         { title: "BPA_STATE", value: permanentAddress?.state || "NA" },
+        { title: "BPA_CITY_VILLAGE", value: permanentAddress?.localityCode || "NA" },
         { title: "BPA_PIN_CODE", value: permanentAddress?.pincode || "NA" },
       ],
     };
@@ -566,6 +566,9 @@ export const OBPSV2Services = {
             {
               title: "BPA_STATE",
               value: primaryOwner.correspondenceAddress?.state || "NA",
+            },
+            { title: "BPA_CITY_VILLAGE",
+              value: primaryOwner.correspondenceAddress?.localityCode || "NA"
             },
             {
               title: "BPA_PIN_CODE",

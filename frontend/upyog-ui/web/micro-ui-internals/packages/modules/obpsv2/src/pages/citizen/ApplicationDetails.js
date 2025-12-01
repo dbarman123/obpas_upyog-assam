@@ -332,7 +332,7 @@ import {
              },
            },
            gisRequest: {
-             tenantId: tenantId,
+             tenantId: "Tinsukia",
              applicationNo: data?.bpa?.[0]?.applicationNo,
              rtpiId: data?.bpa?.[0]?.rtpDetails?.rtpUUID,
            },
@@ -968,20 +968,16 @@ import {
                 text={permanentAddress?.addressLine2 || t("CS_NA")}
               />
               <Row
-                label={t("BPA_LANDMARK")}
-                text={permanentAddress?.landmark || t("CS_NA")}
-              />
-              <Row
                 label={t("BPA_DISTRICT")}
                 text={t(permanentAddress?.district) || t("CS_NA")}
               />
-              {/* <Row
-                label={t("BPA_CITY")}
-                text={permanentAddress?.locality?.name || t("CS_NA")}
-              /> */}
               <Row
                 label={t("BPA_STATE")}
                 text={permanentAddress?.state || t("CS_NA")}
+              />
+               <Row
+                label={t("BPA_CITY_VILLAGE")}
+                text={t(permanentAddress?.localityCode) || t("CS_NA")}
               />
               <Row
                 label={t("BPA_PIN_CODE")}
@@ -1008,13 +1004,13 @@ import {
                   label={t("BPA_DISTRICT")}
                   text={t(primaryOwner?.correspondenceAddress?.district) || t("CS_NA")}
                 />
-                {/* <Row
-                  label={t("BPA_CITY")}
-                  text={primaryOwner?.correspondenceAddress?.locality?.name || t("CS_NA")}
-                /> */}
                 <Row
                   label={t("BPA_STATE")}
                   text={primaryOwner?.correspondenceAddress?.state || t("CS_NA")}
+                />
+                 <Row
+                  label={t("BPA_CITY_VILLAGE")}
+                  text={t(primaryOwner?.correspondenceAddress?.localityCode) || t("CS_NA")}
                 />
                 <Row
                   label={t("BPA_PIN_CODE")}

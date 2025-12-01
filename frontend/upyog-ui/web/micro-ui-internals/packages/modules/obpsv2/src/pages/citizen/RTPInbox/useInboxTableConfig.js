@@ -58,8 +58,8 @@ const useInboxTableConfig = ({ parentRoute, onPageSizeChange, formState, totalCo
         },
         {
             Header: t("APPLICANT_NAME"),
-            accessor: "applicantName",
-            Cell: ({row}) => row?.original?.applicantName || "NA"
+            accessor: "name",
+            Cell: ({row}) => row?.original?.name || "NA"
         },
         {
             Header: t("DISTRICT"),

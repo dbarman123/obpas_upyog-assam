@@ -32,7 +32,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
         code: district.districtCode,
         name: district.districtName,
         i18nKey: district.districtCode,
-      }));
+      })).sort((a, b) => a.code.localeCompare(b.code));
       setDistrictOptions(formattedDistricts);
     }
     if(mdmsData?.states){
@@ -40,7 +40,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
         code: state.stateCode,
         name: state.stateName,
         i18nKey: state.stateCode,
-      }));
+      })).sort((a, b) => a.code.localeCompare(b.code));
       setStateOptions(formattedStates);
       if (!permanentState && formattedStates.length > 0) {
         setPermanentState(formattedStates[0]);
@@ -62,7 +62,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
     "code" : searchResult?.landInfo?.address?.locality?.code,
     "i18nKey" : searchResult?.landInfo?.address?.locality?.code
   } : "";
-  const [permanentCity, setPermanentCity] = useState(formData?.address?.permanent?.city || formData?.areaMapping?.revenueVillage || searchResultCity || "");
+  const [permanentCity, setPermanentCity] = useState(formData?.address?.permanent?.city || searchResultCity || "");
   const searchResultState = searchResult?.landInfo?.address?.state ? {
     "code" : searchResult?.landInfo?.address?.state,
     "i18nKey" : searchResult?.landInfo?.address?.state
@@ -100,7 +100,8 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
           code: revenueVillage.revenueVillageCode,
           name: revenueVillage.revenueVillageName,
           i18nKey: revenueVillage.revenueVillageCode,
-        }));
+        }))
+        .sort((a, b) => a.code.localeCompare(b.code));
       setPermanentCityOptions(formattedRevenueVillage);
       
       // Agar current city selected hai, check karo ki wo naye district ki hai ya nahi
@@ -125,7 +126,8 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
           code: revenueVillage.revenueVillageCode,
           name: revenueVillage.revenueVillageName,
           i18nKey: revenueVillage.revenueVillageCode,
-        }));
+        }))
+        .sort((a, b) => a.code.localeCompare(b.code));
       setCorrespondenceCityOptions(formattedRevenueVillage);
       
       // Agar current city selected hai, check karo ki wo naye district ki hai ya nahi

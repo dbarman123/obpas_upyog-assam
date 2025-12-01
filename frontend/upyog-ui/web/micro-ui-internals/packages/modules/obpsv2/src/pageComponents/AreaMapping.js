@@ -61,7 +61,7 @@ const [villageName, setVillageName] = useState(formData?.areaMapping?.villageNam
         code: district.districtCode,
         name: district.districtName,
         i18nKey: district.districtCode,
-      }));
+      })).sort((a, b) => a.code.localeCompare(b.code));
       setDistricts(formattedDistricts);
     }
   }, [areaMappingData]);
@@ -75,7 +75,8 @@ const [villageName, setVillageName] = useState(formData?.areaMapping?.villageNam
           code: authority.bpAuthorityCode,
           name: authority.bpAuthorityName,
           i18nKey: authority.bpAuthorityCode,
-        }));
+        }))
+        .sort((a, b) => a.code.localeCompare(b.code));
       setConcernedAuthorities(filteredConcernedAuthorities);
     } else {
       setConcernedAuthorities([]);
@@ -88,7 +89,7 @@ const [villageName, setVillageName] = useState(formData?.areaMapping?.villageNam
         code: concernedAuthority.authorityType,
         name: concernedAuthority.authorityType,
         i18nKey: concernedAuthority.authorityType,
-      }));
+      })).sort((a, b) => a.code.localeCompare(b.code));
       setBpAuthorities(formattedBpAuthorities);
     }
   }, [areaMappingData]);
@@ -102,7 +103,8 @@ const [villageName, setVillageName] = useState(formData?.areaMapping?.villageNam
           code: area.planningAreaCode,
           name: area.planningAreaName,
           i18nKey: area.planningAreaCode,
-        }));
+        }))
+        .sort((a, b) => a.code.localeCompare(b.code));
       setPlanningAreas(filteredPlanningAreas);
     } else {
       setPlanningAreas([]);
@@ -118,7 +120,8 @@ const [villageName, setVillageName] = useState(formData?.areaMapping?.villageNam
           code: authority.ppAuthorityCode,
           name: authority.ppAuthorityName,
           i18nKey: authority.ppAuthorityCode,
-        }));
+        }))
+        .sort((a, b) => a.code.localeCompare(b.code));
       setPpAuthorities(filteredPpAuthorities);
     } else {
       setPpAuthorities([]);
@@ -136,7 +139,13 @@ const [villageName, setVillageName] = useState(formData?.areaMapping?.villageNam
           code: ward.wardCode,
           name: ward.wardName,
           i18nKey: ward.wardCode,
-        }));
+        }))
+        .sort((a, b) => {
+          // Extract numbers from ward names for proper numeric sorting
+          const aNum = parseInt(a.name.match(/\d+/)?.[0] || '0');
+          const bNum = parseInt(b.name.match(/\d+/)?.[0] || '0');
+          return aNum - bNum;
+        });
       setWards(filteredWards);
     } else {
       setWards([]);
@@ -152,7 +161,8 @@ const [villageName, setVillageName] = useState(formData?.areaMapping?.villageNam
           code: village.revenueVillageCode,
           name: village.revenueVillageName,
           i18nKey: village.revenueVillageCode,
-        }));
+        }))
+        .sort((a, b) => a.code.localeCompare(b.code));
       setRevenueVillages(filteredRevenueVillages);
     } else {
       setRevenueVillages([]);
@@ -168,7 +178,8 @@ const [villageName, setVillageName] = useState(formData?.areaMapping?.villageNam
           code: village.villageCode,
           name: village.villageName,
           i18nKey: village.villageCode,
-        }));
+        }))
+        .sort((a, b) => a.code.localeCompare(b.code));
       setVillages(filteredVillages);
     } else {
       setVillages([]);
@@ -344,7 +355,7 @@ const [villageName, setVillageName] = useState(formData?.areaMapping?.villageNam
                 optionKey="i18nKey"
                 selected={ward}
                 select={handleWardChange}
-                optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
+                optionCardStyles={{ maxHeight: "250px", overflowY: "auto" }}
                 placeholder={!concernedAuthority ? t("SELECT_CONCERNED_AUTHORITY_FIRST") : t("SELECT_WARD")}
               />
 

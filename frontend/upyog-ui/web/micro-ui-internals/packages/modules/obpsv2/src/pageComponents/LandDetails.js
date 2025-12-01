@@ -47,7 +47,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
           code: constructionTypes.code,
           name: constructionTypes.name,
           i18nKey: constructionTypes.code,
-        }));
+        })).sort((a, b) => a.code.localeCompare(b.code));
         setConstructionTypeOptions(formattedConstructionTypes);
         
       }
@@ -56,7 +56,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
           code: rtpCategories.code,
           name: rtpCategories.name,
           i18nKey: rtpCategories.code,
-        }));
+        })).sort((a, b) => a.code.localeCompare(b.code));
         setRtpCategoryOptions(formattedRtpCategories);
       }
       if(mdmsData?.PermissibleZone){
@@ -64,7 +64,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
           code: occupancyTypes.code,
           name: occupancyTypes.name,
           i18nKey: occupancyTypes.name,
-        }));
+        })).sort((a, b) => a.code.localeCompare(b.code));
         setOccupancyTypeOptions(formattedOccupancyTypes);
       }
     }, [mdmsData]);
@@ -248,7 +248,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             uuid: user.uuid,
             name: `${user.name}, +91 ${user.mobileNumber}, ${user.emailId}`,
             i18nKey:`${user.name}, +91 ${user.mobileNumber}, ${user.emailId}`,
-          }));
+          })).sort((a, b) => a.code.localeCompare(b.code));
           setRtpOptions(formattedRtpOptions);
         }
       } catch (error) {
