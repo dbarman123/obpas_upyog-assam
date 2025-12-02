@@ -18,6 +18,8 @@ import org.upyog.gis.model.*;
 import org.upyog.gis.service.GisService;
 import org.upyog.gis.util.ResponseInfoFactory;
 
+import javax.validation.Valid;
+
 
 /**
  * REST controller for GIS operations
@@ -89,9 +91,14 @@ public class GisController {
     @PostMapping("/zone/_search")
     public ResponseEntity<GisLogSearchResponse> searchGisLogs(
             @ApiParam(value = "Search criteria", required = true)
-            @RequestBody GisLogSearchRequest searchRequest
+            @RequestBody @Valid GisLogSearchRequest searchRequest
     ) {
         try {
+            GisLogSearchCriteria criteria = searchRequest.getCriteria();
+            if (criteria.getTenantId() != null && criteria.getTenantId().contains(".")) {
+                String[] ulbName = criteria.getTenantId().split("\\.");
+                criteria.setTenantId(ulbName[ulbName.length - 1]);
+            }
             log.info("Searching GIS logs with criteria: {}", searchRequest.getCriteria());
 
             List<GisLog> gisLogs = gisService.searchGisLog(searchRequest.getCriteria());
@@ -104,7 +111,9 @@ public class GisController {
                     .gis(gisLogs)
                     .build();
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(response);
 
         } catch (IllegalArgumentException e) {
             log.warn("Invalid search request: {}", e.getMessage());

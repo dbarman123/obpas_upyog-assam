@@ -240,29 +240,12 @@ public class GisServiceImpl implements GisService {
 
     /**
      * Searches GIS logs based on provided search criteria.
-     * 
-     * <p>This method retrieves GIS processing logs from the database using various filter parameters
-     * such as tenant ID, application number, RTPI ID, and status. It supports pagination through
-     * limit and offset parameters in the criteria object.</p>
-     * 
-     * <p>TenantId is mandatory and validated via @NotNull annotation. Other parameters are optional.</p>
-     *
-     * @param criteria the search criteria containing filter parameters and pagination settings
      * @return list of GisLog objects matching the search criteria
      */
     @Override
     public List<GisLog> searchGisLog(GisLogSearchCriteria criteria) {
         log.info("Searching GIS logs with criteria: {}", criteria);
-        List<GisLog> logs = logRepository.search(criteria);
-
-        logs.forEach(log -> {
-            if(log.getTenantId() != null && log.getTenantId().contains(".")){
-                String[] ulbName = log.getTenantId().split("\\.");
-                log.setTenantId(ulbName[ulbName.length -1]);
-            }
-        });
-
-        return logs;
+        return logRepository.search(criteria);
     }
 
 
