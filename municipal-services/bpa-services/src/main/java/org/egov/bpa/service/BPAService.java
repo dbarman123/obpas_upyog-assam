@@ -204,7 +204,6 @@ public class BPAService {
     /**
      * calls calculation service calculate and generte demand accordingly
      *
-     * @param applicationType
      * @param bpaRequest
      */
 	private void addCalculation(BPARequest bpaRequest, String feeType) {
@@ -514,6 +513,14 @@ public class BPAService {
         // Handle RTP details update without workflow (only for citizens)
         BPA existingBPA = searchResult.get(0);
 
+        //Handle file store id for update of documents like Planning permit, Building permit, Occupancy certificate
+        boolean updateRequired = enrichmentService.enrichFileStoreIdsForBPAUpdate(bpa, existingBPA);
+        if(updateRequired){
+            log.info("File store ids updated for application no: {}", bpa.getApplicationNo());
+            repository.update(bpaRequest, BPAConstants.UPDATE);
+            return bpaRequest.getBPA();
+        }
+
         /* RTP details can be updated without workflow only when all the below conditions are met:
          * 1. The existing application should not have RTP details as null
          * 2. The incoming application should not have RTP details as null
@@ -535,6 +542,8 @@ public class BPAService {
 		switch (action.toUpperCase()) {
 
 		case "RTP_IS_CHANGED":
+            actionValidator.validateActionForRTPUpdateWithoutWorkflowUpdate(bpaRequest, action);
+
 			reassignRTP(bpaRequest);
 			log.info("RTP details updated successfully without workflow for citizen application: {}",
 					bpa.getApplicationNo());
@@ -565,7 +574,7 @@ public class BPAService {
 			bpaRequest.getBPA().setBuildingPermitNo(getBuildingPermitNo(bpaRequest));
 			bpaRequest.getBPA().setBuildingPermitDate(util.getCurrentTimestampMillis());
 			log.info("Building Permit No. generated : " + bpaRequest.getBPA().getBuildingPermitNo());
-			// TO_BE_CHANGED
+			// TODO: TO_BE_CHANGED and add oc certificate no generation
 			bpaRequest.getBPA().setOccupancyCertificateNo(getOccupancyCertificateNo(bpaRequest));
 			bpaRequest.getBPA().setOccupancyCertificateDate(util.getCurrentTimestampMillis());
 			log.info("Occupancy Certificate No. generated : " + bpaRequest.getBPA().getOccupancyCertificateNo());
@@ -857,7 +866,6 @@ public class BPAService {
      *
      * @param bpaRequest
      * @param fileName
-     * @param document   return PdfDocument
      */
     private PdfDocument createTempReport(BPARequest bpaRequest, String fileName) {
 

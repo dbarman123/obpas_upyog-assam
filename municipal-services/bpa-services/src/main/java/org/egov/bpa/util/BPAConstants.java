@@ -460,5 +460,5 @@ public class BPAConstants {
 	public static final String EMAIL_SUBJECT = "APPLICATION STATUS UPDATE OF : %s";
 
 
-
+	public static final String UPDATE_FILESTORE_ID = "UPDATE_FILESTORE_ID";
 }
