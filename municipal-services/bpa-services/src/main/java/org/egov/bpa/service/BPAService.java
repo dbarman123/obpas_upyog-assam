@@ -267,7 +267,6 @@ public class BPAService {
                             collect(java.util.stream.Collectors.toCollection(ArrayList::new));
                     log.info("land ids for bpa application : {}", landIds);
                     //In case of landId is not present in BPA then try to fetch from additional details
-                    populateLandToBPAFromAdditionalDetail(bpas);
                     if(landIds.isEmpty()){
                         return bpas;
                     }
@@ -289,21 +288,6 @@ public class BPAService {
      *
      * @param bpas - list of bpas application
      */
-    private void populateLandToBPAFromAdditionalDetail(List<BPA> bpas) {
-        bpas.stream().filter(bpa -> bpa.getLandId() ==null).forEach(
-                bpa -> {
-                    Map<String, String> additionalDetails = bpa.getAdditionalDetails() != null ? (Map<String, String>) bpa.getAdditionalDetails()
-                            : new HashMap<String, String>();
-                    LandInfo landInfo = null;
-                    if (additionalDetails.get(BPAConstants.LAND_INFO_KEY) != null){
-                        log.info("land info found in additional details for bpa : {}", bpa.getApplicationNo());
-                        landInfo = BPAUtil.getLandInfoFromString(additionalDetails.get(BPAConstants.LAND_INFO_KEY));
-                        additionalDetails.remove(BPAConstants.LAND_INFO_KEY);
-                        bpa.setAdditionalDetails(additionalDetails);
-                    }
-                    bpa.setLandInfo(landInfo);
-                });
-    }
 
     /**
      * search the BPA records created by and create for the logged in User
@@ -426,7 +410,7 @@ public class BPAService {
     // Search the Land from name and then from BPA after extracting teh land id
     private List<BPA> getBPAFromApplicantName(BPASearchCriteria criteria, LandSearchCriteria landcriteria, RequestInfo requestInfo) {
         List<BPA> bpas = new LinkedList<>();
-
+        log.info("Call with name to Land::" + criteria.getName());
         landcriteria.setName(criteria.getName());
         ArrayList<LandInfo> landInfo = landService.searchLandInfoToBPA(requestInfo, landcriteria);
         ArrayList<String> landId = new ArrayList<>();
