@@ -48,6 +48,7 @@
 package org.egov.common.entity.edcr;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +59,8 @@ public class FireTenderMovement implements Serializable{
     private List<String> errors = new ArrayList<>();
 
     private transient List<Measurement> fireTenderMovements;
+
+    private  List<BigDecimal> fireTenderMovementWidths;
 
     public List<Measurement> getFireTenderMovements() {
         return fireTenderMovements;
@@ -74,5 +77,12 @@ public class FireTenderMovement implements Serializable{
     public void setErrors(List<String> errors) {
         this.errors = errors;
     }
-    
+
+    public List<BigDecimal> getFireTenderMovementWidths() {
+        return fireTenderMovementWidths;
+    }
+
+    public void setFireTenderMovementWidths(List<BigDecimal> fireTenderMovementWidths) {
+        this.fireTenderMovementWidths = fireTenderMovementWidths;
+    }
 }

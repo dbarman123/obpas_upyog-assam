@@ -1,6 +1,7 @@
 
 package org.egov.edcr.feature;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.egov.common.entity.edcr.FireTenderMovement;
 import org.egov.common.entity.edcr.Measurement;
 import org.egov.common.entity.edcr.SetBack;
 import org.egov.common.entity.edcr.Yard;
+import org.egov.edcr.constants.DxfFileConstants;
 import org.egov.edcr.entity.blackbox.MeasurementDetail;
 import org.egov.edcr.entity.blackbox.PlanDetail;
 import org.egov.edcr.entity.blackbox.YardDetail;
@@ -40,6 +42,9 @@ public class FireTenderMovementExtract extends FeatureExtract {
                     b.getNumber());
             List<DXFLWPolyline> fireTenderMovementPolyLines = Util.getPolyLinesByLayer(pl.getDoc(),
                     fireTenderMovementLayer);
+
+            List<BigDecimal> fireTenderMovementWidth = Util.getListOfDimensionByColourCode(pl, fireTenderMovementLayer, DxfFileConstants.INDEX_COLOR_TWO);
+
             if (!fireTenderMovementPolyLines.isEmpty()) {
                 List<Measurement> measurementDetails = new ArrayList<>();
 
@@ -50,6 +55,7 @@ public class FireTenderMovementExtract extends FeatureExtract {
 
                 FireTenderMovement fireTenderMovement = new FireTenderMovement();
                 fireTenderMovement.setFireTenderMovements(measurementDetails);
+                fireTenderMovement.setFireTenderMovementWidths(fireTenderMovementWidth);
 
                 List<String> errors = new ArrayList<>();
                 b.setFireTenderMovement(fireTenderMovement);

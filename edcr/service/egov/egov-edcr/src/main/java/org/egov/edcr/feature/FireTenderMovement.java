@@ -185,26 +185,27 @@ public class FireTenderMovement extends FeatureProcess {
 			org.egov.common.entity.edcr.FireTenderMovement fireTenderMovement, BigDecimal minRequiredWidth,
 			ScrutinyDetail scrutinyDetail, Map<String, String> errors) {
 
-		List<BigDecimal> widths = fireTenderMovement.getFireTenderMovements().stream().map(ftm -> ftm.getWidth())
-				.collect(Collectors.toList());
+		List<BigDecimal> widths = fireTenderMovement.getFireTenderMovementWidths();
 
 		if (widths.isEmpty())
 			return;
 
-		BigDecimal providedWidth = widths.stream().reduce(BigDecimal::min).orElse(BigDecimal.ZERO)
-				.setScale(DcrConstants.DECIMALDIGITS_MEASUREMENTS, DcrConstants.ROUNDMODE_MEASUREMENTS);
+//		BigDecimal providedWidth = widths.stream().reduce(BigDecimal::min).orElse(BigDecimal.ZERO)
+//				.setScale(DcrConstants.DECIMALDIGITS_MEASUREMENTS, DcrConstants.ROUNDMODE_MEASUREMENTS);
 
-		boolean isAccepted = providedWidth.compareTo(minRequiredWidth) >= 0;
+        for(BigDecimal providedWidth: widths){
+            boolean isAccepted = providedWidth.compareTo(minRequiredWidth) >= 0;
 
-		ReportScrutinyDetail detail = new ReportScrutinyDetail();
-		detail.setRuleNo(RULE_36_3);
-		detail.setDescription(WIDTH_DESCRIPTION);
-		detail.setPermissible(GREATER_THAN_EQUAL + minRequiredWidth.toPlainString());
-		detail.setProvided(providedWidth.toPlainString());
-		detail.setStatus(isAccepted ? Result.Accepted.getResultVal() : Result.Not_Accepted.getResultVal());
+            ReportScrutinyDetail detail = new ReportScrutinyDetail();
+            detail.setRuleNo(RULE_36_3);
+            detail.setDescription(WIDTH_DESCRIPTION);
+            detail.setPermissible(GREATER_THAN_EQUAL + minRequiredWidth.toPlainString());
+            detail.setProvided(providedWidth.toPlainString());
+            detail.setStatus(isAccepted ? Result.Accepted.getResultVal() : Result.Not_Accepted.getResultVal());
 
-		Map<String, String> details = mapReportDetails(detail);
-		addScrutinyDetailtoPlan(scrutinyDetail, plan, details);
+            Map<String, String> details = mapReportDetails(detail);
+            addScrutinyDetailtoPlan(scrutinyDetail, plan, details);
+        }
 
 		if (!fireTenderMovement.getErrors().isEmpty()) {
 			String yardNames = String.join(COMMA, fireTenderMovement.getErrors());

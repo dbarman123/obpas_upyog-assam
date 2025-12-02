@@ -1,5 +1,7 @@
 package org.egov.edcr.constants;
 
+import org.python.antlr.ast.Str;
+
 public class CommonFeatureConstants {
     public static final String YES_NO_NA = "YES/NO/NA";
     public static final String NUMBER_OF_FLOORS = "Number of Floors";
@@ -366,5 +368,11 @@ public class CommonFeatureConstants {
     public static final String DEDUCTED_TOTAL_PROJECTIONS = "Deducted Projections Total Area";
     public static final String DEDUCTED_GUARDROOM = "Deducted Total Guardroom Area";
     public static final String DEDUCTED_CARETAKERROOM = "Deducted Total CareTakerRoom Area";
+
+    public static final String GARBAGE_PIT = "Garbage Pit";
+    public static final String DRY_GARBAGE_DESCRIPTION = "Dry Garbage Pit Details";
+    public static final String WET_GARBAGE_DESCRIPTION = "Wet Garbage Pit Details";
+    public static final String DRY_GARBAGE_PROVIDED = "Provided Dry Garbage Pit Details";
+    public static final String WET_GARBAGE_PROVIDED = "Provided Wet Garbage Pit Details";
 
 }

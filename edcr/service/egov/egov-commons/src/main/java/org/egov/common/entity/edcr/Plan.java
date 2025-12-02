@@ -252,6 +252,7 @@ public class Plan implements Serializable {
     private BigDecimal totalUrinals = BigDecimal.ZERO;
 
     private FarExemption farExemptions;
+    private Garbage garbagePit;
     
     public BigDecimal getRiver() {
 		return river;
@@ -828,5 +829,13 @@ public class Plan implements Serializable {
 
     public void setFarExemptions(FarExemption farExemptions) {
         this.farExemptions = farExemptions;
+    }
+
+    public Garbage getGarbagePit() {
+        return garbagePit;
+    }
+
+    public void setGarbagePit(Garbage garbagePit) {
+        this.garbagePit = garbagePit;
     }
 }
