@@ -449,6 +449,79 @@ import {
       window.open(fileStore[response?.filestoreIds?.[0]] || fileStore[response], "_blank");
 
     };
+    const handleBuildingPermitOrder = async () => {
+      const application = data?.bpa?.[0];
+      let fileStoreId = application?.bpFileStoreId;
+  
+      if (!fileStoreId) {
+        const response = await Digit.PaymentService.generatePdf(
+          tenantId,
+          { Bpa: [application] },
+          "bpaBuildingPermit"
+        );
+  
+        fileStoreId = response?.filestoreIds?.[0];
+  
+        const updatedApplication = {
+          ...application,
+          bpFileStoreId: fileStoreId,
+          additionalDetails: {
+            ...application.additionalDetails,
+            UPDATE_FILESTORE_ID: true
+          }
+        };
+  
+        await Digit.OBPSV2Services.update({
+          BPA: updatedApplication
+        });
+  
+        await refetch();
+      }
+  
+      const fileStore = await Digit.PaymentService.printReciept(
+        tenantId,
+        { fileStoreIds: fileStoreId }
+      );
+  
+      window.open(fileStore[fileStoreId], "_blank");
+    };
+
+    const handlePlanningPermitOrder = async () => {
+      const application = data?.bpa?.[0];
+      let fileStoreId = application?.ppFileStoreId;
+  
+      if (!fileStoreId) {
+        const response = await Digit.PaymentService.generatePdf(
+          tenantId,
+          { Bpa: [application] },
+          "planningPermit"
+        );
+  
+        fileStoreId = response?.filestoreIds?.[0];
+  
+        const updatedApplication = {
+          ...application,
+          ppFileStoreId: fileStoreId,
+          additionalDetails: {
+            ...application.additionalDetails,
+            UPDATE_FILESTORE_ID: true
+          }
+        };
+  
+        await Digit.OBPSV2Services.update({
+          BPA: updatedApplication
+        });
+  
+        await refetch();
+      }
+  
+      const fileStore = await Digit.PaymentService.printReciept(
+        tenantId,
+        { fileStoreIds: fileStoreId }
+      );
+  
+      window.open(fileStore[fileStoreId], "_blank");
+    };
     useEffect(() => {
       const collectionDetails = async () => {
         try {
@@ -526,11 +599,11 @@ import {
           window.open(fileStore[response?.filestoreIds?.[0]] || fileStore[response], "_blank");
         },
       });
-        dowloadOptions.push({
-          order: 3,
-          label: t("BPA_PLANNING_PERMIT_ORDER"),
-          onClick: () => getPermitOccupancyOrderSearch({tenantId: data?.applicationData?.tenantId},"planningPermit"),
-        });
+      dowloadOptions.push({
+        order: 3,
+        label: t("BPA_PLANNING_PERMIT_ORDER"),
+        onClick: handlePlanningPermitOrder,
+      });
       
     }
     if (collectionBillDetails?.length>1) {
@@ -552,7 +625,7 @@ import {
       dowloadOptions.push({
         order: 3,
         label: t("BPA_BUILDING_PERMIT_ORDER"),
-        onClick: () => getBuildingPermitOrder({tenantId: data?.applicationData?.tenantId},"bpaBuildingPermit"),
+        onClick: handleBuildingPermitOrder,
       });
     }
    const Heading = (props) => {
