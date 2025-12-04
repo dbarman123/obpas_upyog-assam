@@ -140,4 +140,10 @@ public class NOCConfiguration {
 	@Value("${assam.state.code}")
 	private String assamStateCode;
 
+	@Value("${nocas.authority.name}")
+	private String authorityName;
+
+	@Value("${nocas.authority.placeholder.fileurl}")
+	private String authorityPlaceholderFileUrl;
+
 }

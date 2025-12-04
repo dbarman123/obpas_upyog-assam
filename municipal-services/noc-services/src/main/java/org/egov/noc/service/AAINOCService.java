@@ -18,6 +18,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.noc.config.NOCConfiguration;
 import org.egov.noc.util.NOCUtil;
 import org.egov.noc.web.model.BpaApplication;
 import org.egov.noc.web.model.Noc;
@@ -42,13 +43,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AAINOCService {
 
-	@Value("${nocas.authority.name}")
-	private String authorityName;
+	@Autowired
+	private NOCConfiguration config;
 
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-
-//    @Autowired
-//    private SiteCoordinateRepository coordinateRepository;
 
 	@Autowired
 	private NOCService nocService;
@@ -71,7 +69,7 @@ public class AAINOCService {
 
 			if (CollectionUtils.isEmpty(nocList)) {
 				log.info("No new AAI NOC applications found");
-				return createEmptyResponse(authorityName);
+				return createEmptyResponse(config.getAuthorityName());
 			}
 
 			RequestInfoWrapper requestInfoWrapper =	new RequestInfoWrapper();
@@ -108,7 +106,7 @@ public class AAINOCService {
 			Document doc = docBuilder.newDocument();
 
 			// Root element
-			Element rootElement = doc.createElement(authorityName + "DETAILS");
+			Element rootElement = doc.createElement(config.getAuthorityName() + "DETAILS");
 			doc.appendChild(rootElement);
 
 			// Add each application
@@ -120,7 +118,7 @@ public class AAINOCService {
 				Element appData = doc.createElement("ApplicationData");
 				toAAI.appendChild(appData);
 
-				addElement(doc, appData, "AUTHORITY", authorityName);
+				addElement(doc, appData, "AUTHORITY", config.getAuthorityName());
 				addElement(doc, appData, "UNIQUEID", app.getUniqueId());
 				addElement(doc, appData, "APPLICATIONDATE", app.getApplicationDate());
 				addElement(doc, appData, "APPLICANTNAME", app.getApplicantName());
@@ -167,6 +165,11 @@ public class AAINOCService {
 				// Files (Document paths)
 				Element files = doc.createElement("FILES");
 				toAAI.appendChild(files);
+
+				addElement(doc, files, "UNDERTAKING1A", config.getAuthorityPlaceholderFileUrl());
+				addElement(doc, files, "SITEELEVATION",  "");
+				addElement(doc, files, "SITECORDINATES",  "");
+				addElement(doc, files, "AUTHORIZATION",  "");
 
 				addElement(doc, files, "UNDERTAKING1A", app.getUniqueId() + "_UNDERTAKING1A.pdf");
 				addElement(doc, files, "SITEELEVATION", app.getUniqueId() + "_SiteElevationCertificate.pdf");
