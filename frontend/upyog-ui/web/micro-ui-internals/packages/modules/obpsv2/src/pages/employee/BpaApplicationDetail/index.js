@@ -63,6 +63,118 @@ const BPAEmployeeDetails = () => {
     window.open(fileStore[response?.filestoreIds[0]], "_blank");
     //reqData["applicationType"] = data?.[0]?.additionalDetails?.applicationType;
   };
+
+  const handlePlanningPermitOrder = async () => {
+    const application = data?.applicationData;
+    let fileStoreId = application?.ppFileStoreId;
+
+    if (!fileStoreId) {
+      const response = await Digit.PaymentService.generatePdf(
+        tenantId,
+        { Bpa: [application] },
+        "planningPermit"
+      );
+
+      fileStoreId = response?.filestoreIds?.[0];
+
+      const updatedApplication = {
+        ...application,
+        ppFileStoreId: fileStoreId,
+        additionalDetails: {
+          ...application.additionalDetails,
+          UPDATE_FILESTORE_ID: true
+        }
+      };
+
+      await Digit.OBPSV2Services.update({
+        BPA: updatedApplication
+      });
+      
+      // Update local data to reflect the new fileStoreId
+      data.applicationData = updatedApplication;
+    }
+
+    const fileStore = await Digit.PaymentService.printReciept(
+      tenantId,
+      { fileStoreIds: fileStoreId }
+    );
+
+    window.open(fileStore[fileStoreId], "_blank");
+  };
+
+  const handleBuildingPermitOrder = async () => {
+    const application = data?.applicationData;
+    let fileStoreId = application?.bpFileStoreId;
+
+    if (!fileStoreId) {
+      const response = await Digit.PaymentService.generatePdf(
+        tenantId,
+        { Bpa: [application] },
+        "bpaBuildingPermit"
+      );
+
+      fileStoreId = response?.filestoreIds?.[0];
+
+      const updatedApplication = {
+        ...application,
+        bpFileStoreId: fileStoreId,
+        additionalDetails: {
+          ...application.additionalDetails,
+          UPDATE_FILESTORE_ID: true
+        }
+      };
+
+      await Digit.OBPSV2Services.update({
+        BPA: updatedApplication
+      });
+      
+      // Update local data to reflect the new fileStoreId
+      data.applicationData = updatedApplication;
+    }
+
+    const fileStore = await Digit.PaymentService.printReciept(
+      tenantId,
+      { fileStoreIds: fileStoreId }
+    );
+
+    window.open(fileStore[fileStoreId], "_blank");
+  };
+  // Occupancy Certificate Download
+  async function getBuildingOccupancy(mode="download") {
+    const application = data?.applicationData;
+    let fileStoreId = application?.ocFileStoreId;
+      if (!fileStoreId) {
+      let currentDate = new Date();
+      let applicationNo = data?.bpa?.[0]?.applicationNo;
+      let bpaResponse = await Digit.OBPSV2Services.search({tenantId,filters: { applicationNo }});
+      let bpaData = bpaResponse?.bpa?.[0];  
+      bpaData.additionalDetails.runDate = convertDateToEpoch(
+        `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`
+      ); 
+      const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam",{ edcrNumber: data?.bpa?.[0]?.edcrNumber });
+      let edcrData = edcrResponse?.edcrDetail?.[0];
+      let requestData = { ...bpaData, edcrDetail: [{ ...edcrData }] };
+      let response = await Digit.PaymentService.generatePdf(tenantId,{ Bpa: [requestData] },"bpa-occupancy-certificate");
+      fileStoreId = response?.filestoreIds?.[0];
+      const updatedApplication = {
+        ...application,
+        ocFileStoreId: fileStoreId,
+        additionalDetails: {
+          ...application.additionalDetails,
+          UPDATE_FILESTORE_ID:true
+        }
+      };
+      await Digit.OBPSV2Services.update({
+        BPA: updatedApplication
+      });
+      data.applicationData = updatedApplication;
+    }
+    const fileStore = await Digit.PaymentService.printReciept(tenantId, {
+      fileStoreIds: fileStoreId
+    });
+    window.open(fileStore[fileStoreId], "_blank");
+  }
+
   let downloadOptions = [];
   if (data?.collectionBillDetails?.[0]) {
     downloadOptions.push({
@@ -99,15 +211,22 @@ const BPAEmployeeDetails = () => {
   if(data?.collectionBillDetails?.[0]){
     downloadOptions.push({
       order: 3,
-      label: t("BPA_PERMIT_ORDER"),
-      onClick: () => getPermitOccupancyOrderSearch("bpaPlanningPermit"),
+      label: t("BPA_PLANNING_PERMIT_ORDER"),
+      onClick: handlePlanningPermitOrder,
     });
   }
   if(data?.collectionBillDetails?.length > 1){
     downloadOptions.push({
       order: 4,
       label: t("BPA_BUILDING_PERMIT_ORDER"),
-      onClick: () => getBuildingPermitOrder("bpaBuildingPermit"),
+      onClick: handleBuildingPermitOrder,
+    });
+  }
+  if(data?.collectionBillDetails?.length > 1){
+    downloadOptions.push({
+      order: 3,
+      label: t("BPA_OCCUPANCY_CERTIFICATE"),
+      onClick: () => getBuildingOccupancy({tenantId: data?.applicationData?.tenantId},"bpa-occupancy-certificate"),
     });
   }
   function checkHead(head) {
