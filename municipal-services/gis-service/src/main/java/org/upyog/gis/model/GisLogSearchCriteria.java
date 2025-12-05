@@ -32,6 +32,7 @@ public class GisLogSearchCriteria {
     private String applicationNo;
     private String rtpId;
     private String status;
+    private String planningAreaCode;
 
     @NotNull
     private String tenantId;

@@ -58,4 +58,6 @@ public class GisLog {
     private double latitude;
 
     private double longitude;
+
+    private String planningAreaCode;
 }

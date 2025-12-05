@@ -59,4 +59,7 @@ public class GISResponse {
 
     @JsonProperty("longitude")
     private double longitude;
+
+    @JsonProperty("planningAreaCode")
+    private String planningAreaCode;
 }

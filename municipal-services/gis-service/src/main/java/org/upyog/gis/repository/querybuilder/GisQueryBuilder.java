@@ -13,7 +13,7 @@ public class GisQueryBuilder {
     private static final String BASE_SEARCH_QUERY = "SELECT " +
             "id, application_no, rtpi_id, file_store_id, latitude, longitude, " +
             "tenant_id, status, response_status, response_json, createdby, createdtime, " +
-            "lastmodifiedby, lastmodifiedtime, details " +
+            "lastmodifiedby, lastmodifiedtime, details, planning_area_code " +
             "FROM ug_gis_log";
 
     public String getGisLogSearchQuery(GisLogSearchCriteria criteria, List<Object> preparedStmtList) {
@@ -39,6 +39,11 @@ public class GisQueryBuilder {
             if (StringUtils.hasText(criteria.getStatus())) {
                 conditions.add("status = ?");
                 preparedStmtList.add(criteria.getStatus());
+            }
+
+            if (StringUtils.hasText(criteria.getPlanningAreaCode())) {
+                conditions.add("planning_area_code = ?");
+                preparedStmtList.add(criteria.getPlanningAreaCode());
             }
         }
 

@@ -41,6 +41,7 @@ public class GisRowMapper implements ResultSetExtractor<List<GisLog>> {
                     .lastmodifiedby(rs.getString("lastmodifiedby"))
                     .lastmodifiedtime(rs.getObject("lastmodifiedtime") != null ? rs.getLong("lastmodifiedtime") : null)
                     .details(parseDetails(rs))
+                    .planningAreaCode(rs.getString("planning_area_code"))
                     .build();
 
             gisLogs.add(gisLog);
