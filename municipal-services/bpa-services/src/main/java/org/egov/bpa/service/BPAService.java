@@ -151,7 +151,7 @@ public class BPAService {
 
 
         // Validating the create request
-        bpaValidator.validateMdmsData(bpaRequest, mdmsData);
+     //   bpaValidator.validateMdmsData(bpaRequest, mdmsData);
 
         landService.addLandInfoToBPA(bpaRequest);
         enrichmentService.enrichBPACreateRequest(bpaRequest, mdmsData, null);
