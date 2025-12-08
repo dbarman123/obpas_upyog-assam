@@ -253,6 +253,30 @@ export const OBPSV2Services = {
       params: {},
       auth: true,
     }),
+    estimate: (data, params) => {
+      if (data && data.CalulationCriteria) {
+        
+        return Request({
+          url: Urls.obpsv2.estimate,
+          data: data,
+          params: { ...params },
+          method: "POST",
+          userService: true,
+          useCache: false,
+          auth: true,
+        });
+      } else {
+        return Request({
+          url: Urls.obpsv2.estimate,
+          data: params,
+          params: { ...params }, 
+          method: "POST",
+          userService: true,
+          useCache: false,
+          auth: true,
+        });
+      }
+    },
   rtpcreate: (data, tenantId) =>
     Request({
       url: Urls.edcr.create,

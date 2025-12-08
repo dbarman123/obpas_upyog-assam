@@ -3,6 +3,7 @@ import { Banner, Card, CardText, SubmitBar, ActionBar, DownloadPrefixIcon, Loade
 import { useHistory, useParams, Link, LinkLabel } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "react-query";
+import { OBPSV2Services } from "../../../../../../libraries/src/services/elements/OBPSV2";
 
 export const convertEpochToDate = (dateEpoch) => {
   // Returning NA in else case because new Date(null) returns Current date from calender
@@ -167,34 +168,48 @@ export const SuccessfulPayment = (props) => {
   };
 
   const getPermitOccupancyOrderSearch = async (order, mode = "download") => {
-    let applicationNo =  data?.[0]?.applicationNo ;
+    let applicationNo =  data?.[0]?.applicationNo ||consumerCode; 
     let bpaResponse = await Digit.OBPSV2Services.search({tenantId,
       filters: { applicationNo }});
-    const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: data?.[0]?.edcrNumber });
+    const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: bpaResponse?.bpa?.[0]?.edcrNumber });
     let bpaData = bpaResponse?.bpa?.[0];
     let edcrData = edcrResponse?.edcrDetail?.[0];
+        const gisResponse = await Digit.OBPSV2Services.gisSearch({
+          GisSearchCriteria: {
+            applicationNo: applicationNo,
+            tenantId: tenantId,
+            status: "SUCCESS"
+          }
+        });
     let currentDate = new Date();
     bpaData.additionalDetails.runDate = convertDateToEpoch(
       currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getDate()
     );
-    let reqData = { ...bpaData, edcrDetail: [{ ...edcrData }] };
+    let reqData = { ...bpaData, edcrDetail: [{ ...edcrData }], gisResponse };
     let response = await Digit.PaymentService.generatePdf(tenantId, { Bpa: [reqData] }, order);
     const fileStore = await Digit.PaymentService.printReciept(tenantId, { fileStoreIds: response.filestoreIds[0] });
     window.open(fileStore[response?.filestoreIds[0]], "_blank");
     reqData["applicationType"] = data?.[0]?.additionalDetails?.applicationType;
   };
   const getBuildingPermitOrder = async (order, mode = "download") => {
-    let applicationNo =  data?.[0]?.applicationNo ;
+    let applicationNo =  data?.[0]?.applicationNo||consumerCode ;
     let bpaResponse = await Digit.OBPSV2Services.search({tenantId,
       filters: { applicationNo }});
-    const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: data?.[0]?.edcrNumber });
+    const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: bpaResponse?.bpa?.[0]?.edcrNumber });
     let bpaData = bpaResponse?.bpa?.[0];
     let edcrData = edcrResponse?.edcrDetail?.[0];
+        const gisResponse = await Digit.OBPSV2Services.gisSearch({
+          GisSearchCriteria: {
+            applicationNo: applicationNo,
+            tenantId: tenantId,
+            status: "SUCCESS"
+          }
+        });
     let currentDate = new Date();
     bpaData.additionalDetails.runDate = convertDateToEpoch(
       currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getDate()
     );
-    let reqData = { ...bpaData, edcrDetail: [{ ...edcrData }] };
+    let reqData = { ...bpaData, edcrDetail: [{ ...edcrData }], gisResponse };
     let response = await Digit.PaymentService.generatePdf(tenantId, { Bpa: [reqData] }, order);
     const fileStore = await Digit.PaymentService.printReciept(tenantId, { fileStoreIds: response.filestoreIds[0] });
     window.open(fileStore[response?.filestoreIds[0]], "_blank");
@@ -239,30 +254,40 @@ export const SuccessfulPayment = (props) => {
             printRecieptNew(payments)
         }
         else if(businessServ.includes("BPA")){
-          // let queryObj = { applicationNo: payments.Payments[0].paymentDetails[0]?.bill?.consumerCode };
-          // const paymentData=payments.Payments[0];
-          // let bpaResponse = await Digit.OBPSService.BPASearch( payments.Payments[0].tenantId, queryObj);
-          // const formattedStakeholderType=bpaResponse?.BPA[0]?.additionalDetails?.typeOfArchitect
-          // const stakeholderType=formattedStakeholderType.charAt(0).toUpperCase()+formattedStakeholderType.slice(1).toLowerCase()
-          // const updatedpayments={
-          //   ...paymentData,
-           
-          //       paymentDetails:[
-          //         {
-          //           ...paymentData.paymentDetails?.[0],
-          //           additionalDetails:{
-          //             ...paymentData.paymentDetails[0].additionalDetails,
-          //             "propertyID":bpaResponse?.BPA[0]?.additionalDetails?.propertyID,
-          //             "stakeholderType":formattedStakeholderType.charAt(0).toUpperCase()+formattedStakeholderType.slice(1).toLowerCase(),
-          //             "contact":bpaResponse?.BPA[0]?.businessService==="BPA-PAP"? t("APPLICANT_CONTACT") : `${stakeholderType} Contact`,
-          //               "idType":bpaResponse?.BPA[0]?.businessService==="BPA-PAP" ? t("APPLICATION_NUMBER"):`${stakeholderType} ID`,
-          //               "name":bpaResponse?.BPA[0]?.businessService==="BPA-PAP" ? t("APPLICANT_NAME"):`${stakeholderType} Name`,
-          //           },
-          //         },
-          //       ],  
-             
-          // }
-          response = await Digit.PaymentService.generatePdf(tenantId, { Payments: payments.Payments}, "bpa-receipt");
+          let queryObj = { applicationNo: payments.Payments[0].paymentDetails[0]?.bill?.consumerCode };
+          let applicationNo= payments.Payments[0].paymentDetails[0]?.bill?.consumerCode
+          let tenantId = payments.Payments[0].tenantId
+          let bpaResponse = await OBPSV2Services.search({tenantId, applicationNo:{ ...queryObj }})
+          const paymentData=payments.Payments;
+          const filters = {
+            "CalulationCriteria": [
+            {
+                "tenantId": "as",
+                "applicationNo": applicationNo,
+                "feeType": paymentData?.paymentDetails?.[0]?.businessService,
+                "applicationType": "RESIDENTIAL_RCC",
+                "BPA": {
+                    "edcrNumber": bpaResponse?.bpa?.[0]?.edcrNumber,
+                    "tenantId": "as",
+                }
+            }
+        ]}
+          let estimateResponse = await OBPSV2Services.estimate(filters, true, null);
+         
+      const updatedpayments = {
+        ...paymentData[0],
+        paymentDetails: [
+          {
+            ...paymentData[0].paymentDetails?.[0],  
+            additionalDetails: {
+              ...paymentData[0].paymentDetails?.[0]?.additionalDetails,  
+              feebreakup: estimateResponse?.Calculations?.[0]?.taxHeadEstimates  
+            },
+          },
+        ],
+      };
+      
+          response = await Digit.PaymentService.generatePdf(tenantId, { Payments: [updatedpayments]}, "bpa-receipt");
         }
         else {
           
@@ -693,7 +718,7 @@ export const SuccessfulPayment = (props) => {
                 <path d="M0 0h24v24H0z" fill="none" />
                 <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z" />
               </svg>
-              {t("CS_COMMON_PRINT_RECEIPT77")}
+              {t("CS_COMMON_PRINT_RECEIPT")}
             </div>)}
             {(businessService == "BPA.PLANNING_PERMIT_FEE") ? (
               <div
