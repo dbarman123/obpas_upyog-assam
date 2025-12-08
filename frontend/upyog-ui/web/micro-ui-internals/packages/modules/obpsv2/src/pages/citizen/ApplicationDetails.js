@@ -33,7 +33,7 @@ import {
   import FormAcknowledgement from "./Create/FormAcknowledgement";
   import Accordion from "../../../../../react-components/src/atoms/Accordion";
   import GisDetails from "../../components/GisDetails";
-  import { convertDateToEpoch } from "../../utils";
+  import { convertDateToEpoch, getEstimatePayload} from "../../utils";
   import { OBPSV2Services } from "../../../../../libraries/src/services/elements/OBPSV2";
   // import getBPAAcknowledgementData from "../../utils/getBPAAcknowledgementData";
   
@@ -648,20 +648,13 @@ import {
         label: t("BPA_FEE_RECEIPT"),
         onClick: async () => {
           let response = null
-          const filters = {
-            "CalulationCriteria": [
-            {
-                "tenantId": "as",
-                "applicationNo": acknowledgementIds,
-                "feeType": "PLANNING_PERMIT_FEE",
-                "applicationType": "RESIDENTIAL_RCC",
-                "BPA": {
-                    "edcrNumber": data?.bpa?.[0]?.edcrNumber,
-                    "tenantId": "as",
-                }
-            }
-        ]}
-          let estimateResponse = await OBPSV2Services.estimate(filters, true, null);
+          const payload = getEstimatePayload({
+            tenantId : collectionBillDetails?.[0].tenantId,
+            applicationNo: acknowledgementIds,
+            edcrNumber: data?.bpa?.[0]?.edcrNumber,
+            feeType:"PLANNING_PERMIT_FEE"
+          });
+          let estimateResponse = await OBPSV2Services.estimate(payload, true, null);
           const updatedPayments = [...collectionBillDetails];
           updatedPayments[0] = {
             ...updatedPayments[0],
@@ -695,20 +688,14 @@ import {
         label: t("BPA_BUILDING_FEE_RECEIPT"),
         onClick: async () => {
           let response = null
-          const filters = {
-            "CalulationCriteria": [
-            {
-                "tenantId": "as",
-                "applicationNo": acknowledgementIds,
-                "feeType": "BUILDING_PERMIT_FEE",
-                "applicationType": "RESIDENTIAL_RCC",
-                "BPA": {
-                    "edcrNumber": data?.bpa?.[0]?.edcrNumber,
-                    "tenantId": "as",
-                }
-            }
-        ]}
-          let estimateResponse = await OBPSV2Services.estimate(filters, true, null);
+          const payload = getEstimatePayload({
+            tenantId : collectionBillDetails?.[1].tenantId,
+            applicationNo: acknowledgementIds,
+            edcrNumber: data?.bpa?.[0]?.edcrNumber,
+            feeType:"BUILDING_PERMIT_FEE"
+          });
+          
+          let estimateResponse = await OBPSV2Services.estimate(payload, true, null);
           
           
           const updatedPayments = [...collectionBillDetails];

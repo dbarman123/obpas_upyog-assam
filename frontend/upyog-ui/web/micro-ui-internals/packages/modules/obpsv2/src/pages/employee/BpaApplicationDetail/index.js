@@ -9,6 +9,7 @@ import { newConfig as newConfigSubmitReport } from "../../../config/submitReport
 import useApplicationActions from "../../../../../../libraries/src/hooks/obpsv2/useApplicationActions";
 import { convertDateToEpoch } from "../../../utils";
 import { OBPSV2Services } from "../../../../../../libraries/src/services/elements/OBPSV2";
+import { getEstimatePayload } from "../../../utils";
 const BPAEmployeeDetails = () => {
   const { t } = useTranslation();
   const { acknowledgementIds, tenantId } = useParams();
@@ -200,20 +201,13 @@ const BPAEmployeeDetails = () => {
       onClick: async () => {
         let response = null
         let paymentData = data?.collectionBillDetails
-        const filters = {
-          "CalulationCriteria": [
-          {
-              "tenantId": "as",
-              "applicationNo": acknowledgementIds,
-              "feeType": "PLANNING_PERMIT_FEE",
-              "applicationType": "RESIDENTIAL_RCC",
-              "BPA": {
-                  "edcrNumber": data?.applicationData?.edcrNumber,
-                  "tenantId": "as",
-              }
-          }
-      ]}
-        let estimateResponse = await OBPSV2Services.estimate(filters, true, null);
+        const payload = getEstimatePayload({
+          tenantId:data?.collectionBillDetails?.[0]?.tenantId,
+          applicationNo: acknowledgementIds,
+          edcrNumber: data?.applicationData?.edcrNumber,
+          feeType:"PLANNING_PERMIT_FEE"
+        });
+        let estimateResponse = await OBPSV2Services.estimate(payload, true, null);
         
       const updatedPayments = [...data?.collectionBillDetails];
       updatedPayments[0] = {
@@ -242,20 +236,14 @@ const BPAEmployeeDetails = () => {
       label: t("BPA_BUILDING_FEE_RECEIPT"),
       onClick: async () => {
         let response = null
-        const filters = {
-          "CalulationCriteria": [
-          {
-              "tenantId": "as",
-              "applicationNo": acknowledgementIds,
-              "feeType": "BUILDING_PERMIT_FEE",
-              "applicationType": "RESIDENTIAL_RCC",
-              "BPA": {
-                  "edcrNumber": data?.applicationData?.edcrNumber,
-                  "tenantId": "as",
-              }
-          }
-      ]}
-        let estimateResponse = await OBPSV2Services.estimate(filters, true, null);
+        const payload = getEstimatePayload({
+          tenantId:data?.collectionBillDetails?.[1]?.tenantId,
+          applicationNo: acknowledgementIds,
+          edcrNumber: data?.applicationData?.edcrNumber,
+          feeType:"BUILDING_PERMIT_FEE"
+        });
+       
+        let estimateResponse = await OBPSV2Services.estimate(payload, true, null);
         
       const updatedPayments = [...data?.collectionBillDetails];
       updatedPayments[1] = {

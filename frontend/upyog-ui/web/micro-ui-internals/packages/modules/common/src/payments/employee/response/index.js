@@ -4,7 +4,7 @@ import { useHistory, useParams, Link, LinkLabel } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "react-query";
 import { OBPSV2Services } from "../../../../../../libraries/src/services/elements/OBPSV2";
-
+import { getEstimatePayload } from "../../../../../obpsv2/src/utils";
 export const convertEpochToDate = (dateEpoch) => {
   // Returning NA in else case because new Date(null) returns Current date from calender
   if (dateEpoch) {
@@ -258,21 +258,15 @@ export const SuccessfulPayment = (props) => {
           let applicationNo= payments.Payments[0].paymentDetails[0]?.bill?.consumerCode
           let tenantId = payments.Payments[0].tenantId
           let bpaResponse = await OBPSV2Services.search({tenantId, applicationNo:{ ...queryObj }})
-          const paymentData=payments.Payments;
-          const filters = {
-            "CalulationCriteria": [
-            {
-                "tenantId": "as",
-                "applicationNo": applicationNo,
-                "feeType": paymentData?.paymentDetails?.[0]?.businessService,
-                "applicationType": "RESIDENTIAL_RCC",
-                "BPA": {
-                    "edcrNumber": bpaResponse?.bpa?.[0]?.edcrNumber,
-                    "tenantId": "as",
-                }
-            }
-        ]}
-          let estimateResponse = await OBPSV2Services.estimate(filters, true, null);
+          const paymentData=payments?.Payments;
+          const businessService = paymentData?.[0]?.paymentDetails?.[0]?.businessService;
+          const payload = getEstimatePayload({
+            tenantId: paymentData?.[0]?.tenantId,
+            applicationNo: applicationNo,
+            edcrNumber: bpaResponse?.bpa?.[0]?.edcrNumber,
+            feeType : businessService.split(".")?.[1],
+          });
+          let estimateResponse = await OBPSV2Services.estimate(payload, true, null);
          
       const updatedpayments = {
         ...paymentData[0],
