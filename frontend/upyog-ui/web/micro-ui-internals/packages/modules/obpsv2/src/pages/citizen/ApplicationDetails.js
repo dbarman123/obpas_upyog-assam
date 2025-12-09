@@ -33,7 +33,8 @@ import {
   import FormAcknowledgement from "./Create/FormAcknowledgement";
   import Accordion from "../../../../../react-components/src/atoms/Accordion";
   import GisDetails from "../../components/GisDetails";
-  import { convertDateToEpoch } from "../../utils";
+  import { convertDateToEpoch, getEstimatePayload} from "../../utils";
+  import { OBPSV2Services } from "../../../../../libraries/src/services/elements/OBPSV2";
   // import getBPAAcknowledgementData from "../../utils/getBPAAcknowledgementData";
   
   /**
@@ -455,11 +456,21 @@ import {
     const handleBuildingPermitOrder = async () => {
       const application = data?.bpa?.[0];
       let fileStoreId = application?.bpFileStoreId;
-  
+      const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: data?.bpa?.[0]?.edcrNumber });
+        let edcrDetail = edcrResponse?.edcrDetail?.[0];
+        const gisResponse = await Digit.OBPSV2Services.gisSearch({
+          GisSearchCriteria: {
+            applicationNo: acknowledgementIds,
+            tenantId: tenantId,
+            status: "SUCCESS"
+          }
+        });
       if (!fileStoreId) {
         const response = await Digit.PaymentService.generatePdf(
           tenantId,
-          { Bpa: [application] },
+          {
+            Bpa: [{...application, edcrDetail, gisResponse}] 
+          },
           "bpaBuildingPermit"
         );
   
@@ -492,11 +503,19 @@ import {
     const handlePlanningPermitOrder = async () => {
       const application = data?.bpa?.[0];
       let fileStoreId = application?.ppFileStoreId;
-  
+      const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: data?.bpa?.[0]?.edcrNumber });
+        let edcrDetail = edcrResponse?.edcrDetail;
+        const gisResponse = await Digit.OBPSV2Services.gisSearch({
+          GisSearchCriteria: {
+            applicationNo: acknowledgementIds,
+            tenantId: tenantId,
+            status: "SUCCESS"
+          }
+        });
       if (!fileStoreId) {
         const response = await Digit.PaymentService.generatePdf(
           tenantId,
-          { Bpa: [application] },
+          {Bpa : [{...application, edcrDetail, gisResponse}]},
           "bpaPlanningPermit"
         );
   
@@ -629,11 +648,29 @@ import {
         label: t("BPA_FEE_RECEIPT"),
         onClick: async () => {
           let response = null
+          const payload = getEstimatePayload({
+            tenantId : collectionBillDetails?.[0].tenantId,
+            applicationNo: acknowledgementIds,
+            edcrNumber: data?.bpa?.[0]?.edcrNumber,
+            feeType:"PLANNING_PERMIT_FEE"
+          });
+          let estimateResponse = await OBPSV2Services.estimate(payload, true, null);
+          const updatedPayments = [...collectionBillDetails];
+          updatedPayments[0] = {
+            ...updatedPayments[0],
+            paymentDetails: updatedPayments[0].paymentDetails.map(detail => ({
+              ...detail,
+              additionalDetails: {
+                ...detail.additionalDetails,
+                feebreakup: estimateResponse?.Calculations?.[0]?.taxHeadEstimates
+              }
+            }))
+          };
           if(collectionBillDetails?.[0]?.fileStoreId){
             response = collectionBillDetails?.[0]?.fileStoreId          
           }
           else{
-             response = await Digit.PaymentService.generatePdf(tenantId, { Payments: collectionBillDetails}, "bpa-receipt");
+             response = await Digit.PaymentService.generatePdf(tenantId, { Payments:[updatedPayments[0]]}, "bpa-receipt");
           }
           const fileStore = await Digit.PaymentService.printReciept(tenantId, { fileStoreIds: response?.filestoreIds?.[0] ||response });
           window.open(fileStore[response?.filestoreIds?.[0]] || fileStore[response], "_blank");
@@ -651,11 +688,32 @@ import {
         label: t("BPA_BUILDING_FEE_RECEIPT"),
         onClick: async () => {
           let response = null
+          const payload = getEstimatePayload({
+            tenantId : collectionBillDetails?.[1].tenantId,
+            applicationNo: acknowledgementIds,
+            edcrNumber: data?.bpa?.[0]?.edcrNumber,
+            feeType:"BUILDING_PERMIT_FEE"
+          });
+          
+          let estimateResponse = await OBPSV2Services.estimate(payload, true, null);
+          
+          
+          const updatedPayments = [...collectionBillDetails];
+          updatedPayments[1] = {
+            ...updatedPayments[1],
+            paymentDetails: updatedPayments[1].paymentDetails.map(detail => ({
+              ...detail,
+              additionalDetails: {
+                ...detail.additionalDetails,
+                feebreakup: estimateResponse?.Calculations?.[0]?.taxHeadEstimates
+              }
+            }))
+          };
           if(collectionBillDetails?.[1]?.fileStoreId){
             response = collectionBillDetails?.[1]?.fileStoreId          
           }
           else{
-             response = await Digit.PaymentService.generatePdf(tenantId, { Payments: collectionBillDetails}, "bpa-receipt");
+             response = await Digit.PaymentService.generatePdf(tenantId, { Payments: [updatedPayments[1]]}, "bpa-receipt");
           }
 
           const fileStore = await Digit.PaymentService.printReciept(tenantId, { fileStoreIds: response?.filestoreIds?.[0] ||response });

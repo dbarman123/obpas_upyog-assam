@@ -167,7 +167,8 @@ const Urls = {
     rtpsearch : "/bpa-services/v1/bpa/_rtpsearch",
     gisService: "/gis-service/find-zone",
     propertyValidate : "/bpa-services/v1/property/validate",
-    gisSearch : "/gis-service/zone/_search"
+    gisSearch : "/gis-service/zone/_search",
+    estimate :"/bpa-services/v1/bpa/v2/_estimate"
   },
   edcr: {
     create: "/edcr/rest/dcr/scrutinize",

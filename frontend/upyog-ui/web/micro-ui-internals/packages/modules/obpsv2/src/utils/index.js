@@ -334,3 +334,27 @@ export const getOrderDocuments = (appUploadedDocumnets, isNoc = false) => {
   }
   return finalDocs;
 }
+
+export const getEstimatePayload = ({
+  tenantId,
+  applicationNo,
+  feeType,
+  applicationType = "RESIDENTIAL_RCC",
+  edcrNumber
+}) => {
+  return {
+    CalulationCriteria: [
+      {
+        tenantId,
+        applicationNo,
+        feeType,
+        applicationType,
+        BPA: {
+          edcrNumber,
+          tenantId
+        }
+      }
+    ]
+  };
+};
+

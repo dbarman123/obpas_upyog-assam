@@ -109,9 +109,39 @@ export const convertEpochToDate = (dateEpoch) => {
       const state = Digit.ULBService.getStateId();
       let response = { filestoreIds: [payments.Payments[0]?.fileStoreId] };
       if (!paymentData?.fileStoreId) {
-            let details
+          //   const filters = {
+          //     "CalulationCriteria": [
+          //     {
+          //         "tenantId": "as",
+          //         "applicationNo": payments.Payments[0]?.bill?.consumerCode,
+          //         "feeType": "PLANNING_PERMIT_FEE",
+          //         "applicationType": "RESIDENTIAL_RCC",
+          //         "BPA": {
+          //             "edcrNumber": data?.bpa?.[0]?.edcrNumber,
+          //             "tenantId": "as",
+          //         }
+          //     }
+          // ]}
+            //let estimateResponse = await OBPSV2Services.estimate(filters, true, null);
             payments.Payments[0].additionalDetails=details;
-            paymentArray[0]=payments.Payments[0]
+            // const updatedpayments={
+            //   ...payments,
+             
+            //       paymentDetails:[
+            //         {
+            //           ...paymentData.paymentDetails?.[0],
+            //           additionalDetails:{
+            //             ...paymentData.paymentDetails[0].additionalDetails,
+            //             "feebreakup":estimateResponse?.Calculations?.[0]?.taxHeadEstimates
+                        
+            //           },
+            //         },
+            //       ],  
+               
+            // }
+            //paymentArray[0]=updatedpayments.Payments[0]
+              //response = await Digit.PaymentService.generatePdf(state, { Payments: [{...updatedpayments}] }, "bpa-receipt");
+              paymentArray[0]=payments.Payments[0]
               response = await Digit.PaymentService.generatePdf(state, { Payments: [{...paymentData}] }, "bpa-receipt");
             
           } 
@@ -144,14 +174,21 @@ export const convertEpochToDate = (dateEpoch) => {
     let applicationNo =  data?.[0]?.applicationNo ;
     let bpaResponse = await Digit.OBPSV2Services.search({tenantId,
       filters: { applicationNo }});
-    const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: data?.[0]?.edcrNumber });
+    const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: data?.[0]?.edcrNumber })
+        const gisResponse = await Digit.OBPSV2Services.gisSearch({
+          GisSearchCriteria: {
+            applicationNo: applicationNo,
+            tenantId: tenantId,
+            status: "SUCCESS"
+          }
+        });
     let bpaData = bpaResponse?.bpa?.[0];
     let edcrData = edcrResponse?.edcrDetail?.[0];
     let currentDate = new Date();
     bpaData.additionalDetails.runDate = convertDateToEpoch(
       currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getDate()
     );
-    let reqData = { ...bpaData, edcrDetail: [{ ...edcrData }] };
+    let reqData = { ...bpaData, edcrDetail: [{ ...edcrData }], gisResponse };
     let response = await Digit.PaymentService.generatePdf(tenantId, { Bpa: [reqData] }, order);
     const fileStore = await Digit.PaymentService.printReciept(tenantId, { fileStoreIds: response.filestoreIds[0] });
     if (fileStore && fileStore[response.filestoreIds[0]]) {
@@ -166,11 +203,18 @@ export const convertEpochToDate = (dateEpoch) => {
     const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: data?.[0]?.edcrNumber });
     let bpaData = bpaResponse?.bpa?.[0];
     let edcrData = edcrResponse?.edcrDetail?.[0];
+        const gisResponse = await Digit.OBPSV2Services.gisSearch({
+          GisSearchCriteria: {
+            applicationNo: applicationNo,
+            tenantId: tenantId,
+            status: "SUCCESS"
+          }
+        });
     let currentDate = new Date();
     bpaData.additionalDetails.runDate = convertDateToEpoch(
       currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getDate()
     );
-    let reqData = { ...bpaData, edcrDetail: [{ ...edcrData }] };
+    let reqData = { ...bpaData, edcrDetail: [{ ...edcrData }], gisResponse};
     let response = await Digit.PaymentService.generatePdf(tenantId, { Bpa: [reqData] }, order);
     const fileStore = await Digit.PaymentService.printReciept(tenantId, { fileStoreIds: response.filestoreIds[0] });
     if (fileStore && fileStore[response.filestoreIds[0]]) {

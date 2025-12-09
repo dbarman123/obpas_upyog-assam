@@ -7,7 +7,8 @@ import BillSumary from "./bill-summary";
 import { stringReplaceAll } from "./utils";
 import TimerServices from "../../../timer-Services/timerServices";
 import { timerEnabledForBusinessService } from "./utils";
-
+import useEstimateDetails from "../../../../../../../../libraries/src/hooks/obpsv2/useEstimateDetails";
+import { OBPSV2Services } from "../../../../../../../../libraries/src/services/elements/OBPSV2";
 const BillDetails = ({ paymentRules, businessService }) => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -20,7 +21,10 @@ const BillDetails = ({ paymentRules, businessService }) => {
   const propertyId = state?.propertyId;
   const applicationNumber = state?.applicationNumber;
   const [Time, setTime ] = useState(0);
-  const skipBillingAndArrears = ["adv-services", "chb-services","request-service.mobile_toilet", "request-service.water_tanker", "request-service.tree_pruning"];
+  const skipBillingAndArrears = ["adv-services", "chb-services", "request-service.mobile_toilet", "request-service.water_tanker", "request-service.tree_pruning"];
+  const [estimatePayload, setEstimatePayload] = useState(null);
+  const [estimateResponse, setEstimateResponse] = useState(null);
+  const [edcr, setEdcr] = useState()
 
   if (wrkflow === "WNS" && consumerCode.includes("?")) consumerCode = consumerCode.substring(0, consumerCode.indexOf("?"));
   const { data, isLoading } = state?.bill
@@ -30,6 +34,52 @@ const BillDetails = ({ paymentRules, businessService }) => {
         businessService,
         consumerCode: wrkflow === "WNS" ? stringReplaceAll(consumerCode, "+", "/") : consumerCode,
       });
+      useEffect(() => {
+        if (bill?.tenantId && bill?.consumerCode) {
+          const fetchBpaData = async () => {
+            const tenantId = bill?.tenantId;
+            const applicationNo = {applicationNo: bill?.consumerCode}
+            try {
+              const bpaResponse = await OBPSV2Services.search({ tenantId, filters:{...applicationNo}});
+              if (bpaResponse?.bpa?.[0]?.edcrNumber) {
+                const edcrNumber = bpaResponse?.bpa?.[0]?.edcrNumber;
+                setEdcr(edcrNumber); 
+                
+              } else {
+                console.error("No edcrNumber found in the BPA response");
+              }
+            } catch (error) {
+              
+              console.error("Error fetching BPA data: ", error);
+            }
+          };
+      
+          fetchBpaData();
+        }
+      }, [bill]); 
+      const filters = {
+        "CalulationCriteria": [
+        {
+            "tenantId": "as",
+            "applicationNo": consumerCode,
+            "feeType": "PLANNING_PERMIT_FEE",
+            "applicationType": "RESIDENTIAL_RCC",
+            "BPA": {
+                "edcrNumber": edcr,
+                "tenantId": "as",
+            }
+        }
+    ]}
+    useEffect(async()=>{
+      if (businessService.includes("BPA") && edcr) {
+        const fetchEstimate = async () => {
+          let estimateResponse = await OBPSV2Services.estimate(filters, true, null);
+          setEstimateResponse(estimateResponse);
+        };
+        fetchEstimate();
+      }
+    },[businessService, edcr])
+    
      
   let Useruuid = data?.Bill?.[0]?.userId || "";
   let requestCriteria = [
@@ -241,7 +291,21 @@ const BillDetails = ({ paymentRules, businessService }) => {
           )}
           <ArrearSummary bill={bill} />
         </div>
-
+        
+        {estimateResponse?.Calculations && (
+          <React.Fragment>
+            <CardSubHeader style={{"marginTop":"20px"}}>{t("BPA_FEE_BREAKUP")}</CardSubHeader>
+            {estimateResponse?.Calculations?.[0]?.taxHeadEstimates.map((tax) => (
+              <div key={t(`BPA_${tax?.additionalDetails?.floor}`)}> 
+                <KeyNote 
+                  key={t(`BPA_${tax?.additionalDetails?.floor}`)} 
+                  keyValue={t(`BPA_${tax?.additionalDetails?.floor}`)} 
+                  note={tax?.estimateAmount} 
+                />
+              </div>
+            ))}
+          </React.Fragment>
+        )}
         <div className="bill-payment-amount">
           <hr className="underline" />
           <CardSubHeader>{t("CS_COMMON_PAYMENT_AMOUNT")}</CardSubHeader>
@@ -266,7 +330,7 @@ const BillDetails = ({ paymentRules, businessService }) => {
             >
               ₹
             </span>
-            {console.log(bill,"bill")}
+           
             {paymentType !== t("CS_PAYMENT_FULL_AMOUNT") ? (
               businessService === "FSM.TRIP_CHARGES" ? (
                 <TextInput className="text-indent-xl" onChange={() => {}} value={getAdvanceAmount()} disable={true} />
