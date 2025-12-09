@@ -295,7 +295,7 @@ public class MDMSValidator {
 	    }
 
 	    Map<String, Object> boundaryRoot =
-	            (Map<String, Object>) tenantBoundaryList.get(0).get("boundary");
+	            (Map<String, Object>) tenantBoundaryList.get(0).get(BPAConstants.BOUNDARY);
 
 	    if (boundaryRoot == null) {
 	        throw new RuntimeException("Boundary root is null");
@@ -321,33 +321,10 @@ public class MDMSValidator {
 	 */
 	private Map<String, List<String>> extractCodes(Map<String, Object> boundaryRoot) {
 
-	    List<String> wardCodes = new ArrayList<>();
 	    List<String> revenueVillageCodes = new ArrayList<>();
 	    List<String> villageNameCodes = new ArrayList<>();
 
-	    List<Map<String, Object>> wardList = normalizeToList(boundaryRoot.get(BPAConstants.CHILDREN));
-
-	    for (Map<String, Object> ward : wardList) {
-
-	        String wardCode = getString(ward, BPAConstants.CODES);
-	        if (wardCode != null) wardCodes.add(wardCode);
-
-	        List<Map<String, Object>> rvList = normalizeToList(ward.get(BPAConstants.CHILDREN));
-
-	        for (Map<String, Object> rv : rvList) {
-
-	            String rvCode = getString(rv, BPAConstants.CODES);
-	            if (rvCode != null) revenueVillageCodes.add(rvCode);
-
-	            List<Map<String, Object>> villageList = normalizeToList(rv.get(BPAConstants.CHILDREN));
-
-	            for (Map<String, Object> village : villageList) {
-
-	                String vCode = getString(village, BPAConstants.CODES);
-	                if (vCode != null) villageNameCodes.add(vCode);
-	            }
-	        }
-	    }
+	    traverseBoundary(boundaryRoot, revenueVillageCodes, villageNameCodes);
 
 	    Map<String, List<String>> result = new HashMap<>();
 	    result.put(BPAConstants.REVENUE_VILLAGE, revenueVillageCodes);
@@ -355,7 +332,29 @@ public class MDMSValidator {
 
 	    return result;
 	}
+	
+	/**
+	 * Recursively traverse boundary children to collect revenue village and village codes
+	 */
+	@SuppressWarnings("unchecked")
+	private void traverseBoundary(Map<String, Object> node, List<String> revenueVillageCodes, List<String> villageNameCodes) {
 
+	    if (node == null) return;
+
+	    String label = getString(node, BPAConstants.LABEL);
+	    String code = getString(node, BPAConstants.CODES);
+
+	    if (BPAConstants.REVENUE_VILLAGE_CODE.equalsIgnoreCase(label) && code != null) {
+	        revenueVillageCodes.add(code);
+	    } else if (BPAConstants.VILLAGE_CODE.equalsIgnoreCase(label) && code != null) {
+	        villageNameCodes.add(code);
+	    }
+
+	    List<Map<String, Object>> children = normalizeToList(node.get(BPAConstants.CHILDREN));
+	    for (Map<String, Object> child : children) {
+	        traverseBoundary(child, revenueVillageCodes, villageNameCodes);
+	    }
+	}
 	/**
 	 * Normalizes an MDMS response node into a List of Map objects.
 	 *

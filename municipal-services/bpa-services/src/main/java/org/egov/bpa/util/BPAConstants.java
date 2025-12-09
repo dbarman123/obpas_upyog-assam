@@ -128,6 +128,12 @@ public class BPAConstants {
 	
 	public static final String CODES = "code";
 	
+	public static final String LABEL = "label";
+	
+	public static final String REVENUE_VILLAGE_CODE = "RevenueVillage";
+	
+	public static final String VILLAGE_CODE = "Village";
+	
 	public static final String CHILDREN = "children";
 	
 	public static final String BOUNDARY = "boundary";

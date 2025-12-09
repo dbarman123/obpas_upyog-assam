@@ -113,11 +113,11 @@ public class BPAUtil {
 //		New MDMS masters added for BPA
 		bpaMasterDtls.add(MasterDetail.builder().name(BPAConstants.PERMISSIBLE_ZONE).build());
 		bpaMasterDtls.add(MasterDetail.builder().name(BPAConstants.CONSTRUCTION_TYPE).build());
-		//bpaMasterDtls.add(MasterDetail.builder().name(BPAConstants.REVENUE_VILLAGE).build());
+		
 		bpaMasterDtls.add(MasterDetail.builder().name(BPAConstants.RTP_CATEGORIES).build());
 		bpaMasterDtls.add(MasterDetail.builder().name(BPAConstants.STATES).build());
 		bpaMasterDtls.add(MasterDetail.builder().name(BPAConstants.ULB_WARD_DETAILS).build());
-		bpaMasterDtls.add(MasterDetail.builder().name(BPAConstants.VILLAGES).build());
+		
 
 		ModuleDetail bpaModuleDtls = ModuleDetail.builder().masterDetails(bpaMasterDtls)
 				.moduleName(BPAConstants.BPA_MODULE).build();
