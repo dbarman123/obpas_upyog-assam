@@ -10,7 +10,7 @@ public class NOCConstants {
 	
 	public static final String NOC_MODULE = "NOC";
 	
-	public static final String NOC_TYPE = "NocType";
+	public static final String NOC_TYPE = "OldNocType";
 	
 	// mdms path codes
 
@@ -44,7 +44,7 @@ public class NOCConstants {
 	
 	public static final String WORKFLOWCODE = "workflowCode";	
 	
-    public static final String NOCTYPE_JSONPATH_CODE = "$.MdmsRes.NOC.NocType";
+    public static final String NOCTYPE_JSONPATH_CODE = "$.MdmsRes.NOC.OldNocType";
     
     public static final String NOC_DOC_TYPE_MAPPING = "DocumentTypeMapping";
     

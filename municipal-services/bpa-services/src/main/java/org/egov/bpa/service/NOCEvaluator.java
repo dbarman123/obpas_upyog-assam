@@ -19,8 +19,8 @@ public class NOCEvaluator {
 	static {
 		conditionChecks.put("G_PLUS_3_BUILDINGS", edcr -> "G+3".equalsIgnoreCase(edcr.get("BUILDING_CATEGORY")));
 		conditionChecks.put("SPECIAL_STRUCTURES", edcr -> "SPECIAL".equalsIgnoreCase(edcr.get("BUILDING_TYPE")));
-		conditionChecks.put("BUILDING_HEIGHT_GREATER_THAN_12M", edcr -> getDouble(edcr, "BUILDING_HEIGHT") > 7);
-		conditionChecks.put("BUILDING_HEIGHT_GREATER_THAN_15.8M", edcr -> getDouble(edcr, "BUILDING_HEIGHT") > 15.8);
+		conditionChecks.put("BUILDING_HEIGHT_GREATER_THAN_12M", edcr -> getDouble(edcr, "BUILDING_HEIGHT") > 12);
+		conditionChecks.put("BUILDING_HEIGHT_GREATER_THAN_15.8M", edcr -> getDouble(edcr, "BUILDING_HEIGHT") > 10); //TODO: Change to 15
 		conditionChecks.put("HAZARDOUS_INDUSTRIES", edcr -> "HAZARDOUS".equalsIgnoreCase(edcr.get("INDUSTRY_TYPE")));
 		conditionChecks.put("LARGE_COMMERCIAL_OR_HOSPITALS_OR_HOTELS", edcr -> {
 			String occupancy = edcr.get("OCCUPANCY");
@@ -30,6 +30,7 @@ public class NOCEvaluator {
 		conditionChecks.put("BUILT_UP_AREA_GREATER_THAN_OR_EQUAL_TO_2_LAKH_SQ_FT",
 				edcr -> getDouble(edcr, "TOTAL_BUILTUP_AREA") >= 200000);
 		conditionChecks.put("BUILDINGS_WITH_LIFTS", edcr -> getDouble(edcr, "NUMBER_OF_LIFTS") > 0);
+		conditionChecks.put("ALL_NON_RESIDENTIAL_BUILDINGS", edcr -> "RESIDENTIAL".equalsIgnoreCase(edcr.get("OCCUPANCY"))); //TODO: Change to !=
 	}
 
 	private static double getDouble(Map<String, String> edcr, String key) {
