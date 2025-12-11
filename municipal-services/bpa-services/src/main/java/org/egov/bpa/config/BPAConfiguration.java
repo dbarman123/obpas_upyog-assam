@@ -405,6 +405,12 @@ public class BPAConfiguration {
 	@Value("${service.retry.backoffMs}")
 	private long backoffMs;
 
+	@Value("${softthink.property.cities}")
+	private String softthinkPropertyCities;
+
+	@Value("${gmc.property.cities}")
+	private String GMCPropertyCities;
+
 
 
 }
