@@ -123,13 +123,29 @@ public class NocService {
 		ApplicationType applicationType = ApplicationType.valueOf(BPAConstants.NOC_APPLICATIONTYPE);
 		String source = config.getNocSourceConfig().get(applType);
 		Workflow workflow = Workflow.builder().action(ACTION_INITIATE).build();
+		Object nocAdditionalDetails = null;
+		Object additionalDetails = bpaRequest.getBPA().getAdditionalDetails();
+		if (additionalDetails instanceof Map) {
+			Map<String, Object> adMap = (Map<String, Object>) additionalDetails;
+			Object nocDetails = adMap.get("nocDetails");
+			if (nocDetails instanceof Map) {
+			    Map<String, Object> nocMap = (Map<String, Object>) nocDetails;
 
+			    Object aaiObj = nocMap.get("AAI_NOC_DETAILS");
+			    if (aaiObj instanceof Map) {
+			        Map<String, Object> aaiMap = (Map<String, Object>) aaiObj;
+			        nocAdditionalDetails = aaiMap;
+			    }
+			}
+
+		}
+		log.info("nocAdditionalDetails : "+nocAdditionalDetails);
 		log.info("Applicable NOCs are, " + nocTypes);
 
 		for (String nocType : nocTypes) {
 
 			Noc noc = Noc.builder().tenantId(tenantId).applicationType(applicationType).sourceRefId(applicationNo)
-					.nocType(nocType).source(source).workflow(workflow).build();
+					.nocType(nocType).source(source).workflow(workflow).additionalDetails(nocAdditionalDetails).build();
 			nocs.add(noc);
 		}
 
