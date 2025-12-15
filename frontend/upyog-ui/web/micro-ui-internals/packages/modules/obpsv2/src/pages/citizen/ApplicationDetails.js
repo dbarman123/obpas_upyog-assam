@@ -33,7 +33,7 @@ import {
   import FormAcknowledgement from "./Create/FormAcknowledgement";
   import Accordion from "../../../../../react-components/src/atoms/Accordion";
   import GisDetails from "../../components/GisDetails";
-  import { convertDateToEpoch, getEstimatePayload} from "../../utils";
+  import { convertDateToEpoch, getEstimatePayload,formatEpochDateDMY} from "../../utils";
   import { OBPSV2Services } from "../../../../../libraries/src/services/elements/OBPSV2";
   // import getBPAAcknowledgementData from "../../utils/getBPAAcknowledgementData";
   
@@ -65,6 +65,31 @@ import {
       filters: { applicationNo: acknowledgementIds },
       config: { staleTime: Infinity, cacheTime: Infinity }
     });
+    const nocFilters = {
+      sourceRefId: acknowledgementIds,
+    };
+
+    // const nocData = Digit.Hooks.noc.useNOCSearchApplication(tenantId,nocFilters);
+    const nocData = Digit.Hooks.noc.useNOCSearchApplication(tenantId, nocFilters);
+
+      // Safely access and map the NOC array
+      const mappedNocData = nocData?.data?.Noc?.map(item => ({
+        id: item.id,
+        tenantId: item.tenantId,
+        applicationNo: item.applicationNo,
+        applicationType: item.applicationType,
+        nocType: item.nocType,
+        source: item.source,
+        sourceRefId: item.sourceRefId,
+        applicationStatus: item.applicationStatus,
+        applicantName: item.additionalDetails?.applicantName,
+        workflowCode: item.additionalDetails?.workflowCode,
+        submittedOn: item.additionalDetails?.SubmittedOn,
+      })) || [];
+
+      console.log("ehgfhwef",mappedNocData);
+
+
     const [hasAccess, setHasAccess] = useState(false);
     const { roles } = Digit.UserService.getUser().info;
     const [workflowDetails, setWorkflowDetails] = useState(null);
@@ -792,13 +817,14 @@ import {
         break;
       case "EDIT":
         let url=window.location.href;
-        let redirectingUrl= url.split("/application/")[0] + "/editApplication/" + url.split("/application/")[1].split("/")[0];
+        let applicationNo = url.split("/application/")[1].split("/")[0];
+        let redirectingUrl= url.split("/application/")[0] + "/editApplication/" + applicationNo + "/" + tenantId;
 
         redirectToPage(redirectingUrl);    
         break;
       case "APPLY_FOR_SCRUTINY":
         let scrutinyurl=window.location.href;
-        let scrutinyRedirectingUrl= scrutinyurl.split("/application/")[0] +  `/rtp/apply/home?applicationNo=${bpaId}`;
+        let scrutinyRedirectingUrl= scrutinyurl.split("/application/")[0] +  `/rtp/apply/home?applicationNo=${bpaId}&tenantId=${tenantId}`;
         redirectToPage(scrutinyRedirectingUrl);
         break;
       case "APPROVE":
@@ -1326,6 +1352,43 @@ import {
                 label={t("BPA_OCCUPANCY_TYPE")}
                 text={t(landInfo?.units?.[0]?.occupancyType) || t("CS_NA")}
               />
+
+            {mappedNocData.length > 0 && (
+              <React.Fragment>
+                <CardSubHeader style={{ fontSize: "24px" }}>
+                  {t("BPA_NOC_DETAILS")}
+                </CardSubHeader>
+
+                {mappedNocData.map((noc, index) => (
+                  <div key={noc.id || index} style={{ marginBottom: "2rem" }}>
+                    <CardSubHeader style={{ fontSize: "20px", marginBottom: "0.5rem" }}>
+                      {`${t("BPA_NOC")} ${index + 1} - ${t(noc.nocType)}`}
+                    </CardSubHeader>
+
+                    <StatusTable>
+                      {/* <Row
+                        label={t("BPA_NOC_TYPE")}
+                        text={t(noc.nocType) || t("CS_NA")}
+                      /> */}
+                      <Row
+                        label={t("BPA_NOC_APPLICATION_NO")}
+                        text={noc.applicationNo || t("CS_NA")}
+                      />
+                      <Row
+                        label={t("BPA_SUBMISSION_DATE")}
+                        text={formatEpochDateDMY(noc.submittedOn) || t("CS_NA")}
+                      />
+                      <Row
+                        label={t("BPA_APPLICATION_STATUS")}
+                        text={noc.applicationStatus || t("CS_NA")}
+                      />
+                    </StatusTable>
+                  </div>
+                ))}
+              </React.Fragment>
+            )}
+
+
               {landInfo?.documents && landInfo.documents.length > 0 && (
               <div style={{ marginTop: "16px" }}>
                 <DocumentsPreview

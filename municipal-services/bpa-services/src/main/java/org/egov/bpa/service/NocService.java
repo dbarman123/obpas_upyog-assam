@@ -20,6 +20,7 @@ import org.egov.bpa.util.BPAErrorConstants;
 import org.egov.bpa.web.model.BPA;
 import org.egov.bpa.web.model.BPARequest;
 import org.egov.bpa.web.model.RequestInfoWrapper;
+import org.egov.bpa.web.model.NOC.Document;
 import org.egov.bpa.web.model.NOC.Noc;
 import org.egov.bpa.web.model.NOC.NocRequest;
 import org.egov.bpa.web.model.NOC.NocResponse;
@@ -76,14 +77,22 @@ public class NocService {
 		String permitType = null;
 		if (additionalDetails instanceof Map) {
 			Map<String, Object> adMap = (Map<String, Object>) additionalDetails;
-			permitType = (String) adMap.get("permitType");
+			Object nocDetails = adMap.get("nocDetails");
+			if (nocDetails instanceof Map) {
+				Map<String, Object> nocMap = (Map<String, Object>) nocDetails;
+				permitType = (String) nocMap.get("permitType");
+			}
+		}
+		
+		if (StringUtils.isBlank(permitType)) {
+			throw new CustomException("ERROR", "Permit type can't be null.");
 		}
 
 		String nocPath = BPAConstants.NOC_TYPE_MAPPING_PATH.replace("{1}", permitType);
 		List<Object> nocMappingResponse = (List<Object>) JsonPath.read(mdmsData, nocPath);
 
 		// fetching Site Engr NOCs
-		String SiteEngrfilterExp = "$.[?(@.source=='SITE_ENGINEER')].type";
+		String SiteEngrfilterExp = "$.[?(@.source=='SITE_ENGINEER')].code";
 		Set<String> allowedNocsBySiteEng = new HashSet<>(JsonPath.read(nocMappingResponse, SiteEngrfilterExp));
 		nocTypes.addAll(fetchNOCBySiteEngr(bpa.getNocList(), allowedNocsBySiteEng));
 
@@ -115,19 +124,80 @@ public class NocService {
 		ApplicationType applicationType = ApplicationType.valueOf(BPAConstants.NOC_APPLICATIONTYPE);
 		String source = config.getNocSourceConfig().get(applType);
 		Workflow workflow = Workflow.builder().action(ACTION_INITIATE).build();
+		Object additionalDetails = bpaRequest.getBPA().getAdditionalDetails();
+		Map<String, Object> nocAdditionalDetails = new HashMap<>();
+		Map<String, List<Document>> docMap = new HashMap<>();
 
+		if (additionalDetails instanceof Map) {
+			Map<String, Object> adMap = (Map<String, Object>) additionalDetails;
+			Object nocDetails = adMap.get("nocDetails");
+			if (nocDetails instanceof Map) {
+				Map<String, Object> nocMap = (Map<String, Object>) nocDetails;
+
+				Object aaiObj = nocMap.get("AAI_NOC_DETAILS");
+				if (aaiObj instanceof Map) {
+					Map<String, Object> aaiMap = (Map<String, Object>) aaiObj;
+					for (Map.Entry<String, Object> entry : aaiMap.entrySet()) {
+						if (!"documents".equals(entry.getKey())) {
+							nocAdditionalDetails.put(entry.getKey(), entry.getValue());
+						}
+					}
+
+					Object docsObj = aaiMap.get("documents");
+					docMap.put("CIVIL_AVIATION", getDocumentList(docsObj));
+
+				}
+			}
+
+		}
+		log.info("nocAdditionalDetails : " + nocAdditionalDetails);
 		log.info("Applicable NOCs are, " + nocTypes);
 
 		for (String nocType : nocTypes) {
 
+			List<Document> documents = docMap.get(nocType);
 			Noc noc = Noc.builder().tenantId(tenantId).applicationType(applicationType).sourceRefId(applicationNo)
-					.nocType(nocType).source(source).workflow(workflow).build();
+					.nocType(nocType).source(source).workflow(workflow).documents(documents)
+					.additionalDetails(nocAdditionalDetails).build();
 			nocs.add(noc);
 		}
 
 		NocRequest nocRequest = NocRequest.builder().nocList(nocs).requestInfo(bpaRequest.getRequestInfo()).build();
 
 		createNoc(nocRequest);
+	}
+	
+	/**
+	 * Converts raw document data into a list of Document objects. Maps document
+	 * metadata and stores fileName inside additionalDetails.
+	 *
+	 * @param docsObj Raw documents object (expected as List of Map)
+	 * @return List of populated Document objects
+	 */
+	private List<Document> getDocumentList(Object docsObj) {
+
+		List<Document> documents = new ArrayList<>();
+
+		if (docsObj instanceof List) {
+
+			List<Map<String, Object>> docsList = (List<Map<String, Object>>) docsObj;
+
+			for (Map<String, Object> docMap : docsList) {
+				Document document = new Document();
+
+				document.setDocumentType((String) docMap.get("documentType"));
+				document.setFileStoreId((String) docMap.get("fileStoreId"));
+				document.setDocumentUid((String) docMap.get("documentUid"));
+
+				Map<String, Object> additionalDetailsMap = new HashMap<>();
+				additionalDetailsMap.put("fileName", docMap.get("fileName"));
+				document.setAdditionalDetails(additionalDetailsMap);
+
+				documents.add(document);
+			}
+		}
+
+		return documents;
 	}
 
 	/**
@@ -142,7 +212,7 @@ public class NocService {
 	private List<String> fetchNOCByOthers(Map<String, String> edcrResponse, List<Map<String, Object>> nocByOthers) {
 
 		Map<String, List<String>> nocTypeConditionsByOthers = nocByOthers.stream()
-				.collect(Collectors.toMap(n -> (String) n.get("type"), n -> (List<String>) n.get("conditions")));
+				.collect(Collectors.toMap(n -> (String) n.get("code"), n -> (List<String>) n.get("conditions")));
 
 		if (!CollectionUtils.isEmpty(nocTypeConditionsByOthers)) {
 			return nocEval.getApplicableNOCList(nocTypeConditionsByOthers, edcrResponse);
@@ -205,7 +275,7 @@ public class NocService {
 		Map<String,String> nocSourceCnofig = config.getNocSourceConfig();
 
 		List<Object> nocMappingResponse = (List<Object>) JsonPath.read(mdmsData, nocPath);
-		List<String> nocTypes = JsonPath.read(nocMappingResponse, "$..type");
+		List<String> nocTypes = JsonPath.read(nocMappingResponse, "$..code");
 		Map<String, String> bypassNocs = new HashMap<>();
 		Map<String,Object> additionalDetails = (Map<String, Object>) bpa.getAdditionalDetails();
 		if(!CollectionUtils.isEmpty(additionalDetails)) {

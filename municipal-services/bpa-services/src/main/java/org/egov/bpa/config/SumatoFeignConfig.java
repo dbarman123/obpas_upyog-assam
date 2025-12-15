@@ -20,7 +20,7 @@ public class SumatoFeignConfig {
         return new BasicAuthRequestInterceptor(username, password);
     }
 
-    @Bean
+    @Bean(name = "sumatoErrorDecoder")
     public ErrorDecoder errorDecoder() {
         return new PropertyServiceErrorDecoder();
     }

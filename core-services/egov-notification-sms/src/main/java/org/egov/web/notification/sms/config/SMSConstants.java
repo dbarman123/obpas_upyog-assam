@@ -12,6 +12,8 @@ public class SMSConstants {
 
     public static final String SENDER_MESSAGE_IDENTIFIER = "senderMessageId";
     public static final String SENDER_MOBNO_IDENTIFIER = "senderMobileNoId";
+    
+    public static final String REGISTERD_CONTENT = "Dear+User%2C+You+have+successfully+registered+%26+logged+in+to+the+OBPAS+portal+%28UPYOG+-+Assam%29.+Please+proceed+to+fill+the+Common+Application+Form.";
 
 
 }

@@ -31,8 +31,8 @@ const BannerPicker = (props) => {
 
 const BPAAcknowledgement = ({ data, onSuccess }) => {
   const { t } = useTranslation();
-  const tenantId = Digit.ULBService.getCitizenCurrentTenant(true) || Digit.ULBService.getCurrentTenantId();
   const flow = window.location.href.includes("editApplication") ? "edit" : "create";
+  const tenantId = flow === "edit" ? data?.areaMapping?.concernedAuthority?.code : (Digit.ULBService.getCitizenCurrentTenant(true) || Digit.ULBService.getCurrentTenantId());
   const mutation = Digit.Hooks.obpsv2.useBPACreateUpdateApi(tenantId, flow);
   const user = Digit.UserService.getUser().info;
   const { data: storeData } = Digit.Hooks.useStore.getInitData();
@@ -105,7 +105,7 @@ const BPAAcknowledgement = ({ data, onSuccess }) => {
             </Link>
           )}
           {mutation.isSuccess && flow === "edit" && (
-            <Link to={`/upyog-ui/citizen/obpsv2/application/${mutation.data?.bpa?.[0]?.applicationNo}/${tenantId}`}>
+            <Link to={`/upyog-ui/citizen/obpsv2/application/${mutation.data?.bpa?.[0]?.applicationNo}/${mutation.data?.bpa?.[0]?.tenantId}`}>
               <LinkButton label={t("CORE_COMMON_GO_BACK_TO_APPLICATION")} />
             </Link>
           )}
