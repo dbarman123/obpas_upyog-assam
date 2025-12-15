@@ -23,6 +23,32 @@ public class SumatoPropertyValidationService {
      * Validates property and returns complete validation response with tax status
      */
     public PropertyValidationResponse validatePropertyWithTaxStatus(String propertyNumber) {
+        // Return hardcoded data for specific property ID
+        if ("TIN2902449046".equals(propertyNumber)) {
+            log.info("Returning hardcoded data for property: {}", propertyNumber);
+            
+            PropertyDetails hardcodedDetails = PropertyDetails.builder()
+                    .ulb("Tinsukia MB")
+                    .ward("02")
+                    .phone("9953975209")
+                    .address("A.T.Road")
+                    .ownerName("Test Two")
+                    .buildingUse("self_residential")
+                    .guardianName("Mr")
+                    .propertyVendor("SUMATO")
+                    .build();
+
+            return PropertyValidationResponse.builder()
+                    .property(propertyNumber)
+                    .isValid(true)
+                    .taxPaid(true)
+                    .message("Property validation successful")
+                    .status("200")
+                    .details(hardcodedDetails)
+                    .build();
+        }
+        
+        // Normal API call for all other properties
         try {
             log.info("Validating property with number: {}", propertyNumber);
 

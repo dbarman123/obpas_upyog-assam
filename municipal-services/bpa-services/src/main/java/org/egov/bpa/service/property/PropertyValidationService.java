@@ -35,9 +35,7 @@ public class PropertyValidationService {
             return gmcPropertyValidationService.validateProperty(propertyNumber);
         }else {
             log.info("Property validation request for property number: {} in tenant: {} is handled by Sumato", propertyNumber, tenantId);
-            // TODO for Testing will be removed later after sumato api is fixed
-            return gmcPropertyValidationService.validateProperty(propertyNumber);
-//            return sumatoPropertyValidationService.validatePropertyWithTaxStatus(propertyNumber);
+            return sumatoPropertyValidationService.validatePropertyWithTaxStatus(propertyNumber);
         }
     }
 }
