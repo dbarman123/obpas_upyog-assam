@@ -75,10 +75,10 @@ abstract public class BaseSMSService implements SMSService, SMSBodyBuilder {
             return;
         }
         log.info("calling submitToExternalSmsService() method");
-        submitToExternalSmsService(sms);
+        submitToExternalSmsServiceV2(sms);
     }
 
-    protected abstract void submitToExternalSmsService(Sms sms);
+    protected abstract void submitToExternalSmsServiceV2(Sms sms);
 
     protected <T> ResponseEntity<T> executeAPI(URI uri, HttpMethod method, HttpEntity<?> requestEntity, Class<T> type) {
         log.info("executeAPI() start");

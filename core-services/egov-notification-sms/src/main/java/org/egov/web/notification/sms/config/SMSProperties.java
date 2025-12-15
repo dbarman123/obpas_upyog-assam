@@ -86,6 +86,29 @@ public class SMSProperties {
 
     @Value("${sms.enabled:false}")
     private boolean smsEnabled;
+    
+    @Value("${sms.agency}")
+    private String smsAgency;
+    
+    @Value("${sms.password}")
+    private String smsPassword;
+    
+    @Value("${sms.district}")
+    private String smsDistrict;
+    
+    @Value("${sms.appId}")
+    private String smsAppId;
+    
+    @Value("${sms.senderId}")
+    private String smsSenderId;
+    
+    @Value("${sms.unicode}")
+    private String smsUnicode;
+    
+    @Value("${sms.registered.templateid}")
+    private String smsRegisteredTemplateId;
+    
+    
 
     @Setter(AccessLevel.PROTECTED) private List<Pattern> whitelistPatterns;
     @Setter(AccessLevel.PROTECTED) private List<Pattern> blacklistPatterns;

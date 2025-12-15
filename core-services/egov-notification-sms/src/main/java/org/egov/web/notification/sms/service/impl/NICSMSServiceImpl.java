@@ -169,6 +169,69 @@ public class NICSMSServiceImpl extends BaseSMSService {
 		}
 	}
 
+	protected void submitToExternalSmsServiceV2(Sms sms) {
+		log.info("submitToExternalSmsService() start");
+		try {
+
+			String final_data = "";
+			final_data += "agency=" + smsProperties.getSmsAgency();
+			final_data += "&password=" + smsProperties.getSmsPassword();
+			final_data += "&district=" + smsProperties.getSmsDistrict();
+			final_data += "&app_id=" + smsProperties.getSmsAppId();
+			final_data += "&sender_id=" + smsProperties.getSmsSenderId();
+			final_data += "&unicode=" + smsProperties.getSmsUnicode();
+			final_data += "&to=" + sms.getMobileNumber();
+			final_data += "&te_id=" + smsProperties.getSmsRegisteredTemplateId();
+
+			String smsBody = sms.getMessage();
+
+			if (smsBody.split("#").length > 1) {
+				String templateId = smsBody.split("#")[1];
+
+				sms.setTemplateId(templateId);
+				smsBody = smsBody.split("#")[0];
+
+			} else if (StringUtils.isEmpty(sms.getTemplateId())) {
+				log.info("No template Id, Message Not sent" + smsBody);
+				return;
+			}
+
+			String message = "" + smsBody;
+			message = URLEncoder.encode(message, "UTF-8");
+
+			final_data += "&msg=" + message;
+			
+			if (smsProperties.isSmsEnabled()) {
+				HttpsURLConnection conn = (HttpsURLConnection) new URL(smsProperties.getUrl() + "?" + final_data)
+						.openConnection();
+				conn.setSSLSocketFactory(sslContext.getSocketFactory());
+				conn.setDoOutput(true);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.connect();
+				final BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+				final StringBuffer stringBuffer = new StringBuffer();
+				String line;
+				while ((line = rd.readLine()) != null) {
+					stringBuffer.append(line);
+				}
+				log.info("conn: " + conn.toString());
+				if (smsProperties.isDebugMsggateway()) {
+					log.info("sms api url : " + smsProperties.getUrl());
+					log.info("sms response: " + stringBuffer.toString());
+					log.info("sms data: " + final_data);
+				}
+				rd.close();
+				conn.disconnect();
+			} else {
+				log.info("SMS Data: " + final_data);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Error occurred while sending SMS to : " + sms.getMobileNumber(), e);
+		}
+	}
+	
 	private boolean textIsInEnglish(String text) {
 		ArrayList<Character.UnicodeBlock> english = new ArrayList<>();
 		english.add(Character.UnicodeBlock.BASIC_LATIN);
