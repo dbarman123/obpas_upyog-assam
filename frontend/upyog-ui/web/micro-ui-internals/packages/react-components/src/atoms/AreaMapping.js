@@ -389,31 +389,67 @@ const AreaMapping = ({
       )}
 
       {/* Municipal Corporation Fields */}
-      {bpAuthority?.code === "MUNICIPAL_CORPORATION" && (
+      {bpAuthority && (
         <>
-          <CardLabel>{`${t("MOUZA")}`} <span className="check-page-link-button">*</span></CardLabel>
-          <Dropdown
-            t={t}
-            option={mouzaOptions}
-            optionKey="i18nKey"
-            selected={mouza}
-            select={handleMouzaChange}
-            disable={isDisabled}
-            optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
-            placeholder={!concernedAuthority ? t("SELECT_CONCERNED_AUTHORITY_FIRST") : t("SELECT_MOUZA")}
-          />
+          <CardLabel>
+            {`${t("MOUZA")}`} <span className="check-page-link-button">*</span>
+          </CardLabel>
 
-          <CardLabel>{`${t("REVENUE_VILLAGE")}`} <span className="check-page-link-button">*</span></CardLabel>
-          <Dropdown
-            t={t}
-            option={revenueVillages?.filter(rv => rv.parentMouzaCode === mouza?.code) || []}
-            optionKey="i18nKey"
-            selected={revenueVillage}
-            select={setRevenueVillage}
-            disable={isDisabled}
-            optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
-            placeholder={!mouza ? t("SELECT_MOUZA_FIRST") : t("SELECT_REVENUE_VILLAGE")}
-          />
+          {bpAuthority?.code === "MUNICIPAL_CORPORATION" ? (
+            <>
+              <Dropdown
+                t={t}
+                option={mouzaOptions}
+                optionKey="i18nKey"
+                selected={mouza}
+                select={handleMouzaChange}
+                disable={isDisabled}
+                optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
+                placeholder={
+                  !concernedAuthority
+                    ? t("SELECT_CONCERNED_AUTHORITY_FIRST")
+                    : t("SELECT_MOUZA")
+                }
+              />
+
+              <CardLabel>
+                {`${t("REVENUE_VILLAGE")}`}{" "}
+                <span className="check-page-link-button">*</span>
+              </CardLabel>
+              <Dropdown
+                t={t}
+                option={
+                  revenueVillages?.filter(
+                    rv => rv.parentMouzaCode === mouza?.code
+                  ) || []
+                }
+                optionKey="i18nKey"
+                selected={revenueVillage}
+                select={setRevenueVillage}
+                disable={isDisabled}
+                optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
+                placeholder={
+                  !mouza
+                    ? t("SELECT_MOUZA_FIRST")
+                    : t("SELECT_REVENUE_VILLAGE")
+                }
+              />
+            </>
+          ) : (
+            <TextInput
+              t={t}
+              name="mouza"
+              value={mouza}
+              placeholder={t("ENTER_MOUZA_NAME")}
+              disabled={isDisabled}
+              onChange={(e) =>
+                setMouza(e.target.value.replace(/[^a-zA-Z0-9\s]/g, ""))
+              }
+              ValidationRequired={true}
+              pattern="^[A-Za-z0-9 ]+$"
+              title={t("BPA_NAME_ERROR_MESSAGE")}
+            />
+          )}
         </>
       )}
 
@@ -429,29 +465,11 @@ const AreaMapping = ({
             select={setVillageName}
             disable={isDisabled}
             optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
-            placeholder={!concernedAuthority ? t("SELECT_CONCERNED_AUTHORITY_FIRST") : t("SELECT_VILLAGE")}
-          />
-        </>
-      )}
-
-      {/* Mouza Text Input for other cases */}
-      {bpAuthority?.code !== "MUNICIPAL_CORPORATION" && (
-        <>
-          <CardLabel>{`${t("MOUZA")}`}</CardLabel>
-          <TextInput
-            t={t}
-            name="mouza"
-            value={mouza}
-            placeholder={`${t("ENTER_MOUZA_NAME")}`}
-            disabled={isDisabled}
-            onChange={(e) =>
-              setMouza(
-                e.target.value.replace(/[^a-zA-Z0-9\s]/g, "")
-              )
+            placeholder={
+              !concernedAuthority
+                ? t("SELECT_CONCERNED_AUTHORITY_FIRST")
+                : t("SELECT_VILLAGE")
             }
-            ValidationRequired={true}
-            pattern="^[A-Za-z0-9 ]+$"
-            title={t("BPA_NAME_ERROR_MESSAGE")}
           />
         </>
       )}
