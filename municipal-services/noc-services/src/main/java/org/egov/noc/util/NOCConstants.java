@@ -10,7 +10,7 @@ public class NOCConstants {
 	
 	public static final String NOC_MODULE = "NOC";
 	
-	public static final String NOC_TYPE = "NocType";
+	public static final String NOC_TYPE = "NocTypeMapping";
 	
 	// mdms path codes
 
@@ -44,7 +44,7 @@ public class NOCConstants {
 	
 	public static final String WORKFLOWCODE = "workflowCode";	
 	
-    public static final String NOCTYPE_JSONPATH_CODE = "$.MdmsRes.NOC.NocType";
+    public static final String NOCTYPE_JSONPATH_CODE = "$.MdmsRes.NOC.NocTypeMapping";
     
     public static final String NOC_DOC_TYPE_MAPPING = "DocumentTypeMapping";
     
@@ -99,4 +99,7 @@ public class NOCConstants {
 	public static final String DOC_TYPE_SITECORDINATES = "NOC.SITECORDINATES";
 	public static final String DOC_TYPE_AUTHORIZATION = "NOC.AUTHORIZATION";
 	public static final String DOC_TYPE_PERMISSION = "NOC.PERMISSION";
+
+	// Fire NOC Workflow Constants
+	public static final String FIRE_NOC_WORKFLOW_CODE = "FIRE_NOC_SRV";
 }

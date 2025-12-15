@@ -83,9 +83,9 @@ public class NOCUtil {
 	public List<ModuleDetail> getNOCModuleRequest() {
 		List<MasterDetail> nocMasterDtls = new ArrayList<>();
 
-		final String nocFilterCode = "$.[?(@.isActive==true)]";
+//		final String nocFilterCode = "$.[*].nocs[?(@.isActive==true)]";
 
-		nocMasterDtls.add(MasterDetail.builder().name(NOCConstants.NOC_TYPE).filter(nocFilterCode).build());
+		nocMasterDtls.add(MasterDetail.builder().name(NOCConstants.NOC_TYPE).build());
 		nocMasterDtls.add(MasterDetail.builder().name(NOCConstants.NOC_DOC_TYPE_MAPPING).build());
 		ModuleDetail nocModuleDtls = ModuleDetail.builder().masterDetails(nocMasterDtls)
 				.moduleName(NOCConstants.NOC_MODULE).build();
