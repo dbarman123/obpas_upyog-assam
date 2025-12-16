@@ -16,6 +16,7 @@ const siteReport = ({submitReport, onChange, data}) => {
   // Extract BPA data from FormComposer
   const bpaData = data?.bpaData;
   const { t } = useTranslation();
+  const [buildingPermitAuthority, setBuildingPermitAuthority] = useState("");
   const { data: nocLists, isLoading } = Digit.Hooks.useEnabledMDMS(
     "as", 
     "NOC", 
@@ -123,6 +124,7 @@ const siteReport = ({submitReport, onChange, data}) => {
       const adjoiningOwners = appData?.additionalDetails?.adjoiningOwners || {};
       const rtpDetails = appData?.rtpDetails || {};
       const architectName = rtpDetails?.rtpName ? rtpDetails.rtpName.split(',')[0] : '';
+      setBuildingPermitAuthority(areaMapping?.buildingPermitAuthority || "");
       
       setForm(prev => ({
         ...prev,
@@ -131,7 +133,7 @@ const siteReport = ({submitReport, onChange, data}) => {
         applicantAddress: `${address?.houseNo || ''} ${address?.addressLine1 || ''} ${address?.addressLine2 || ''}`.trim() || prev.applicantAddress,
         architectName: t(architectName) || t(prev.architectName),
         masterPlanZone: t(areaMapping?.planningArea) || t(prev.masterPlanZone),
-        revenueVillage: t(areaMapping?.revenueVillage) || t(prev.revenueVillage),
+        revenueVillage: t(areaMapping?.revenueVillage) || t(areaMapping?.villageName) || t(prev.revenueVillage),
         pattaNo: t(landInfo?.newPattaNumber) || t(landInfo?.oldPattaNumber) || t(prev.pattaNo),
         dagNo: t(landInfo?.newDagNumber) || t(landInfo?.oldDagNumber) || t(prev.dagNo),
         plotArea: t(landInfo?.totalPlotArea) || t(prev.plotArea),
@@ -456,16 +458,28 @@ const siteReport = ({submitReport, onChange, data}) => {
             {t("BPA_LOCATION_OF_LAND")}
           </CardSectionHeader>
 
-          <div style={fieldRowStyle}>
-            <CardLabel style={labelStyle}>{t("BPA_REVENUE_VILLAGE")}</CardLabel>
-            <TextInput
-              style={inputStyle}
-              value={form.revenueVillage}
-              onChange={(e) => handleChange("revenueVillage", e.target.value)}
-              disable={!!form.revenueVillage}
-            />
-          </div>
-
+           {/* Conditionally show village or revenueVillage field */}
+           {buildingPermitAuthority === "GRAM_PANCHAYAT" ? (
+            <div style={fieldRowStyle}>
+              <CardLabel style={labelStyle}>{t("VILLAGE_NAME")}</CardLabel>
+              <TextInput
+                style={inputStyle}
+                value={form.revenueVillage} // Still using revenueVillage field for village data
+                onChange={(e) => handleChange("revenueVillage", e.target.value)}
+                disable={!!form.revenueVillage}
+              />
+            </div>
+          ) : (
+            <div style={fieldRowStyle}>
+              <CardLabel style={labelStyle}>{t("BPA_REVENUE_VILLAGE")}</CardLabel>
+              <TextInput
+                style={inputStyle}
+                value={form.revenueVillage}
+                onChange={(e) => handleChange("revenueVillage", e.target.value)}
+                disable={!!form.revenueVillage}
+              />
+            </div>
+          )}
           <div style={fieldRowStyle}>
             <CardLabel style={labelStyle}>{t("BPA_PATTA_NO")}</CardLabel>
             <TextInput

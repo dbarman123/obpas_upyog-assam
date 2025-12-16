@@ -388,12 +388,34 @@ const AreaMapping = ({
         </>
       )}
 
+      {/* Gram Panchayat Fields */}
+      {bpAuthority?.code === "GRAM_PANCHAYAT" && (
+        <>
+          <CardLabel>{`${t("VILLAGE_NAME")}`} <span className="check-page-link-button">*</span></CardLabel>
+          <Dropdown
+            t={t}
+            option={villages}
+            optionKey="i18nKey"
+            selected={villageName}
+            select={setVillageName}
+            disable={isDisabled}
+            optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
+            placeholder={
+              !concernedAuthority
+                ? t("SELECT_CONCERNED_AUTHORITY_FIRST")
+                : t("SELECT_VILLAGE")
+            }
+          />
+        </>
+      )}
+
       {/* Municipal Corporation Fields */}
       {bpAuthority && (
         <>
           <CardLabel>
-            {`${t("MOUZA")}`} <span className="check-page-link-button">*</span>
-          </CardLabel>
+            {`${t("MOUZA")}`} 
+            {bpAuthority?.code === "MUNICIPAL_CORPORATION" && <span className="check-page-link-button">*</span>}
+           </CardLabel>
 
           {bpAuthority?.code === "MUNICIPAL_CORPORATION" ? (
             <>
@@ -450,27 +472,6 @@ const AreaMapping = ({
               title={t("BPA_NAME_ERROR_MESSAGE")}
             />
           )}
-        </>
-      )}
-
-      {/* Gram Panchayat Fields */}
-      {bpAuthority?.code === "GRAM_PANCHAYAT" && (
-        <>
-          <CardLabel>{`${t("VILLAGE_NAME")}`} <span className="check-page-link-button">*</span></CardLabel>
-          <Dropdown
-            t={t}
-            option={villages}
-            optionKey="i18nKey"
-            selected={villageName}
-            select={setVillageName}
-            disable={isDisabled}
-            optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
-            placeholder={
-              !concernedAuthority
-                ? t("SELECT_CONCERNED_AUTHORITY_FIRST")
-                : t("SELECT_VILLAGE")
-            }
-          />
         </>
       )}
     </div>
