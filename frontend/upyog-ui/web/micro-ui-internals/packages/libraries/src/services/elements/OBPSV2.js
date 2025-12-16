@@ -347,6 +347,17 @@ export const OBPSV2Services = {
             auth: true,
         });
     },
+    nocValidate: (details) =>
+      Request({
+        url: Urls.obpsv2.nocValidate,
+        data: details,
+        useCache: false,
+        setTimeParam: false,
+        userService: true,
+        method: "POST",
+        params: {},
+        auth: true,
+      }),
       
   BPAApplicationDetails: async (tenantId, filters) => {
     const response = await OBPSV2Services.search({

@@ -3,13 +3,12 @@ import { FormStep, TextInput, CardLabel, CheckBox, Dropdown, CardHeader, Loader 
 import Timeline from "../components/Timeline";
 
 const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
-  // Fetch data from MDMS
-  const { data: mdmsData, isLoading } = Digit.Hooks.useEnabledMDMS(
-    "as", 
+  const stateId = Digit.ULBService.getStateId();
+
+  const { data: stateData } = Digit.Hooks.useEnabledMDMS(
+    stateId, 
     "BPA", 
     [
-      { name: "districts" }, 
-      { name: "revenueVillages" },
       { name: "states" }
     ],
     {
@@ -18,6 +17,20 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
       },
     }
   );
+  
+  // Fetch data from MDMS
+  const { data: mdmsData, isLoading } = Digit.Hooks.useEnabledMDMS(stateId, "egov-location", [{ name: "egov-location" }], {
+    select: (data) => {
+      return data?.["egov-location"]?.["egov-location"]?.[0] || {};
+    },
+  });
+
+  // Fetch tenants data
+  const { data: tenantData } = Digit.Hooks.useEnabledMDMS(stateId, "tenant", [{ name: "tenants" }], {
+    select: (data) => {
+      return data?.["tenant"]?.["tenants"] || [];
+    },
+  });
 
   // State for dropdown options
   const [districtOptions, setDistrictOptions] = useState([]);
@@ -35,8 +48,8 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
       })).sort((a, b) => a.code.localeCompare(b.code));
       setDistrictOptions(formattedDistricts);
     }
-    if(mdmsData?.states){
-      const formattedStates = mdmsData.states.map((state) => ({
+    if(stateData?.states){
+      const formattedStates = stateData.states.map((state) => ({
         code: state.stateCode,
         name: state.stateName,
         i18nKey: state.stateCode,
@@ -47,7 +60,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
         setCorrespondenceState(formattedStates[0]);
       }
     }
-  }, [mdmsData]);
+  }, [mdmsData, stateData]);
 
   // Permanent Address Fields
   const [permanentHouseNo, setPermanentHouseNo] = useState(formData?.address?.permanent?.houseNo || searchResult?.landInfo?.address?.houseNo ||"");
@@ -91,23 +104,24 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
   const [correspondenceCity, setCorrespondenceCity] = useState(formData?.address?.correspondence?.city || searchResultCityCorr || "");
   const [correspondenceState, setCorrespondenceState] = useState(formData?.address?.correspondence?.state || searchResultStateCorr || "");
   const [correspondencePincode, setCorrespondencePincode] = useState(formData?.address?.correspondence?.pincode || searchResult?.landInfo?.owners[0]?.correspondenceAddress?.pincode || "");
-    // Update permanent city options when permanent district changes
+  // Update permanent city options when permanent district changes
   useEffect(() => {
-    if (permanentDistrict && mdmsData?.revenueVillages) {
-      const formattedRevenueVillage = mdmsData.revenueVillages
-        .filter(revenueVillage => revenueVillage.districtCode === permanentDistrict?.code)
-        .map((revenueVillage) => ({
-          code: revenueVillage.revenueVillageCode,
-          name: revenueVillage.revenueVillageName,
-          i18nKey: revenueVillage.revenueVillageCode,
-        }))
-        .sort((a, b) => a.code.localeCompare(b.code));
-      setPermanentCityOptions(formattedRevenueVillage);
+    if (permanentDistrict && tenantData) {
+      const filteredTenants = tenantData.filter(tenant => {
+        const districtMatch = tenant.city?.districtCode === permanentDistrict?.code ||
+                             tenant.city?.districtCode?.includes(permanentDistrict?.code) ||
+                             permanentDistrict?.code?.includes(tenant.city?.districtCode);
+        return districtMatch && tenant.code !== "as";
+      });
+      const formattedCities = filteredTenants.map((tenant) => ({
+        code: tenant.code,
+        name: tenant.name,
+        i18nKey: tenant.name,
+      })).sort((a, b) => a.name.localeCompare(b.name));
+      setPermanentCityOptions(formattedCities);
       
-      // Agar current city selected hai, check karo ki wo naye district ki hai ya nahi
       if (permanentCity) {
-        const isCityInNewDistrict = formattedRevenueVillage.some(city => city.code === permanentCity.code);
-        // Agar city naye district ki nahi hai to clear karo
+        const isCityInNewDistrict = formattedCities.some(city => city.code === permanentCity.code);
         if (!isCityInNewDistrict) {
           setPermanentCity("");
         }
@@ -115,25 +129,26 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
     } else {
       setPermanentCityOptions([]);
     }
-  }, [permanentDistrict, mdmsData]);
+  }, [permanentDistrict, tenantData]);
 
   // Update correspondence city options when correspondence district changes
   useEffect(() => {
-    if (correspondenceDistrict && mdmsData?.revenueVillages) {
-      const formattedRevenueVillage = mdmsData.revenueVillages
-        .filter(revenueVillage => revenueVillage.districtCode === correspondenceDistrict?.code)
-        .map((revenueVillage) => ({
-          code: revenueVillage.revenueVillageCode,
-          name: revenueVillage.revenueVillageName,
-          i18nKey: revenueVillage.revenueVillageCode,
-        }))
-        .sort((a, b) => a.code.localeCompare(b.code));
-      setCorrespondenceCityOptions(formattedRevenueVillage);
+    if (correspondenceDistrict && tenantData) {
+      const filteredTenants = tenantData.filter(tenant => {
+        const districtMatch = tenant.city?.districtCode === correspondenceDistrict?.code ||
+                             tenant.city?.districtCode?.includes(correspondenceDistrict?.code) ||
+                             correspondenceDistrict?.code?.includes(tenant.city?.districtCode);
+        return districtMatch && tenant.code !== "as";
+      });
+      const formattedCities = filteredTenants.map((tenant) => ({
+        code: tenant.code,
+        name: tenant.name,
+        i18nKey: tenant.name,
+      })).sort((a, b) => a.name.localeCompare(b.name));
+      setCorrespondenceCityOptions(formattedCities);
       
-      // Agar current city selected hai, check karo ki wo naye district ki hai ya nahi
       if (correspondenceCity) {
-        const isCityInNewDistrict = formattedRevenueVillage.some(city => city.code === correspondenceCity.code);
-        // Agar city naye district ki nahi hai to clear karo
+        const isCityInNewDistrict = formattedCities.some(city => city.code === correspondenceCity.code);
         if (!isCityInNewDistrict) {
           setCorrespondenceCity("");
         }
@@ -141,7 +156,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
     } else {
       setCorrespondenceCityOptions([]);
     }
-  }, [correspondenceDistrict, mdmsData]);
+  }, [correspondenceDistrict, tenantData]);
 
   // Update correspondence address when sameAsPermanent is checked
   useEffect(() => {

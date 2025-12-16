@@ -122,7 +122,8 @@ module.exports = function (app) {
     "/bpa-calculator/_estimate",
     "/gis-service/find-zone",
     "/bpa-services/v1/bpa/_rtpsearch",
-    "/gis-service/zone/_search"
+    "/gis-service/zone/_search",
+    "/noc-services/v1/noc/_validate"
 
   ].forEach((location) => app.use(location, createProxy));
   ["/pb-egov-assets"].forEach((location) => app.use(location, assetsProxy));

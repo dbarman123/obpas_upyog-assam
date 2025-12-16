@@ -172,6 +172,7 @@ const Urls = {
     estimate: "/bpa-services/v2/bpa/_estimate",
     updateNOC: "/noc-services/v1/noc/_update",
     nocSearch: "/noc-services/v1/noc/_search",
+    nocValidate: "/noc-services/v1/noc/_validate"
   },
   edcr: {
     create: "/edcr/rest/dcr/scrutinize",
