@@ -61,20 +61,47 @@ public class AmtronSMSServiceImpl extends BaseSMSService {
 
         try {
             String baseUrl = smsProperties.getUrl();
-
             MultiValueMap<String, String> queryParams = getSmsRequestBody(sms);
 
-           
-            String message = queryParams.getFirst("msg");
-            if (message != null) {
-                queryParams.set("msg", URLEncoder.encode(message, StandardCharsets.UTF_8.name()));
+            String originalMsg = queryParams.getFirst("msg");
+
+            if (originalMsg != null && originalMsg.contains("##")) {
+
+                String[] parts = originalMsg.split("##", 2);
+                String cleanMessage = parts[0];
+                String extractedTemplateId = parts[1];
+
+             
+                String templateParamKey = null;
+                for (String key : smsProperties.getConfigMap().keySet()) {
+                    if ("$templateid".equals(smsProperties.getConfigMap().get(key))) {
+                        templateParamKey = key;
+                        break;
+                    }
+                }
+
+                if (templateParamKey != null) {
+                    queryParams.set(templateParamKey, extractedTemplateId);
+                }
+
+                queryParams.set("msg", cleanMessage);
             }
 
-            UriComponentsBuilder builder = UriComponentsBuilder
-                    .fromHttpUrl(baseUrl)
-                    .queryParams(queryParams);
+            // Encode ONLY message
+            String finalMsg = queryParams.getFirst("msg");
+            if (finalMsg != null) {
+                queryParams.set(
+                    "msg",
+                    URLEncoder.encode(finalMsg, StandardCharsets.UTF_8.name())
+                );
+            }
 
-            URI finalUri = URI.create(builder.build(false).toUriString());
+            URI finalUri = URI.create(
+                    UriComponentsBuilder.fromHttpUrl(baseUrl)
+                            .queryParams(queryParams)
+                            .build(false)
+                            .toUriString()
+            );
 
             log.info("AMTRON SMS URL => {}", finalUri);
 

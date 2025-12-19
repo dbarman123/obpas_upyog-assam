@@ -21,12 +21,12 @@ public class TestController {
     public ResponseEntity<?> test(@RequestParam(value="number", required = true) String number,
                                   @RequestParam(value="msg", required = true) String msg,
                                   @RequestParam(value="category", required = true) Category category,
-                                  @RequestParam(value="expirytime", required = true) Long expirytime,
-                                  @RequestParam(value = "templateid", required = false) String templateId){
+                                  @RequestParam(value="expirytime", required = true) Long expirytime
+                                 ){
 
         //Sms sms = new Sms(number, sms, Category.OTP, expirytime);
 
-        Sms sms = new Sms(number, msg, category, expirytime, templateId);
+        Sms sms = new Sms(number, msg, category, expirytime, "123");
 
         smsService.sendSMS(sms);
 
