@@ -18,7 +18,7 @@ public class BPAConstants {
 
 	public static final String BPA_MODULE_CODE = "BPA";
 
-	public static final String BPA_ARCHITECT_MODULE_CODE = "BPA_ARCHITECT";
+	public static final String BPA_ARCHITECT_ROLE = "BPA_ARCHITECT";
 	
 	public static final String NOC_BYPASS_DETAILS = "nocBypassDetails";
 	

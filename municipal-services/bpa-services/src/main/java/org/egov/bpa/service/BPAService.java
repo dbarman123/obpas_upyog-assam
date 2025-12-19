@@ -255,7 +255,7 @@ public class BPAService {
                     landcriteria.setIds(landIds);
                     if(requestInfo != null && requestInfo.getUserInfo() != null) {
                         boolean isRTP = requestInfo.getUserInfo().getRoles().stream()
-                                .anyMatch(role -> role.getCode().equalsIgnoreCase(BPAConstants.BPA_ARCHITECT_MODULE_CODE));
+                                .anyMatch(role -> role.getCode().equalsIgnoreCase(BPAConstants.BPA_ARCHITECT_ROLE));
                         if(isRTP) {
                             landcriteria.setTenantId(requestInfo.getUserInfo().getTenantId());
                         }else {
