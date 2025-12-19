@@ -26,13 +26,15 @@ import ChallanQRCode from "./ChallanQRCode";
 import { newConfig as newConfigEDCR } from "../../config/edcrConfig";
 import CreateAnonymousEDCR from "./Home/EDCR";
 import EDCRAcknowledgement from "./Home/EDCR/EDCRAcknowledgement";
+import LocationSelection from "./Home/LocationSelection";
 const sidebarHiddenFor = [
   "upyog-ui/citizen/register/name",
   "/upyog-ui/citizen/select-language",
   "/upyog-ui/citizen/area-mapping",
   "/upyog-ui/citizen/login",
   "/upyog-ui/citizen/register/otp",
-  "/upyog-ui/citizen/verificationsearch-home" // route for verificationsearch component
+  "/upyog-ui/citizen/verificationsearch-home", // route for verificationsearch component
+  "/upyog-ui/citizen/select-location",
 ];
 import { APPLICATION_PATH } from "./Home/EDCR/utils";
 const getTenants = (codes, tenants) => {
@@ -220,6 +222,9 @@ const Home = ({
 
           <Route exact path={`${path}/area-mapping`}>
             <AreaMapping />
+          </Route> 
+           <Route exact path={`${path}/select-location`}>
+            <LocationSelection />
           </Route>
           <Route path={`${path}/error`}>
             <ErrorComponent

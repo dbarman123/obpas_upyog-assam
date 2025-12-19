@@ -1,4 +1,4 @@
-import { BackButton, CardHeader, CardLabelError, CardLabel, Dropdown, TextInput } from "@upyog/digit-ui-react-components";
+import { BackButton, CardHeader, CardLabelError, CardLabel, Dropdown, TextInput,SubmitBar } from "@upyog/digit-ui-react-components";
 import CommonAreaMapping from "../../../../../../react-components/src/atoms/AreaMapping.js";
 import React, { useMemo, useState, useEffect, Fragment } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,9 @@ const AreaMapping = () => {
   const location = useLocation();
   
   const [showError, setShowError] = useState(false);
+  const redirectToRTPLogin = () => {
+    history.push("/upyog-ui/citizen/select-location");
+  };
 
   // State for all dropdown values
   const [district, setDistrict] = useState("");
@@ -78,7 +81,17 @@ const AreaMapping = () => {
     <div className="selection-card-wrapper">
       <BackButton />
       <PageBasedInput texts={texts} onSubmit={onSubmit}>
-        <CardHeader>{t("BPA_AREA_MAPPING")}</CardHeader>
+        <CardHeader style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>{t("BPA_AREA_MAPPING")}</span>
+          <SubmitBar 
+            label={t("BPA_RTP_LOGIN")}
+            onSubmit={redirectToRTPLogin}
+            style={{
+              width: "auto",
+              marginLeft: "50%",
+            }}
+          />
+        </CardHeader>
         
         <CommonAreaMapping
           t={t}
