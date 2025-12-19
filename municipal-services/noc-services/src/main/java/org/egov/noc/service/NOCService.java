@@ -358,8 +358,8 @@ public class NOCService {
 			NocSearchCriteria criteria = new NocSearchCriteria();
 			criteria.setApplicationStatus(NOCConstants.APPLICATION_STATUS_INPROGRESS);
 			criteria.setNocType(NOCConstants.CIVIL_AVIATION_NOC_TYPE);
-			criteria.setTenantId(tenantId != null ? tenantId : config.getAssamStateCode());
-			return nocRepository.getNewAAINocData(criteria);
+			criteria.setTenantId(tenantId);
+			return nocRepository.getNocDatav2(criteria);
 		}
 
 		/**

@@ -154,7 +154,7 @@ public class AAINOCService {
 				addElement(doc, appData, "PERMISSIONTAKEN", app.getPermissionTaken());
 
 				BPA correspondingBPA = bpaMap.get(app.getApplicationNo());
-				List<SiteCoordinate> coordinates = extractCoordinatesFromBPA(correspondingBPA, requestInfo);
+				List<SiteCoordinate> coordinates = extractCoordinatesFromNOC(app.getNoc(), correspondingBPA, requestInfo);
 
 				Element siteDetails = doc.createElement("SiteDetails");
 				toAAI.appendChild(siteDetails);
@@ -425,43 +425,82 @@ public class AAINOCService {
 	}
 
 	/**
-	 * Extracts coordinates from BPA GeoLocation
+	 * Extracts coordinates from NOC additionalDetails
 	 *
-	 * @param bpa         BPA object
-	 * @param requestInfo
+	 * @param noc         NOC object containing additionalDetails with CENTER and siteElevation
+	 * @param bpa         BPA object (for building height from ECDR)
+	 * @param requestInfo RequestInfo for ECDR service call
 	 * @return List of coordinates
 	 */
-	private List<SiteCoordinate> extractCoordinatesFromBPA(BPA bpa, RequestInfo requestInfo) {
+	private List<SiteCoordinate> extractCoordinatesFromNOC(Noc noc, BPA bpa, RequestInfo requestInfo) {
 		List<SiteCoordinate> coordinates = new ArrayList<>();
 
-		/*if (bpa == null || bpa.getLandInfo() == null || bpa.getLandInfo().getAddress() == null) {
+		if (noc == null) {
+			log.warn("NOC is null, cannot extract coordinates");
 			return coordinates;
-		}*/
+		}
 
-		/*GeoLocation geoLocation = bpa.getLandInfo().getAddress().getGeoLocation();
-		if (geoLocation != null && geoLocation.getLatitude() != null && geoLocation.getLongitude() != null) {
-			SiteCoordinate coord = SiteCoordinate.builder()
-					.latitude(String.valueOf(geoLocation.getLatitude()))
-					.longitude(String.valueOf(geoLocation.getLongitude()))
-					.siteElevation(null)
-					.buildingHeight(null)
-					.structureNo(1)
-					.build();
-		}*/
+		// Extract coordinates and siteElevation from additionalDetails
+		Map<String, Object> additionalDetails = noc.getAdditionalDetails() != null
+				? (Map<String, Object>) noc.getAdditionalDetails()
+				: new HashMap<>();
 
+		String latitude = null;
+		String longitude = null;
+		Double siteElevation = null;
+
+		// Extract CENTER coordinates
+		Object centerObj = additionalDetails.get("CENTER");
+		if (centerObj instanceof Map) {
+			Map<String, Object> center = (Map<String, Object>) centerObj;
+			Object latObj = center.get("latitude");
+			Object lonObj = center.get("longitude");
+			
+			if (latObj != null) {
+				latitude = String.valueOf(latObj);
+			}
+			if (lonObj != null) {
+				longitude = String.valueOf(lonObj);
+			}
+		}
+
+		// Extract siteElevation
+		Object siteElevationObj = additionalDetails.get("siteElevation");
+		if (siteElevationObj != null) {
+			try {
+				if (siteElevationObj instanceof Number) {
+					siteElevation = ((Number) siteElevationObj).doubleValue();
+				} else if (siteElevationObj instanceof String) {
+					String siteElevationStr = ((String) siteElevationObj).trim();
+					if (!siteElevationStr.isEmpty()) {
+						siteElevation = Double.parseDouble(siteElevationStr);
+					}
+				}
+			} catch (NumberFormatException e) {
+				log.warn("Invalid siteElevation value: {}", siteElevationObj, e);
+			}
+		}
+
+		// Extract building height from ECDR if available
 		Double buildingHeight = null;
-		if (bpa.getEdcrNumber() != null && !bpa.getEdcrNumber().isEmpty()) {
+		if (bpa != null && bpa.getEdcrNumber() != null && !bpa.getEdcrNumber().isEmpty()) {
 			buildingHeight = edcrService.fetchBuildingHeight(bpa.getEdcrNumber(), requestInfo);
 		}
 		
+		// Only create coordinate if we have at least latitude and longitude
+		if (latitude != null && longitude != null) {
 		SiteCoordinate coord = SiteCoordinate.builder()
-				.latitude("26 26 27.9")
-				.longitude("91 26 27.6")
-				.siteElevation(42.0)
+					.latitude(latitude)
+					.longitude(longitude)
+					.siteElevation(siteElevation)
 				.buildingHeight(buildingHeight)
 				.structureNo(1)
 				.build();
 		coordinates.add(coord);
+		} else {
+			log.warn("Missing coordinates in NOC additionalDetails - latitude: {}, longitude: {}", latitude, longitude);
+		}
+
 		return coordinates;
 	}
 

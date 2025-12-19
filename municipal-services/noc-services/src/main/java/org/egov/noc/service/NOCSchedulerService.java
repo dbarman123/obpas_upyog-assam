@@ -2,16 +2,13 @@ package org.egov.noc.service;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.noc.config.NOCConfiguration;
-import org.egov.noc.util.NOCConstants;
 import org.egov.noc.web.model.Noc;
-import org.egov.noc.web.model.NocSearchCriteria;
+import org.egov.noc.web.model.UserResponse;
 import org.egov.noc.web.model.aai.AAIStatusResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,6 +37,9 @@ public class NOCSchedulerService {
     @Autowired
     private NOCStatusUpdateService nocStatusUpdateService;
 
+    @Autowired
+    private UserService userService;
+
     /**
      * Scheduled job to sync NOC statuses with AAI NOCAS
      */
@@ -50,94 +50,31 @@ public class NOCSchedulerService {
         lockAtMostFor = "${scheduler.aai.noc.status.sync.lock.at.most.for}"
     )
     public void syncAAINOCStatus() {
-        if (!config.getSchedulerEnabled()) {
-            log.info("Scheduler disabled");
-            return;
-        }
-
-        if (!config.getAaiNocasEnabled()) {
-            log.info("AAI integration disabled");
+        if (!config.getSchedulerEnabled() || !config.getAaiNocasEnabled()) {
             return;
         }
 
         try {
-            List<Noc> pendingNocs = fetchPendingAAINOCApplications();
+            RequestInfo requestInfo = createSystemRequestInfo();
+            List<Noc> pendingNocs = nocService.fetchNewAAINOCs(null);
             
             if (CollectionUtils.isEmpty(pendingNocs)) {
-                log.info("No pending AIRPORT_NOC applications found");
+                log.info("AAI sync: no pending applications");
                 return;
             }
 
-            log.info("Found {} pending applications", pendingNocs.size());
-
-            List<String> applicationNumbers = pendingNocs.stream()
-                    .map(Noc::getApplicationNo)
-                    .collect(Collectors.toList());
-
-            RequestInfo requestInfo = createSystemRequestInfo();
-            AAIStatusResponse aaiResponse = aaiIntegrationService.fetchNOCStatusFromAAI(applicationNumbers, requestInfo);
-
-            if (aaiResponse == null || !aaiResponse.getSuccess()) {
-                log.error("Failed to fetch status from AAI: {}", 
-                        aaiResponse != null ? aaiResponse.getErrorMessage() : "Unknown error");
+            AAIStatusResponse aaiResponse = aaiIntegrationService.fetchNOCStatusFromAAI(new ArrayList<>(), requestInfo);
+            if (aaiResponse == null || !Boolean.TRUE.equals(aaiResponse.getSuccess())) {
+                log.error("AAI sync: failed to fetch status");
                 return;
             }
 
             List<Noc> updatedNocs = nocStatusUpdateService.updateNOCStatusFromAAI(aaiResponse, requestInfo);
-            log.info("Status sync completed. Updated {} applications", updatedNocs.size());
+            log.info("AAI sync: completed, updated {}", updatedNocs.size());
 
         } catch (Exception e) {
-            log.error("Error during status synchronization", e);
+            log.error("AAI sync: error", e);
         }
-    }
-
-    /**
-     * Fetches pending AIRPORT_NOC applications
-     * 
-     * @return List of NOC applications
-     */
-    private List<Noc> fetchPendingAAINOCApplications() {
-        try {
-            NocSearchCriteria searchCriteria = NocSearchCriteria.builder()
-                    .nocType(NOCConstants.AIRPORT_NOC_TYPE)
-                    .build();
-
-            RequestInfo requestInfo = createSystemRequestInfo();
-            List<Noc> allAirportNocs = nocService.search(searchCriteria, requestInfo);
-
-            if (CollectionUtils.isEmpty(allAirportNocs)) {
-                return new ArrayList<>();
-            }
-
-            return allAirportNocs.stream()
-                    .filter(this::isApplicationPendingStatusSync)
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            log.error("Error fetching pending applications", e);
-            return new ArrayList<>();
-        }
-    }
-
-    /**
-     * Checks if NOC application needs status sync
-     * 
-     * @param noc NOC application
-     * @return true if pending sync
-     */
-    private boolean isApplicationPendingStatusSync(Noc noc) {
-        if (noc == null || noc.getApplicationStatus() == null) {
-            return false;
-        }
-
-        List<String> finalStates = Arrays.asList(
-                NOCConstants.APPROVED_STATE,
-                NOCConstants.AUTOAPPROVED_STATE,
-                NOCConstants.APPLICATION_STATUS_REJECTED,
-                NOCConstants.VOIDED_STATUS
-        );
-
-        return !finalStates.contains(noc.getApplicationStatus());
     }
 
     /**
@@ -146,18 +83,17 @@ public class NOCSchedulerService {
      * @return RequestInfo object
      */
     private RequestInfo createSystemRequestInfo() {
-        User systemUser = User.builder()
-                .id(1L)
-                .userName("SYSTEM")
-                .name("System")
-                .type("SYSTEM")
-                .mobileNumber("9999999999")
-                .emailId("system@egovernments.org")
-                .roles(new ArrayList<>())
-                .tenantId("as")
-                .build();
+        String internalUserName = config.getInternalMicroserviceUserName();
+        String stateLevelTenant = config.getAssamStateCode();
+        UserResponse userResponse = userService.searchByUserName(internalUserName, stateLevelTenant);
 
+        if (userResponse == null || userResponse.getUser() == null || userResponse.getUser().isEmpty()) {
+            throw new RuntimeException("Internal microservice user not found for scheduler operations");
+        }
+
+        User systemUser = userResponse.getUser().get(0);
         long currentTime = Instant.now().toEpochMilli();
+        
         return RequestInfo.builder()
                 .apiId("noc-scheduler")
                 .ver("1.0")
@@ -166,7 +102,7 @@ public class NOCSchedulerService {
                 .did("internal")
                 .key("internal")
                 .msgId("noc-scheduler-" + currentTime)
-                .authToken("internal")
+                .authToken("SYSTEM_INTERNAL_AUTH")
                 .userInfo(systemUser)
                 .build();
     }
@@ -179,13 +115,40 @@ public class NOCSchedulerService {
     }
 
     /**
+     * Manually triggers status sync for a specific UNIQUE ID
+     * 
+     * @param uniqueId UNIQUE ID (BPA application number / sourceRefId) to sync
+     */
+    public void triggerManualSyncByUniqueId(String uniqueId) {
+        if (!config.getAaiNocasEnabled() || uniqueId == null || uniqueId.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            RequestInfo requestInfo = createSystemRequestInfo();
+            AAIStatusResponse aaiResponse = aaiIntegrationService.fetchNOCStatusByUniqueId(uniqueId, requestInfo);
+
+            if (aaiResponse == null || !Boolean.TRUE.equals(aaiResponse.getSuccess())) {
+                log.error("AAI sync: failed for {}", uniqueId);
+                return;
+            }
+
+            List<Noc> updatedNocs = nocStatusUpdateService.updateNOCStatusFromAAI(aaiResponse, requestInfo);
+            log.info("AAI sync: manual trigger for {}, updated {}", uniqueId, updatedNocs.size());
+        } catch (Exception e) {
+            log.error("AAI sync: manual trigger failed for {}", uniqueId, e);
+        }
+    }
+
+    /**
      * Gets count of pending applications
      * 
      * @return Application count
      */
     public int getPendingApplicationsCount() {
         try {
-            return fetchPendingAAINOCApplications().size();
+            List<Noc> pendingNocs = nocService.fetchNewAAINOCs(null);
+            return pendingNocs != null ? pendingNocs.size() : 0;
         } catch (Exception e) {
             log.error("Error getting count", e);
             return -1;

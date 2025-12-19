@@ -77,9 +77,11 @@ public class NocRowMapper implements ResultSetExtractor<List<Noc>> {
 		String tenantId = noc.getTenantId();
 		if (!StringUtils.isEmpty(documentId)) {
 			Document applicationDocument = new Document();
-		     Object additionalDetails = new Gson().fromJson(rs.getString("doc_details").equals("{}")
-						|| rs.getString("doc_details").equals("null") ? null : rs.getString("doc_details"),
-						Object.class);
+			String docDetailsStr = rs.getString("doc_details");
+			Object additionalDetails = null;
+			if (docDetailsStr != null && !docDetailsStr.equals("{}") && !docDetailsStr.equals("null")) {
+				additionalDetails = new Gson().fromJson(docDetailsStr, Object.class);
+			}
 			applicationDocument.setId(documentId);
 			applicationDocument.setDocumentType(rs.getString("documenttype"));
 			applicationDocument.setFileStoreId(rs.getString("noc_doc_filestore"));

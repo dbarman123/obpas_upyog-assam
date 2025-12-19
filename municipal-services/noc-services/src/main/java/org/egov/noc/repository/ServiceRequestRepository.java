@@ -1,11 +1,13 @@
 package org.egov.noc.repository;
 
+import java.net.URI;
 import java.util.Map;
 
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.HttpClientErrorException;
@@ -106,5 +108,35 @@ public class ServiceRequestRepository {
 			throw new ServiceCallException("Error calling external service: " + e.getMessage());
 		}
 		return response;
+	}
+
+	/**
+	 * Fetch results using GET request with form-urlencoded data
+	 * @param uri URI endpoint with query parameters
+	 * @param headers Custom headers map
+	 * @return Response object
+	 */
+	public Object fetchResultUsingGetWithFormData(StringBuilder uri, Map<String, String> headers) {
+		try {
+			HttpHeaders httpHeaders = new HttpHeaders();
+			httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+			if (headers != null) {
+				headers.forEach((key, value) -> {
+					if (!"Content-Type".equalsIgnoreCase(key)) {
+						httpHeaders.add(key, value);
+					}
+				});
+			}
+			HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
+			URI finalUri = URI.create(uri.toString());
+			return restTemplate.exchange(finalUri, HttpMethod.GET, httpEntity, Map.class).getBody();
+		} catch (HttpClientErrorException e) {
+			log.error("External Service threw an Exception: ", e);
+			log.error("Response body: " + e.getResponseBodyAsString());
+			throw new ServiceCallException(e.getResponseBodyAsString());
+		} catch (Exception e) {
+			log.error("Exception while fetching from external service: ", e);
+			throw new ServiceCallException("Error calling external service: " + e.getMessage());
+		}
 	}
 }

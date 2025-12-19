@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * Model for NOC application status from AAI NOCAS
+ * Maps to the Data array items in the AAI API response
  */
 @Data
 @Builder
@@ -14,20 +15,77 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AAIApplicationStatus {
 
-    private String applicationNumber;
+    /**
+     * AAI NOCAS ID (e.g., "GUWA/NORTH_EAST/B/17122025/634977")
+     */
+    private String nocasId;
 
+    /**
+     * Unique ID - BPA Application Number (e.g., "PG-BP-2025-11-21-000602")
+     * This maps to sourceRefId in NOC table
+     */
+    private String uniqueId;
+
+    /**
+     * Authority Name (e.g., "ASSAMULB")
+     */
+    private String authorityName;
+
+    /**
+     * Status from AAI (e.g., "INPROCESS", "ISSUED", "REJECTED")
+     */
     private String status;
 
-    private String remarks;
+    /**
+     * PTE field from AAI response
+     */
+    private String pte;
 
-    private String nocCertificateNumber;
+    /**
+     * Issue Date from AAI
+     */
+    private String issueDate;
 
-    private Long issueDate;
+    /**
+     * Airport Name
+     */
+    private String airportName;
 
-    private Long validityDate;
+    /**
+     * Remarks from AAI
+     */
+    private String remark;
 
-    private byte[] documentData;
+    /**
+     * File Name
+     */
+    private String fileName;
 
-    private String documentFileName;
+    /**
+     * Action Type
+     */
+    private String actionType;
+
+    /**
+     * Query Type
+     */
+    private String queryType;
+
+    /**
+     * Search Type
+     */
+    private String searchType;
+
+    /**
+     * Error Code
+     */
+    private String errorCode;
+
+    /**
+     * Message
+     */
+    private String message;
+
+    private Boolean statusFlag;
 }
 
