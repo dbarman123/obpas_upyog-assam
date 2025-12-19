@@ -150,6 +150,7 @@ public class BPANotificationService {
 			if (null != config.getIsSMSEnabled()) {
 				if (config.getIsSMSEnabled()) {
 					log.info("SMS Requests :"+smsRequests.toString());
+					enrichSMSRequest(bpaRequest, smsRequests);
 					if (!CollectionUtils.isEmpty(smsRequests)) {
 						util.sendSMS(smsRequests, config.getIsSMSEnabled(), tenantId);
 					}
