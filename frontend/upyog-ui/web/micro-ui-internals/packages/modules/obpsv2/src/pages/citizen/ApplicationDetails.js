@@ -439,7 +439,7 @@ import {
     const handleNocValidate = async () => {
       if (!nocInput.trim()) {
         setShowToast({ key: "error", label: t("NOC_INPUT_REQUIRED") });
-        // Automatically close the toast after 3 seconds
+        // Automatically close the toast after 2 seconds
         setTimeout(() => {
           setShowToast(null);
         }, 2000);
@@ -457,7 +457,7 @@ import {
         setNocValidationResult(response);
       } catch (error) {
         setShowToast({ key: "error", label: t("NOC_VALIDATION_FAILED") });
-        // Automatically close the toast after 3 seconds
+        // Automatically close the toast after 2 seconds
         setTimeout(() => {
           setShowToast(null);
         }, 2000);
