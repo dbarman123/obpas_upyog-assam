@@ -438,7 +438,11 @@ import {
 
     const handleNocValidate = async () => {
       if (!nocInput.trim()) {
-        setActionError(t("NOC_INPUT_REQUIRED"));
+        setShowToast({ key: "error", label: t("NOC_INPUT_REQUIRED") });
+        // Automatically close the toast after 3 seconds
+        setTimeout(() => {
+          setShowToast(null);
+        }, 2000);
         return;
       }
       
@@ -452,8 +456,11 @@ import {
         });
         setNocValidationResult(response);
       } catch (error) {
-        console.error("NOC validation error:", error);
-        setActionError(t("NOC_VALIDATION_FAILED"));
+        setShowToast({ key: "error", label: t("NOC_VALIDATION_FAILED") });
+        // Automatically close the toast after 3 seconds
+        setTimeout(() => {
+          setShowToast(null);
+        }, 2000);
       }
     };
 
@@ -1500,6 +1507,17 @@ import {
                     <LinkButton label={t("VALIDATE_NOC")} onClick={handleNocValidate} />
                   </div>
                 </div>
+                {!nocInput.trim() && !(nocValidationResult?.Noc?.length > 0) && (
+                  <div style={{ marginTop: "16px" }}>
+                    <p>
+                      {t("DON'T_HAVE_ARN_NUMBER")}{" "}
+                      <LinkButton
+                        label={t("CLICK_HERE_TO_APPLY")}
+                        onClick={() => window.open("https://eodb.assam.gov.in/site/login", "_blank")}
+                      />
+                    </p>
+                  </div>
+                )}
                 {nocValidationResult && nocValidationResult.Noc && nocValidationResult.Noc.length > 0 && (
                   <div>
                     {nocValidationResult.Noc.map((noc, index) => {
