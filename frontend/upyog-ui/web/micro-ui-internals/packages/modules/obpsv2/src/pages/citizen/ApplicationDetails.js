@@ -1490,6 +1490,19 @@ import {
                 t={t}
                 isFlag={false}
               >
+                {/* Show "Click Here to Apply" only if nocInput is empty and no validation results exist */}
+                {!nocInput.trim() && !(nocValidationResult?.Noc?.length > 0) && (
+                  <div style={{ marginBottom: "16px" }}>
+                    <p>
+                      {t("DON'T_HAVE_ARN_NUMBER")}{" "}
+                      <LinkButton
+                        label={t("CLICK_HERE_TO_APPLY")}
+                        onClick={() => window.open("https://eodb.assam.gov.in/site/login", "_blank")}
+                      />
+                    </p>
+                  </div>
+                )}
+                {/* Input for NOC ARN Number */}
                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%", marginBottom: "16px" }}>
                   <div style={{ flex: 1 }}>
                     <Row
@@ -1507,17 +1520,6 @@ import {
                     <LinkButton label={t("VALIDATE_NOC")} onClick={handleNocValidate} />
                   </div>
                 </div>
-                {!nocInput.trim() && !(nocValidationResult?.Noc?.length > 0) && (
-                  <div style={{ marginTop: "16px" }}>
-                    <p>
-                      {t("DON'T_HAVE_ARN_NUMBER")}{" "}
-                      <LinkButton
-                        label={t("CLICK_HERE_TO_APPLY")}
-                        onClick={() => window.open("https://eodb.assam.gov.in/site/login", "_blank")}
-                      />
-                    </p>
-                  </div>
-                )}
                 {nocValidationResult && nocValidationResult.Noc && nocValidationResult.Noc.length > 0 && (
                   <div>
                     {nocValidationResult.Noc.map((noc, index) => {
