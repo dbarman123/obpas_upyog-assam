@@ -7,21 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * Response model for AAI NOCAS API
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AAIStatusResponse {
-
     private List<AAIApplicationStatus> applicationStatuses;
-
-    private String responseStatus;
-
-    private String errorMessage;
-
     private Boolean success;
+    private String errorMessage;
+    private String errorCode;
 }
-

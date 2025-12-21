@@ -51,6 +51,25 @@ public class UserService {
 	}
 
 	/**
+	 * Searches user by username for a given tenant.
+	 * This is used to fetch the internal microservice user (e.g. AAI internal user)
+	 * which is then set as RequestInfo.userInfo for internal microservice calls.
+	 *
+	 * @param userName  username of the internal user
+	 * @param tenantId  tenant id (generally state-level tenant, e.g. "as")
+	 * @return UserResponse containing matched users
+	 */
+	public UserResponse searchByUserName(String userName, String tenantId) {
+		UserSearchRequest userSearchRequest = new UserSearchRequest();
+		userSearchRequest.setUserType(config.getInternalMicroserviceUserType());
+		userSearchRequest.setUserName(userName);
+		// Use state-level tenant if applicable
+		userSearchRequest.setTenantId(centralInstanceUtil.getStateLevelTenant(tenantId));
+		StringBuilder uri = new StringBuilder(config.getUserHost()).append(config.getUserSearchEndpoint());
+		return userCall(userSearchRequest, uri);
+	}
+
+	/**
 	 * Creates userSearchRequest from nocSearchCriteria
 	 * 
 	 * @param criteria

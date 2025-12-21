@@ -45,6 +45,7 @@ import javax.validation.Valid;
 
 import org.egov.noc.config.ResponseInfoFactory;
 import org.egov.noc.service.NOCService;
+import org.egov.noc.service.NOCSchedulerService;
 import org.egov.noc.web.model.Noc;
 import org.egov.noc.web.model.NocRequest;
 import org.egov.noc.web.model.NocResponse;
@@ -57,6 +58,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 	
 @RestController
@@ -68,6 +70,9 @@ public class NOCController {
 	
 	@Autowired
 	private NOCService nocService;
+
+	@Autowired
+	private NOCSchedulerService nocSchedulerService;
 
 	@PostMapping(value = "/_create")
 	public ResponseEntity<NocResponse> create(@Valid @RequestBody NocRequest nocRequest) {
@@ -106,6 +111,43 @@ public class NOCController {
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(nocRequest.getRequestInfo(), true))
 				.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	/**
+	 * Manually triggers the AAI NOC status sync scheduler
+	 * This endpoint allows manual intervention to sync NOC statuses with AAI NOCAS
+	 * 
+	 * If uniqueId is provided, it will use the filter search API to fetch status for that specific UNIQUE ID.
+	 * Otherwise, it will use the regular API to fetch all records (same as scheduler).
+	 * 
+	 * @param requestInfoWrapper Request info wrapper
+	 * @param uniqueId Optional UNIQUE ID (BPA application number / sourceRefId) to sync a specific application
+	 * @return Response with sync status
+	 */
+	@PostMapping(value = "/_syncAAIStatus")
+	public ResponseEntity<NocResponse> syncAAIStatus(
+			@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+			@RequestParam(required = false) String uniqueId) {
+		try {
+			if (uniqueId != null && !uniqueId.trim().isEmpty()) {
+				// Use filter search API for specific UNIQUE ID
+				nocSchedulerService.triggerManualSyncByUniqueId(uniqueId.trim());
+			} else {
+				// Use regular API to fetch all records (same as scheduler)
+				nocSchedulerService.triggerManualSync();
+			}
+			NocResponse response = NocResponse.builder()
+					.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(
+							requestInfoWrapper.getRequestInfo(), true))
+					.build();
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			NocResponse response = NocResponse.builder()
+					.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(
+							requestInfoWrapper.getRequestInfo(), false))
+					.build();
+			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }

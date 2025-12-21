@@ -97,6 +97,8 @@ public class NOCConstants {
 
 	public static final String CIVIL_AVIATION_NOC_TYPE = "CIVIL_AVIATION";
 
+	public static final String CIVIL_NOC_WORKFLOW_CODE = "CIVIL_AVIATION_SRV";
+
 	// AAI Document Type Constants
 	public static final String DOC_TYPE_UNDERTAKING1A = "NOC.UNDERTAKING1A";
 	public static final String DOC_TYPE_SITEELEVATION = "NOC.SITEELEVATION";

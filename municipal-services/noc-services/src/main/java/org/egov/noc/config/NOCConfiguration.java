@@ -130,6 +130,17 @@ public class NOCConfiguration {
     @Value("${aai.nocas.enabled}")
     private Boolean aaiNocasEnabled;
 
+	// AAI NOCAS Authority credentials (for JSON status API)
+	@Value("${aai.nocas.authority.id}")
+	private String aaiNocasAuthorityId;
+
+	@Value("${aai.nocas.authority.key}")
+	private String aaiNocasAuthorityKey;
+
+	// AAI NOCAS Filter Search API URL (for single UNIQUE ID search)
+	@Value("${aai.nocas.filter.search.api.url:}")
+	private String aaiNocasFilterSearchApiUrl;
+
     // Scheduler Configuration
     @Value("${scheduler.aai.noc.status.sync.enabled}")
     private Boolean schedulerEnabled;
@@ -139,6 +150,13 @@ public class NOCConfiguration {
 
 	@Value("${assam.state.code}")
 	private String assamStateCode;
+
+	// Internal microservice user (AAI internal user for scheduler / internal calls)
+	@Value("${internal.microservice.user.username}")
+	private String internalMicroserviceUserName;
+
+	@Value("${internal.microservice.user.type}")
+	private String internalMicroserviceUserType;
 
 	@Value("${nocas.authority.name}")
 	private String authorityName;

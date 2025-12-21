@@ -154,7 +154,7 @@ public class AAINOCService {
 				addElement(doc, appData, "PERMISSIONTAKEN", app.getPermissionTaken());
 
 				BPA correspondingBPA = bpaMap.get(app.getApplicationNo());
-				List<SiteCoordinate> coordinates = extractCoordinatesFromBPA(correspondingBPA, requestInfo);
+				List<SiteCoordinate> coordinates = extractCoordinatesFromNOC(app.getNoc(), correspondingBPA, requestInfo);
 
 				Element siteDetails = doc.createElement("SiteDetails");
 				toAAI.appendChild(siteDetails);
@@ -425,43 +425,75 @@ public class AAINOCService {
 	}
 
 	/**
-	 * Extracts coordinates from BPA GeoLocation
-	 *
-	 * @param bpa         BPA object
-	 * @param requestInfo
-	 * @return List of coordinates
+	 * Extracts coordinates from NOC additionalDetails
+	 * For plot > 300 sq m: Extracts 4 corner coordinates (EAST, WEST, NORTH, SOUTH)
+	 * For plot <= 300 sq m: Extracts center coordinate (CENTER)
 	 */
-	private List<SiteCoordinate> extractCoordinatesFromBPA(BPA bpa, RequestInfo requestInfo) {
+	private List<SiteCoordinate> extractCoordinatesFromNOC(Noc noc, BPA bpa, RequestInfo requestInfo) {
 		List<SiteCoordinate> coordinates = new ArrayList<>();
-
-		/*if (bpa == null || bpa.getLandInfo() == null || bpa.getLandInfo().getAddress() == null) {
+		if (noc == null || noc.getAdditionalDetails() == null) {
 			return coordinates;
-		}*/
+		}
 
-		/*GeoLocation geoLocation = bpa.getLandInfo().getAddress().getGeoLocation();
-		if (geoLocation != null && geoLocation.getLatitude() != null && geoLocation.getLongitude() != null) {
-			SiteCoordinate coord = SiteCoordinate.builder()
-					.latitude(String.valueOf(geoLocation.getLatitude()))
-					.longitude(String.valueOf(geoLocation.getLongitude()))
-					.siteElevation(null)
-					.buildingHeight(null)
-					.structureNo(1)
-					.build();
-		}*/
+		@SuppressWarnings("unchecked")
+		Map<String, Object> additionalDetails = (Map<String, Object>) noc.getAdditionalDetails();
+
+		Object siteElevationObj = additionalDetails.get("siteElevation");
+		Double siteElevation = null;
+		if (siteElevationObj != null) {
+			try {
+				siteElevation = siteElevationObj instanceof Number 
+						? ((Number) siteElevationObj).doubleValue()
+						: Double.parseDouble(String.valueOf(siteElevationObj).trim());
+			} catch (Exception e) {
+				log.warn("Invalid siteElevation: {}", siteElevationObj);
+			}
+		}
 
 		Double buildingHeight = null;
-		if (bpa.getEdcrNumber() != null && !bpa.getEdcrNumber().isEmpty()) {
+		if (bpa != null && bpa.getEdcrNumber() != null && !bpa.getEdcrNumber().isEmpty()) {
 			buildingHeight = edcrService.fetchBuildingHeight(bpa.getEdcrNumber(), requestInfo);
 		}
-		
-		SiteCoordinate coord = SiteCoordinate.builder()
-				.latitude("26 26 27.9")
-				.longitude("91 26 27.6")
-				.siteElevation(42.0)
-				.buildingHeight(buildingHeight)
-				.structureNo(1)
-				.build();
-		coordinates.add(coord);
+
+		String[] directions = {"EAST", "WEST", "NORTH", "SOUTH"};
+		for (String direction : directions) {
+			Object dirObj = additionalDetails.get(direction);
+			if (dirObj instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> dirMap = (Map<String, Object>) dirObj;
+				Object lat = dirMap.get("latitude");
+				Object lon = dirMap.get("longitude");
+				if (lat != null && lon != null) {
+					coordinates.add(SiteCoordinate.builder()
+							.latitude(String.valueOf(lat))
+							.longitude(String.valueOf(lon))
+							.siteElevation(siteElevation)
+							.buildingHeight(buildingHeight)
+							.structureNo(1)
+							.build());
+				}
+			}
+		}
+
+		if (coordinates.isEmpty()) {
+			Object centerObj = additionalDetails.get("CENTER");
+			if (centerObj instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> centerMap = (Map<String, Object>) centerObj;
+				Object lat = centerMap.get("latitude");
+				Object lon = centerMap.get("longitude");
+				if (lat != null && lon != null) {
+					coordinates.add(SiteCoordinate.builder()
+							.latitude(String.valueOf(lat))
+							.longitude(String.valueOf(lon))
+							.siteElevation(siteElevation)
+							.buildingHeight(buildingHeight)
+							.structureNo(1)
+							.build());
+				}
+			}
+		}
+
 		return coordinates;
 	}
 
