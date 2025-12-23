@@ -1090,7 +1090,13 @@ import {
             <SiteReport submitReport={submitReport} onChange={setSubmitReport}/>
           )} */}
             <StatusTable>
-              <Row className="border-none" label={t("BPA_APPLICATION_NO")} text={bpa_details?.applicationNo || t("CS_NA")} />
+              <Row label={t("BPA_APPLICATION_NO")} text={bpa_details?.applicationNo || t("CS_NA")} />
+              {bpa_details?.planningPermitNo && (
+                <Row label={t("BPA_PLANNING_PERMIT_NO")} text={bpa_details.planningPermitNo || t("CS_NA")} />
+              )}
+              {bpa_details?.buildingPermitNo && (
+                <Row label={t("BPA_BUILDING_PERMIT_NO")} text={bpa_details.buildingPermitNo} />
+              )}
             </StatusTable>
                     
             <CardSubHeader style={{ fontSize: "24px" }}>{t("BPA_AREA_MAPPING")}</CardSubHeader>
