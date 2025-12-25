@@ -444,6 +444,24 @@ export const OBPSV2Services = {
           title: "BPA_APPLICATION_NUMBER_LABEL",
           value: bpa?.applicationNo || "NA",
         },
+    
+        ...(bpa?.planningPermitNo
+          ? [
+              {
+                title: "BPA_PLANNING_PERMIT_NO",
+                value: bpa.planningPermitNo,
+              },
+            ]
+          : []),
+    
+        ...(bpa?.buildingPermitNo
+          ? [
+              {
+                title: "BPA_BUILDING_PERMIT_NO",
+                value: bpa.buildingPermitNo,
+              },
+            ]
+          : []),
       ],
     };
     const landInfo = bpa?.landInfo || {};
