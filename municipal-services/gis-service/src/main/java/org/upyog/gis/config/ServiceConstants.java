@@ -7,7 +7,6 @@ public class ServiceConstants {
     public static final String FAILED = "failed";
 
     // MDMS Constants
-    public static final String TENANT_ID = "as";
     public static final String BPA_MODULE = "BPA";
     public static final String PERMISSIBLE_ZONE = "PermissibleZone";
 
