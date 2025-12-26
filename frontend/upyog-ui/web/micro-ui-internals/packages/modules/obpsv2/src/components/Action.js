@@ -299,6 +299,7 @@ const Action = ({ selectedAction, applicationNo, closeModal, setSelectedAction, 
           planningAreaCode:bpaDetails?.bpa?.[0]?.additionalDetails?.gisCode,
           applicationNo,
           rtpiId: bpaDetails?.bpa?.[0]?.rtpDetails?.rtpUUID,
+          occupancyType:occupancyType
         },
       };
 
@@ -309,6 +310,7 @@ const Action = ({ selectedAction, applicationNo, closeModal, setSelectedAction, 
       const response = await OBPSV2Services.gisService({ data: formData });
       const wfsResponse = response?.data?.wfsResponse;
       const landuse = wfsResponse?.landuse;
+      const validationStatus = response?.data?.validationStatus;
 
       // Store GIS response for display
       setGisResponse({
@@ -319,27 +321,22 @@ const Action = ({ selectedAction, applicationNo, closeModal, setSelectedAction, 
         village: wfsResponse?.village || "N/A",
         areaHectare: wfsResponse?.area_ha || "N/A",
         wardNo: wfsResponse?.ward_no || "N/A",
-        zone: wfsResponse?.zone || "N/A"
+        zone: wfsResponse?.zone || "N/A",
+        validationStatus: validationStatus || "N/A"
       });
-      // Filter MDMS Data using both occupancyType and landuse
-      const permissibleZones = mdmsData || [];
-      const filteredZones = permissibleZones.filter(
-        (zone) => zone?.code === occupancyType && zone?.typeOfLand?.toLowerCase() === landuse?.toLowerCase()
-      );
 
-      // store the filtered data in a new variable (or state if needed)
-      const matchedZone = filteredZones?.[0] || null;
 
-      // Check if permissible is "No"
-      if (matchedZone && matchedZone?.permissible === "No") {
+
+      // if Validation Status is Rejected
+      if (validationStatus === "REJECTED") {
         setShowGisResponse(true);
         setGisValidationSuccess(false);
         setError(t("NOT_PERMISSIBLE_FOR_CONSTRUCTION"));
         return false;
       }
 
-      // If permissible is "Yes"
-      if (matchedZone && matchedZone?.permissible === "Yes") {
+      // if Validation Status is Accepted
+      if (validationStatus === "ACCEPTED") {
         setShowGisResponse(true);
         setGisValidationSuccess(true);
         // Call update API here as normal
@@ -350,7 +347,7 @@ const Action = ({ selectedAction, applicationNo, closeModal, setSelectedAction, 
        // Fallback if no matching zone found
       setShowGisResponse(true);
       setGisValidationSuccess(false);
-      setError(t("NO_MATCHING_PERMISSIBLE_ZONE_FOUND"));
+      setError(t("NO_MATCHING_PERMISSIBLE_ZONE_FOUND" || validationStatus));
       return false;
     } catch (err) {
       console.error("GIS Validation Error:", err);
@@ -489,6 +486,9 @@ const Action = ({ selectedAction, applicationNo, closeModal, setSelectedAction, 
                     <div>
                       <strong>{t("WARD_NO")}:</strong> {gisResponse.wardNo}
                     </div>
+                    <div>
+                        <strong>{t("VALIDATION_STATUS")}:</strong> {gisResponse.validationStatus}
+                      </div>
 
                    <div style={{ gridColumn: "span 2", textAlign: "center", marginTop: "20px" }}>
                     <button
