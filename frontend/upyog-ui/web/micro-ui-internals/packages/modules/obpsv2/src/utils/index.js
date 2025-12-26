@@ -101,19 +101,19 @@ export const bpaPayload = async(data) => {
   const correspondenceAddress = data?.address?.sameAsPermanent
     ? { ...permanentAddress, addressCategory: "CORRESPONDENCE",  addressType: "CORRESPONDENCE_ADDRESS", }
     : {
-      addressLine1: data?.address?.correspondence?.addressLine1,
-      addressLine2: data?.address?.correspondence?.addressLine2,
-      addressCategory: "CORRESPONDENCE",
-      addressType: "CORRESPONDENCE_ADDRESS",
-      city: data?.address?.correspondence?.city?.code,
-      country: "INDIA",
-      localityCode: data?.address?.correspondence?.city?.code,
-      district: data?.address?.correspondence?.district?.code,
-      houseNo: data?.address?.correspondence?.houseNo,
-      pincode: data?.address?.correspondence?.pincode,
-      state: data?.address?.correspondence?.state?.code,
-      tenantId: data?.tenantId,
-    };
+        addressLine1: data?.address?.correspondence?.addressLine1,
+        addressLine2: data?.address?.correspondence?.addressLine2,
+        addressCategory: "CORRESPONDENCE",
+        addressType: "CORRESPONDENCE_ADDRESS",
+        city: data?.address?.correspondence?.city?.code,
+        country: "INDIA",
+        localityCode: data?.address?.correspondence?.city?.code,
+        district: data?.address?.correspondence?.district?.code,
+        houseNo: data?.address?.correspondence?.houseNo,
+        pincode: data?.address?.correspondence?.pincode,
+        state: data?.address?.correspondence?.state?.code,
+        tenantId: data?.tenantId,
+      };
 
   // Final Payload
   const formdata = {
@@ -149,10 +149,7 @@ export const bpaPayload = async(data) => {
         ...(data?.areaMapping?.bpAuthority?.code === "GRAM_PANCHAYAT" && {
           villageName: data?.areaMapping?.villageName?.code,
         }),
-        ...(data?.areaMapping?.bpAuthority?.code === "MUNICIPAL_CORPORATION" && {
-          mouza: data?.areaMapping?.mouza?.code,
-        }),
-      },
+      },      
 
       rtpDetails: {
         rtpCategory: data?.land?.rtpCategory?.code,
@@ -168,12 +165,12 @@ export const bpaPayload = async(data) => {
         oldPattaNumber: data?.land?.oldPattaNumber,
         totalPlotArea: data?.land?.totalPlotArea,
         documents:
-          data?.land?.documents?.map((doc) => ({
-            documentType: doc?.documentType || "",
-            documentUid: doc?.documentUid || "",
-            fileStoreId: doc?.fileStoreId || "",
-            id: doc?.id || "",
-          })) || [],
+        data?.land?.documents?.map((doc) => ({
+          documentType: doc?.documentType || "",
+          documentUid: doc?.documentUid || "",
+          fileStoreId: doc?.fileStoreId || "",
+          id: doc?.id || "",
+        })) || [],
         address:{
           addressLine1: data?.address?.permanent?.addressLine1,
           addressLine2: data?.address?.permanent?.addressLine2,
@@ -200,7 +197,7 @@ export const bpaPayload = async(data) => {
             motherName: data?.applicant?.motherName,
             permanentAddress,
             correspondenceAddress,
-            active: true
+            active: true 
           },
         ],
         ownerAddresses: [],
@@ -223,7 +220,7 @@ export const bpaPayload = async(data) => {
   return formdata;
 };
 
-export const bpaEditPayload = async (formData) => {
+export const bpaEditPayload = async (formData) => { 
   const applicationNo = window.location.pathname.split("/").find((seg, i, arr) => arr[i - 1] === "editApplication");
   const tenantId = formData.tenantId
   const searchRes = await OBPSV2Services.search({
