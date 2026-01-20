@@ -7,6 +7,7 @@ import SelectMobileNumber from "./SelectMobileNumber";
 import SelectOtp from "./SelectOtp";
 import SelectName from "./SelectName";
 import { subYears, format } from "date-fns";
+import SelectRtpMobileNumber from "./SelectRtpMobileNumber";
 const TYPE_REGISTER = { type: "register" };
 const TYPE_LOGIN = { type: "login" };
 const DEFAULT_USER = "digit-user";
@@ -45,6 +46,25 @@ const Login = ({ stateCode, isUserRegistered = true }) => {
   const [canSubmitName, setCanSubmitName] = useState(false);
   const [canSubmitOtp, setCanSubmitOtp] = useState(true);
   const [canSubmitNo, setCanSubmitNo] = useState(true);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const existingUser = Digit.UserService.getUser();
+    const currentTenant = Digit.ULBService.getCitizenCurrentTenant(true);
+    
+    if (existingUser?.access_token && currentTenant) {
+      // User is already logged in with tenant selected, redirect to home
+      history.replace("/upyog-ui/citizen");
+      return;
+    }
+  }, [history]);
+
+  // Function to determine if it's RTP login, based on URL path, check the path and if it includes '/rtp-login' returns true
+   const isRtpLogin = () => {
+    return location.pathname.includes('/rtp-login');
+  };
+
 
   useEffect(() => {
     let errorTimeout;
@@ -111,6 +131,7 @@ const Login = ({ stateCode, isUserRegistered = true }) => {
       ...mobileNumber,
       tenantId: stateCode,
       userType: "citizen",
+      rtpLogin: isRtpLogin(),
     };
     if (isUserRegistered) {
       const [res, err] = await sendOtp({ otp: { ...data, ...TYPE_LOGIN } });
@@ -120,17 +141,13 @@ const Login = ({ stateCode, isUserRegistered = true }) => {
         return;
       } else {
         setCanSubmitNo(true);
-        if (!(location.state && location.state.role === "FSM_DSO")) {
-          history.push(`/upyog-ui/citizen/register/name`, { from: getFromLocation(location.state, searchParams), data: data });
+          if (isRtpLogin()) {
+          setError(t("RTP_USER_NOT_REGISTERED_PLAESE_CONTACT_TO_DEPARTMENT"));
+          return;
         }
-      }
-      if (location.state?.role) {
-        setCanSubmitNo(true);
-        setError(location.state?.role === "FSM_DSO" ? t("ES_ERROR_DSO_LOGIN") : "User not registered.");
-      }
-      if (location.state?.role) {
-        setCanSubmitNo(true);
-        setError(location.state?.role === "WT_VENDOR" ? t("ES_ERROR_WT_VENDOR_LOGIN") : "User not registered.");
+          // Show modal instead of redirecting
+          setShowRegistrationModal(true);
+          return;
       }
     } else {
       const [res, err] = await sendOtp({ otp: { ...data, ...TYPE_REGISTER } });
@@ -142,6 +159,19 @@ const Login = ({ stateCode, isUserRegistered = true }) => {
       setCanSubmitNo(true);
     }
   };
+
+const ePramaanRegister = async () => {
+  try {
+    const data = await Digit.EPramaanService.register({ module: "SSO" });
+    const redirectUrl = data.redirectURL;
+    localStorage.setItem("epramaanData", JSON.stringify(data?.epramaanData));
+    window.location.href = redirectUrl;
+  } catch (error) {
+    setError(t("EPRAMAAN_REGISTRATION_FAILED"));
+  }
+  setShowRegistrationModal(false);
+};
+
   function selectCommencementDate(value) {
     const appDate= new Date();
     const proposedDate= format(subYears(appDate, 18), 'yyyy-MM-dd').toString();
@@ -208,7 +238,9 @@ const Login = ({ stateCode, isUserRegistered = true }) => {
         if (window?.globalConfigs?.getConfig("ENABLE_SINGLEINSTANCE")) {
           info.tenantId = Digit.ULBService.getStateId();
         }
-
+        //Set RTP login flag in session so that we determine the user type throughout the application and to prevent Architect from applying BPA
+        Digit.SessionStorage.set("isRTPLogin", isRtpLogin());
+        
         setUser({ info, ...tokens });
       } else if (!isUserRegistered) {
         const requestData = {
@@ -261,6 +293,17 @@ const Login = ({ stateCode, isUserRegistered = true }) => {
         <AppContainer>
           <BackButton />
           <Route path={`${path}`} exact>
+            {isRtpLogin() ? (
+              <SelectRtpMobileNumber
+                onSelect={selectMobileNumber}
+                config={stepItems[0]}
+                mobileNumber={params.mobileNumber || ""}
+                onMobileChange={handleMobileChange}
+                canSubmit={canSubmitNo}
+                showRegisterLink={isUserRegistered && !location.state?.role}
+                t={t}
+              />
+            ) : (
             <SelectMobileNumber
               onSelect={selectMobileNumber}
               config={stepItems[0]}
@@ -268,8 +311,11 @@ const Login = ({ stateCode, isUserRegistered = true }) => {
               onMobileChange={handleMobileChange}
               canSubmit={canSubmitNo}
               showRegisterLink={isUserRegistered && !location.state?.role}
+              showRegistrationModal={showRegistrationModal}
+              setShowRegistrationModal={setShowRegistrationModal}
+              ePramaanRegister={ePramaanRegister}
               t={t}
-            />
+            />)}
           </Route>
           <Route path={`${path}/otp`}>
             <SelectOtp

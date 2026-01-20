@@ -62,6 +62,8 @@ const AreaMapping = () => {
     };
     
     Digit.SessionStorage.set("CITIZEN.AREA.MAPPING", areaMappingStep);
+     // Set citizen login flag (not RTP login) in session so that we determine the user type throughout the application and hide Login as RTP button
+      Digit.SessionStorage.set("isRTPLogin", false);
     
     // Set the selected tenant
     if (concernedAuthority?.code) {
@@ -84,7 +86,7 @@ const AreaMapping = () => {
           </CardHeader>
           
           <Link 
-            to={`/upyog-ui/citizen/select-location`}
+            to={`/upyog-ui/citizen/rtp/select-location`}
             style={{
               position: "absolute",
               top: "0",

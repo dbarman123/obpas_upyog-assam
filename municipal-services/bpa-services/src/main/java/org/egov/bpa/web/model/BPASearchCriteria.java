@@ -31,6 +31,8 @@ public class BPASearchCriteria {
 
     private String mobileNumber;
 
+    private String masterPlanningArea;
+
     @JsonIgnore
     private List<String> landId;
 
@@ -66,6 +68,10 @@ public class BPASearchCriteria {
     private String name;
 
     private String district;
+
+    @JsonIgnore
+    @Builder.Default
+    private Boolean isInboxSearch = false;
 
     public boolean isEmpty() {
         return (this.tenantId == null && this.status == null && this.ids == null && this.applicationNo == null

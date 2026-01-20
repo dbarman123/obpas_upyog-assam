@@ -159,6 +159,11 @@ debugger
     }));
   }
   let updatedData = replaceDigitUiWithUpyogUi(links);
+    // Filter out RTP registration link based on login type, if logged in as citizen hide the link else show it
+  const isRTPLogin = Digit.SessionStorage.get("isRTPLogin");
+  if (!isRTPLogin) {
+    updatedData = updatedData.filter(item => item.name !== "BPA_APPLY_FOR_REGISTER_AS_RTP");
+  }
   const rtpObject=updatedData?.[2]
   
   updatedData=[
