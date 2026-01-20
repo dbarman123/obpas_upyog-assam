@@ -3,7 +3,7 @@ import React, { Fragment } from "react";
 import { Switch, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Search from "../citizen/Search";
-
+import OcBuildingPermit from "../../components/ocBuildingPermit";
 
 const EmployeeApp = ({ path }) => {
   const location = useLocation()
@@ -22,7 +22,7 @@ const EmployeeApp = ({ path }) => {
          <PrivateRoute path={`${path}/application/:acknowledgementIds/:tenantId`} component={BPAApplicationDetails}></PrivateRoute>
         <PrivateRoute path={`${path}/rtp/inbox`} component={(props) => <RTPInbox {...props} parentRoute={path} />} />
         <PrivateRoute path={`${path}/search/application`} component={(props) => <Search {...props} parentRoute={path} />} />
-
+        <PrivateRoute path={`${path}/ocbpa`} component={OcBuildingPermit}/>
       </Switch>
     </Fragment>
   )
