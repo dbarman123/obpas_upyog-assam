@@ -96,6 +96,9 @@ public class BPAConfiguration {
 
 	@Value("${persister.update.buildingplan.adhoc.topic}")
 	private String updateAdhocTopic;
+	
+	@Value("${persister.save.oc.topic}")
+	private String saveOcTopic;
 
 	// Location Config
 	@Value("${egov.location.host}")
