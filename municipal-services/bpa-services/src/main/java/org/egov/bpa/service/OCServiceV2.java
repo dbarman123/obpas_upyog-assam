@@ -69,9 +69,6 @@ public class OCServiceV2 {
 	private EnrichmentService enrichmentService;
 
 	@Autowired
-	private OcBpaValidationService ocBpaValidationService;
-
-	@Autowired
 	private BPAService bpaService;
 
 
