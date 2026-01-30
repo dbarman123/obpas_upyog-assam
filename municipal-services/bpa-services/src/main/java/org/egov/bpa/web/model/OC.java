@@ -116,6 +116,8 @@ public class OC {
 	private Boolean isPaymentDone = false;
 
 	private String ocFileStoreId;
+	private String signedOcFileStoreId;
+	private Boolean isPanalityApplicable = false;
 
 	// attachments
 	private String planningPermit;

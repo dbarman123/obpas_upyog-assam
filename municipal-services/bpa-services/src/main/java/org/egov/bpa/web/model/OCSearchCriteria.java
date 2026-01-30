@@ -1,6 +1,9 @@
 
 package org.egov.bpa.web.model;
+
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,12 +22,18 @@ public class OCSearchCriteria {
 
 	private List<String> ids;
 
-	private String phoneNumber;
+	private String mobileNumber;
 
 	private String nocNo;
 
-	private String email;
-	
 	private String applicationNo;
 
+	private String bpaApplicationNo;
+
+	private String name;
+	
+	private String occupancyCertificateNo;
+
+	@JsonIgnore
+	private List<String> landId;
 }

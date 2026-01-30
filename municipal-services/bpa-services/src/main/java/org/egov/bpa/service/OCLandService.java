@@ -35,15 +35,6 @@ public class OCLandService {
 		StringBuilder uri = new StringBuilder(config.getLandInfoHost());
 		uri.append(config.getLandInfoCreate());
 		LandInfo info = ocRequest.getOc().getLandInfo();
-//		if (info.getOwners() == null) {
-//			info.setOwners(ocRequest.getOc().getOwners());
-//		}
-		try {
-			log.info("LandInfo to check owners:: {}", new ObjectMapper().writeValueAsString(ocRequest.getOc().getLandInfo()));
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		LandInfoRequest landRequest = new LandInfoRequest();
 		landRequest.setRequestInfo(ocRequest.getRequestInfo());
 		landRequest.setLandInfo(ocRequest.getOc().getLandInfo());

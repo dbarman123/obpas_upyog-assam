@@ -1,25 +1,35 @@
 package org.egov.bpa.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import org.apache.commons.lang3.StringUtils;
 import org.egov.bpa.config.BPAConfiguration;
 import org.egov.bpa.repository.IdGenRepository;
 import org.egov.bpa.repository.OCRepository;
+import org.egov.bpa.repository.ServiceRequestRepository;
 import org.egov.bpa.util.BPAErrorConstants;
 import org.egov.bpa.util.BPAUtil;
 import org.egov.bpa.util.OCErrorConstants;
+import org.egov.bpa.web.model.BPA;
+import org.egov.bpa.web.model.BPASearchCriteria;
 import org.egov.bpa.web.model.OC;
 import org.egov.bpa.web.model.OCRequest;
 import org.egov.bpa.web.model.OCSearchCriteria;
+import org.egov.bpa.web.model.RequestInfoWrapper;
 import org.egov.bpa.web.model.idgen.IdResponse;
+import org.egov.bpa.web.model.landInfo.LandInfo;
+import org.egov.bpa.web.model.landInfo.LandInfoRequest;
+import org.egov.bpa.web.model.landInfo.LandSearchCriteria;
 import org.egov.bpa.workflow.WorkflowIntegrator;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.utils.MultiStateInstanceUtil;
@@ -27,6 +37,9 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,58 +51,62 @@ public class OCServiceV2 {
 	private MultiStateInstanceUtil centralInstanceUtil;
 
 	@Autowired
-	private MdmsCacheService mdmsCacheService;
-
-	@Autowired
 	private BPAUtil util;
 
 	@Autowired
-	private WorkflowIntegrator wfIntegrator;
-
-	@Autowired
-	private OCRepository repository;
+	private OCRepository ocRepository;
 
 	@Autowired
 	private BPAConfiguration config;
 
 	@Autowired
 	private IdGenRepository idGenRepository;
-	
+
 	@Autowired
 	private OCLandService ocLandService;
-	
+
 	@Autowired
 	private EnrichmentService enrichmentService;
+
+	@Autowired
+	private OcBpaValidationService ocBpaValidationService;
+
+	@Autowired
+	private BPAService bpaService;
+
+
+	@Autowired
+	private ServiceRequestRepository serviceRequestRepository;
+
+	@Autowired
+	private ObjectMapper mapper;
 
 	public OC createOC(OCRequest ocRequest) {
 		if (null != ocRequest.getOc()) {
 
 			RequestInfo requestInfo = ocRequest.getRequestInfo();
 			String stateTenantId = centralInstanceUtil.getStateLevelTenant(ocRequest.getOc().getTenantId());
-			String tenantId = ocRequest.getOc().getAreaMapping().getConcernedAuthority();
+			// String tenantId = ocRequest.getOc().getAreaMapping().getConcernedAuthority();
 
 			// Get MDMS Data for request validation
-			 Object mdmsTenantData = mdmsCacheService.getMdmsData(requestInfo, tenantId);
-			 Object mdmsStateTenantData = mdmsCacheService.getMdmsData(requestInfo, stateTenantId);
+			//	Object mdmsTenantData = mdmsCacheService.getMdmsData(requestInfo, tenantId);
+			//	Object mdmsStateTenantData = mdmsCacheService.getMdmsData(requestInfo, stateTenantId);
 
-			 if(centralInstanceUtil.isTenantIdStateLevel(ocRequest.getOc().getTenantId())) {
-				 throw new CustomException(OCErrorConstants.INVALID_TENANT, "Application cannot be create at StateLevel");
-			 }
+			if (centralInstanceUtil.isTenantIdStateLevel(ocRequest.getOc().getTenantId())) {
+				throw new CustomException(OCErrorConstants.INVALID_TENANT,
+						"Application cannot be create at StateLevel");
+			}
 
-//			 Since approval number should be generated at approve stage
-			 if(StringUtils.isNotEmpty(ocRequest.getOc().getApprovalNo())) {
-				 ocRequest.getOc().setApprovalNo(null);
-			 }
-//			 this.validateOCCreation(ocRequest, mdmsTenantData, mdmsStateTenantData);
+			//this.validateOCCreation(ocRequest, mdmsTenantData, mdmsStateTenantData);
 			ocRequest.getOc().setApplicationDate(util.getCurrentTimestampMillis());
 
 			ocLandService.addLandInfoToOC(ocRequest);
-			
+
 			enrichmentService.enrichOCCreateRequest(ocRequest, null);
-			
+
 			// wfIntegrator.callWorkFlow(ocRequest);
 			log.info("OC Request:: {}", ocRequest);
-			repository.save(ocRequest);
+			ocRepository.save(ocRequest);
 		}
 		return ocRequest.getOc();
 	}
@@ -127,10 +144,10 @@ public class OCServiceV2 {
 	}
 
 	private void validateUpdateOC(@Valid OCRequest ocRequest) {
-		if(StringUtils.isNotEmpty(ocRequest.getOc().getId())) {
-			throw new CustomException(BPAErrorConstants.UPDATE_ERROR, "Application Not found in the System to Update");	
+		if (StringUtils.hasText(ocRequest.getOc().getId())) {
+			throw new CustomException(BPAErrorConstants.UPDATE_ERROR, "Application Not found in the System to Update");
 		}
-		
+
 		getOcByOcId(ocRequest);
 	}
 
@@ -139,8 +156,135 @@ public class OCServiceV2 {
 		OCSearchCriteria criteria = OCSearchCriteria.builder().ids(Collections.singletonList(ocRequest.getOc().getId()))
 				.tenantId(ocRequest.getOc().getTenantId()).build();
 
-//		List<OC> oc = repository.getOCDetail(criteria);
+		//		List<OC> oc = repository.getOCDetail(criteria);
 		return null;
 	}
 
+	public List<OC> searchOC(OCSearchCriteria criteria, RequestInfo requestInfo) {
+
+		List<OC> ocList = new ArrayList<>();
+
+		// Search by OC applicationNo or OC number
+		if (StringUtils.hasText(criteria.getApplicationNo())
+					|| StringUtils.hasText(criteria.getOccupancyCertificateNo())) {
+
+			ocList = ocRepository.search(criteria);
+			enrichOCWithLandInfo(ocList, criteria.getTenantId(), requestInfo);
+			return ocList;
+		}
+
+		// Search by mobile number
+		if (StringUtils.hasText(criteria.getMobileNumber())) {
+
+			ocList = ocRepository.searchByMobileNumber(criteria);
+			enrichOCWithLandInfo(ocList, criteria.getTenantId(), requestInfo);
+			return ocList;
+		}
+
+		return ocList;
+	}
+
+	private void enrichOCWithLandInfo(List<OC> ocList, String tenantId,
+			RequestInfo requestInfo) {
+
+		if (CollectionUtils.isEmpty(ocList)) {
+			return;
+		}
+
+		Map<String, BPA> bpaMap = new HashMap<>();
+		Map<String, LandInfo> landMap = new HashMap<>();
+
+		for (OC oc : ocList) {
+
+			// OC created from BPA
+			if (StringUtils.hasText(oc.getBpaApplicationNo())) {
+				BPA bpa = bpaMap.get(oc.getBpaApplicationNo());
+				if (bpa == null) {
+					BPASearchCriteria bpaCriteria = BPASearchCriteria.builder()
+							.tenantId(tenantId)
+							.applicationNo(oc.getBpaApplicationNo())
+							.build();
+
+					List<BPA> bpaList = bpaService.search(bpaCriteria, requestInfo);
+					if (!CollectionUtils.isEmpty(bpaList)) {
+						bpa = bpaList.get(0);
+						bpaMap.put(oc.getBpaApplicationNo(), bpa);
+					}
+				}
+
+				if (bpa != null && bpa.getLandInfo() != null) {
+					oc.setLandInfo(bpa.getLandInfo());
+					oc.setLandId(bpa.getLandInfo().getId());
+				}
+			}
+			// Manual OC → landInfo fetch from Land service
+			else {
+				if (!StringUtils.hasText(oc.getLandId())) {
+					continue;
+				}
+
+				LandInfo landInfo = landMap.get(oc.getLandId());
+				if (landInfo == null) {
+					landInfo = searchLandById(tenantId, oc.getLandId(),	requestInfo);
+
+					if (landInfo == null) {
+						log.warn("No LandInfo found by landId: {}", oc.getLandId());
+						continue;
+					}
+					landMap.put(oc.getLandId(), landInfo);
+				}
+				oc.setLandInfo(landInfo);
+			}
+		}
+	}
+
+	public LandInfo searchLandById(String tenantId,	String landId,
+			RequestInfo requestInfo) {
+
+		LandSearchCriteria landCriteria = new LandSearchCriteria();
+		landCriteria.setTenantId(tenantId);
+		landCriteria.setIds(Collections.singletonList(landId));
+
+		StringBuilder url = getLandSerchURLWithParams(requestInfo, landCriteria);
+
+		RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
+
+		LinkedHashMap responseMap = (LinkedHashMap) serviceRequestRepository.fetchResult(url, requestInfoWrapper);
+
+		if (responseMap == null || responseMap.get("LandInfo") == null) {
+			return null;
+		}
+		ArrayList<?> landInfo = (ArrayList<?>) responseMap.get("LandInfo");
+
+		if (CollectionUtils.isEmpty(landInfo)) {
+	        return null;
+	    }
+
+	    return mapper.convertValue(landInfo.get(0), LandInfo.class);
+	}
+
+	private StringBuilder getLandSerchURLWithParams(RequestInfo requestInfo, LandSearchCriteria landcriteria) {
+		StringBuilder uri = new StringBuilder(config.getLandInfoHost());
+		uri.append(config.getLandInfoSearch());
+		uri.append("?tenantId=");
+		uri.append(landcriteria.getTenantId());
+//		LandSearchCriteria landSearchCriteria = new LandSearchCriteria();
+//		LandInfoRequest landRequest = new LandInfoRequest();
+//		landRequest.setRequestInfo(requestInfo);
+		if (landcriteria.getIds() != null) {
+//			landSearchCriteria.setIds(landcriteria.getIds());
+			uri.append("&").append("ids=");
+			for (int i = 0; i < landcriteria.getIds().size(); i++) {
+				if (i != 0) {
+					uri.append(",");
+				}
+				uri.append(landcriteria.getIds().get(i));
+			}
+		} else if (landcriteria.getMobileNumber() != null) {
+//			landSearchCriteria.setMobileNumber(landcriteria.getMobileNumber());
+			uri.append("&").append("mobileNumber=");
+			uri.append(landcriteria.getMobileNumber());
+		}
+		return uri;
+	}
 }

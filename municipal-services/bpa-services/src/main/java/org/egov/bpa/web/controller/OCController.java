@@ -1,11 +1,14 @@
 package org.egov.bpa.web.controller;
 
 import java.util.Collections;
+import java.util.List;
 
 import javax.validation.Valid;
 
 import org.egov.bpa.service.OCServiceV2;
 import org.egov.bpa.util.ResponseInfoFactory;
+import org.egov.bpa.web.model.BPA;
+import org.egov.bpa.web.model.BPAResponse;
 import org.egov.bpa.web.model.OC;
 import org.egov.bpa.web.model.OCRequest;
 import org.egov.bpa.web.model.OCResponse;
@@ -65,10 +68,15 @@ public class OCController {
 	}
 	
 
+	@PostMapping(value = "/_search")
 	public ResponseEntity<?> search(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
 			@Valid @ModelAttribute OCSearchCriteria criteria) {
 
-		
-		return null;
+		List<OC> ocList = ocServiceV2.searchOC(criteria, requestInfoWrapper.getRequestInfo());
+		//int count = ocServiceV2.getOCCount(criteria, requestInfoWrapper.getRequestInfo());
+		OCResponse response = OCResponse.builder().ocs(ocList).responseInfo(
+				responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }
