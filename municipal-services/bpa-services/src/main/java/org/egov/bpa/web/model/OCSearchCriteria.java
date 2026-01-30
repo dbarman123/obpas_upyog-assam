@@ -20,11 +20,9 @@ public class OCSearchCriteria {
 
 	private String tenantId;
 
-	private List<String> ids;
+	private String id;
 
 	private String mobileNumber;
-
-	private String nocNo;
 
 	private String applicationNo;
 

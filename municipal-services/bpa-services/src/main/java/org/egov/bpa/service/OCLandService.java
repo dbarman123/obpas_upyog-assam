@@ -31,10 +31,11 @@ public class OCLandService {
 	@Autowired
 	private ObjectMapper mapper;
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void addLandInfoToOC(OCRequest ocRequest) {
 		StringBuilder uri = new StringBuilder(config.getLandInfoHost());
 		uri.append(config.getLandInfoCreate());
-		LandInfo info = ocRequest.getOc().getLandInfo();
+//		LandInfo info = ocRequest.getOc().getLandInfo();
 		LandInfoRequest landRequest = new LandInfoRequest();
 		landRequest.setRequestInfo(ocRequest.getRequestInfo());
 		landRequest.setLandInfo(ocRequest.getOc().getLandInfo());

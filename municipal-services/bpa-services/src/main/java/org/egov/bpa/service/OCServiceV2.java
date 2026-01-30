@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -28,9 +26,7 @@ import org.egov.bpa.web.model.OCSearchCriteria;
 import org.egov.bpa.web.model.RequestInfoWrapper;
 import org.egov.bpa.web.model.idgen.IdResponse;
 import org.egov.bpa.web.model.landInfo.LandInfo;
-import org.egov.bpa.web.model.landInfo.LandInfoRequest;
 import org.egov.bpa.web.model.landInfo.LandSearchCriteria;
-import org.egov.bpa.workflow.WorkflowIntegrator;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.utils.MultiStateInstanceUtil;
 import org.egov.tracer.model.CustomException;
@@ -39,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -150,7 +147,7 @@ public class OCServiceV2 {
 
 	private List<OC> getOcByOcId(@Valid OCRequest ocRequest) {
 
-		OCSearchCriteria criteria = OCSearchCriteria.builder().ids(Collections.singletonList(ocRequest.getOc().getId()))
+		OCSearchCriteria criteria = OCSearchCriteria.builder().id(ocRequest.getOc().getId())
 				.tenantId(ocRequest.getOc().getTenantId()).build();
 
 		//		List<OC> oc = repository.getOCDetail(criteria);
@@ -161,9 +158,11 @@ public class OCServiceV2 {
 
 		List<OC> ocList = new ArrayList<>();
 
-		// Search by OC applicationNo or OC number
+		// Direct search from oc tbl
 		if (StringUtils.hasText(criteria.getApplicationNo())
-					|| StringUtils.hasText(criteria.getOccupancyCertificateNo())) {
+				|| StringUtils.hasText(criteria.getOccupancyCertificateNo())
+				|| StringUtils.hasText(criteria.getTenantId())
+				|| StringUtils.hasText(criteria.getBpaApplicationNo())) {
 
 			ocList = ocRepository.search(criteria);
 			enrichOCWithLandInfo(ocList, criteria.getTenantId(), requestInfo);

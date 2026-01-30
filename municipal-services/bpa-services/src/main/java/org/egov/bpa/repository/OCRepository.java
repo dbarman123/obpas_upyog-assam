@@ -17,6 +17,7 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +70,15 @@ public class OCRepository {
 			preparedStmtList.add(criteria.getOccupancyCertificateNo());
 		}
 
+		if (StringUtils.hasText(criteria.getId())) {
+			query.append(" AND oc.id = ? ");
+			preparedStmtList.add(criteria.getId());
+		}
+		
+		if (StringUtils.hasText(criteria.getBpaApplicationNo())) {
+			query.append(" AND oc.bpa_application_no = ? ");
+			preparedStmtList.add(criteria.getBpaApplicationNo());
+		}
 		query.append(" ORDER BY oc.application_date DESC ");
 
 		log.info("OC search query: {}", query);
