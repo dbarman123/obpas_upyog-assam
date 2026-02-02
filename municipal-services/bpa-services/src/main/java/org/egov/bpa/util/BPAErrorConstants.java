@@ -46,6 +46,14 @@ public class BPAErrorConstants {
 	public static final String BPA_INVALID_DOCUMENTTYPE = "BPA INVALID DOCUMENTTYPE";
 
 	public static final String INVALID_OCCUPANCY = "INVALID OCCUPANCY TYPE";
+	
+	public static final String ERR_WORKFLOW_SERVICE = "ERR_WORKFLOW_SERVICE";
+
+	public static final String ERR_TECHNICAL = "ERR_TECHNICAL";
+
+	public static final String ERR_BAD_REQUEST = "ERR_BAD_REQUEST";
+
+	public static final String ERR_TECHNICAL_MSG = "Internal server error occurred.";
 
 	public static final String INVALID_RISK_TYPE = "INVALID RISK TYPE";
 

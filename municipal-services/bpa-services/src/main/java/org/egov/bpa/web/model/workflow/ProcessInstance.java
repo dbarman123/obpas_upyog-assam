@@ -95,6 +95,9 @@ public class ProcessInstance   {
 
         @JsonProperty("auditDetails")
         private AuditDetails auditDetails;
+        
+        @JsonProperty("additionalDetails")
+    	private Object additionalDetails = null;
 
 
         public ProcessInstance addDocumentsItem(Document documentsItem) {

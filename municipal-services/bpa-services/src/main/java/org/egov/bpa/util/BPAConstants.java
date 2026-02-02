@@ -16,6 +16,11 @@ public class BPAConstants {
 	public static final String BPA_MODULE = "BPA";
 
 	public static final String BPA_BusinessService = "BPA";
+	
+	
+	public static final String OC_BUSINESSSERVICE = "BPA_OC_SERVICE";
+
+	public static final String OC_MODULE_NAME = "bpa-oc-service";
 
 	public static final String FORWARDED_TO_TECHNICAL_ENGINEER_MB= "FORWARDED_TO_TECHNICAL_ENGINEER_MB";
 

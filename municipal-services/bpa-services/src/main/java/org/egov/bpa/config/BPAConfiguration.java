@@ -25,6 +25,9 @@ public class BPAConfiguration {
 	public void initialize() {
 		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
 	}
+	
+	@Value("${wf.state.level.tenant.id}")
+	private String stateLevelTenantId;
 
 	// User Config
 	@Value("${egov.user.host}")
@@ -233,12 +236,24 @@ public class BPAConfiguration {
 
 	@Value("${workflow.context.path}")
 	private String wfHost;
+	
+	@Value("${egov.workflow.validAction.endpoint}")
+	private String workFlowValidActionEndpoint;
+	
+	@Value("${egov.workflow.validAssignee.endpoint}")
+	private String workFlowValidAssigneeEndpoint;
 
 	@Value("${workflow.transition.path}")
 	private String wfTransitionPath;
 
 	@Value("${workflow.businessservice.search.path}")
 	private String wfBusinessServiceSearchPath;
+	
+	@Value("${egov.workflow.documents.search.path}")
+	private String workflowDocumentSearchEndpoint;
+ 
+	@Value("${egov.workflow.update-document.path}")
+	private String workflowUpdateDocumentEndpoint;
 
 	@Value("${workflow.process.path}")
 	private String wfProcessPath;

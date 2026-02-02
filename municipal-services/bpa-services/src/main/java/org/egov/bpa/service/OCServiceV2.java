@@ -15,6 +15,7 @@ import org.egov.bpa.config.BPAConfiguration;
 import org.egov.bpa.repository.IdGenRepository;
 import org.egov.bpa.repository.OCRepository;
 import org.egov.bpa.repository.ServiceRequestRepository;
+import org.egov.bpa.util.BPAConstants;
 import org.egov.bpa.util.BPAErrorConstants;
 import org.egov.bpa.util.BPAUtil;
 import org.egov.bpa.util.OCErrorConstants;
@@ -24,9 +25,12 @@ import org.egov.bpa.web.model.OC;
 import org.egov.bpa.web.model.OCRequest;
 import org.egov.bpa.web.model.OCSearchCriteria;
 import org.egov.bpa.web.model.RequestInfoWrapper;
+import org.egov.bpa.web.model.WorkflowRequest;
+import org.egov.bpa.web.model.WorkflowResponse;
 import org.egov.bpa.web.model.idgen.IdResponse;
 import org.egov.bpa.web.model.landInfo.LandInfo;
 import org.egov.bpa.web.model.landInfo.LandSearchCriteria;
+import org.egov.bpa.web.model.workflow.ProcessInstance;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.utils.MultiStateInstanceUtil;
 import org.egov.tracer.model.CustomException;
@@ -35,7 +39,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +77,9 @@ public class OCServiceV2 {
 
 	@Autowired
 	private ObjectMapper mapper;
+	
+	@Autowired
+	private WorkflowV2Service workflowService;
 
 	public OC createOC(OCRequest ocRequest) {
 		if (null != ocRequest.getOc()) {
@@ -101,8 +107,30 @@ public class OCServiceV2 {
 			// wfIntegrator.callWorkFlow(ocRequest);
 			log.info("OC Request:: {}", ocRequest);
 			ocRepository.save(ocRequest);
-		}
+			
+			// initiate workflow
+			executeWorkFlowForCreate(ocRequest, ocRequest.getOc().getApplicationNo());
+			}
 		return ocRequest.getOc();
+	}
+
+	private ProcessInstance executeWorkFlowForCreate(OCRequest request, String applicationNumber) {
+
+		ProcessInstance processInstance = new ProcessInstance();
+		processInstance.setTenantId(config.getStateLevelTenantId());
+		processInstance.setAction(BPAConstants.ACTION_APPLY);
+		processInstance.setBusinessService(BPAConstants.OC_BUSINESSSERVICE);
+		processInstance.setModuleName(BPAConstants.OC_MODULE_NAME);
+		processInstance.setBusinessId(applicationNumber);
+
+		WorkflowRequest estateWorkflowRequest = WorkflowRequest.builder()
+				.processInstances(Collections.singletonList(processInstance)).requestInfo(request.getRequestInfo())
+				.build();
+
+		WorkflowResponse WorkflowResponse = workflowService.initiateWorkflow(estateWorkflowRequest);
+		List<ProcessInstance> processInstances = WorkflowResponse.getProcessInstances();
+
+		return processInstances.get(0);
 	}
 
 	public OC updateOC(@Valid OCRequest ocRequest) {

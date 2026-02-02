@@ -299,6 +299,14 @@ public class BPAUtil {
 	public static String generateUUID() {
 		return UUID.randomUUID().toString();
 	}
+	
+	public static Object mapUuidToAdditionalDetails(String details)
+	{
+		Map<String, Object> additionalDetails = new HashMap<>();
+		additionalDetails.put("uuid", details);
+
+		return additionalDetails;
+	}
 
 	/*
 	 * public Boolean validateGmdaGmcBusinessService(String businessService) {

@@ -141,4 +141,7 @@ public class OC {
 
 	/** Audit details of the application. */
 	private AuditDetails auditDetails;
+	
+	@Builder.Default
+	private Boolean isFinalSubmit = false;
 }

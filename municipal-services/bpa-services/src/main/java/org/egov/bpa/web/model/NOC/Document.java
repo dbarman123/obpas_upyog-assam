@@ -14,20 +14,34 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class Document {
-	
-	 @JsonProperty("id")
-	 private String id;
 
-	 @JsonProperty("documentType")
-	 private String documentType;
+	@JsonProperty("id")
+	private String id;
 
-	 @JsonProperty("fileStoreId")
-	 private String fileStoreId;
+	@JsonProperty("documentType")
+	private String documentType;
 
-	 @JsonProperty("documentUid")
-	 private String documentUid;
+	@JsonProperty("fileStoreId")
+	private String fileStoreId;
 
-	 @JsonProperty("additionalDetails")
-	 private Object additionalDetails;
-	 
+	@JsonProperty("documentUid")
+	private String documentUid;
+
+	@JsonProperty("additionalDetails")
+	private Object additionalDetails;
+
+	private String tenantId;
+
+	private AuditDetails auditDetails;
+
+	private String fileName;
+
+	// EntityRefDocument fields
+
+	private String documentName;
+
+	private String docReferenceId;
+
+	private String docReferenceType;
+
 }
