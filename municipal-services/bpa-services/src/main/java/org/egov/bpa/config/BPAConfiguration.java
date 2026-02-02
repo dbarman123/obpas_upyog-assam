@@ -99,6 +99,9 @@ public class BPAConfiguration {
 	
 	@Value("${persister.save.oc.topic}")
 	private String saveOcTopic;
+	
+	@Value("${persister.update.oc.topic}")
+	private String updateOcTopic;
 
 	// Location Config
 	@Value("${egov.location.host}")

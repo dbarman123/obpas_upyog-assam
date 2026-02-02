@@ -8,6 +8,8 @@ import org.egov.bpa.config.BPAConfiguration;
 import org.egov.bpa.producer.Producer;
 import org.egov.bpa.repository.querybuilder.OCQueryBuilder;
 import org.egov.bpa.repository.rowmapper.OCDetailsRowMapper;
+import org.egov.bpa.util.BPAConstants;
+import org.egov.bpa.web.model.BPARequest;
 import org.egov.bpa.web.model.OC;
 import org.egov.bpa.web.model.OCRequest;
 import org.egov.bpa.web.model.OCSearchCriteria;
@@ -74,7 +76,7 @@ public class OCRepository {
 			query.append(" AND oc.id = ? ");
 			preparedStmtList.add(criteria.getId());
 		}
-		
+
 		if (StringUtils.hasText(criteria.getBpaApplicationNo())) {
 			query.append(" AND oc.bpa_application_no = ? ");
 			preparedStmtList.add(criteria.getBpaApplicationNo());
@@ -84,29 +86,29 @@ public class OCRepository {
 		log.info("OC search query: {}", query);
 		return jdbcTemplate.query(query.toString(), preparedStmtList.toArray(), ocRowMapper);
 	}
-	
-    public List<OC> searchByMobileNumber(OCSearchCriteria criteria) {
 
-        List<Object> preparedStmtList = new ArrayList<>();
-        StringBuilder query = new StringBuilder(getBaseQuery());
+	public List<OC> searchByMobileNumber(OCSearchCriteria criteria) {
 
-        addWhereClause(query);
+		List<Object> preparedStmtList = new ArrayList<>();
+		StringBuilder query = new StringBuilder(getBaseQuery());
 
-        if (StringUtils.hasText(criteria.getTenantId())) {
-            query.append(" oc.tenant_id = ? ");
-            preparedStmtList.add(criteria.getTenantId());
-        }
+		addWhereClause(query);
 
-        if (StringUtils.hasText(criteria.getMobileNumber())) {
-            query.append(" AND oc.phone_number = ? ");
-            preparedStmtList.add(criteria.getMobileNumber());
-        }
+		if (StringUtils.hasText(criteria.getTenantId())) {
+			query.append(" oc.tenant_id = ? ");
+			preparedStmtList.add(criteria.getTenantId());
+		}
 
-        query.append(" ORDER BY oc.application_date DESC ");
+		if (StringUtils.hasText(criteria.getMobileNumber())) {
+			query.append(" AND oc.phone_number = ? ");
+			preparedStmtList.add(criteria.getMobileNumber());
+		}
 
-        log.debug("OC mobile search query: {}", query);
-        return jdbcTemplate.query(query.toString(), preparedStmtList.toArray(), ocRowMapper);
-    }
+		query.append(" ORDER BY oc.application_date DESC ");
+
+		log.debug("OC mobile search query: {}", query);
+		return jdbcTemplate.query(query.toString(), preparedStmtList.toArray(), ocRowMapper);
+	}
 
 	private String getBaseQuery() {
 		return " SELECT DISTINCT oc.* FROM ug_oc_details oc ";
@@ -114,5 +116,9 @@ public class OCRepository {
 
 	private void addWhereClause(StringBuilder query) {
 		query.append(" WHERE ");
+	}
+
+	public void update(OCRequest ocRequest) {
+		producer.push(ocRequest.getOc().getTenantId(), config.getUpdateOcTopic(), ocRequest);
 	}
 }

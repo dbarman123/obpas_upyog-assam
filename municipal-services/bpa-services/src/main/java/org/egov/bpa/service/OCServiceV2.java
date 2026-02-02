@@ -15,9 +15,11 @@ import org.egov.bpa.config.BPAConfiguration;
 import org.egov.bpa.repository.IdGenRepository;
 import org.egov.bpa.repository.OCRepository;
 import org.egov.bpa.repository.ServiceRequestRepository;
+import org.egov.bpa.util.BPAConstants;
 import org.egov.bpa.util.BPAErrorConstants;
 import org.egov.bpa.util.BPAUtil;
 import org.egov.bpa.util.OCErrorConstants;
+import org.egov.bpa.web.model.AuditDetails;
 import org.egov.bpa.web.model.BPA;
 import org.egov.bpa.web.model.BPASearchCriteria;
 import org.egov.bpa.web.model.OC;
@@ -74,17 +76,20 @@ public class OCServiceV2 {
 
 	@Autowired
 	private ObjectMapper mapper;
+	
+	@Autowired
+	private MdmsCacheService mdmsCacheService;
 
 	public OC createOC(OCRequest ocRequest) {
 		if (null != ocRequest.getOc()) {
 
 			RequestInfo requestInfo = ocRequest.getRequestInfo();
 			String stateTenantId = centralInstanceUtil.getStateLevelTenant(ocRequest.getOc().getTenantId());
-			// String tenantId = ocRequest.getOc().getAreaMapping().getConcernedAuthority();
+//			 String tenantId = ocRequest.getOc().getAreaMapping().getConcernedAuthority();
 
-			// Get MDMS Data for request validation
-			//	Object mdmsTenantData = mdmsCacheService.getMdmsData(requestInfo, tenantId);
-			//	Object mdmsStateTenantData = mdmsCacheService.getMdmsData(requestInfo, stateTenantId);
+			 // Get MDMS Data for request validation
+//			 Object mdmsTenantData = mdmsCacheService.getMdmsData(requestInfo, tenantId);
+//			 Object mdmsStateTenantData = mdmsCacheService.getMdmsData(requestInfo, stateTenantId);
 
 			if (centralInstanceUtil.isTenantIdStateLevel(ocRequest.getOc().getTenantId())) {
 				throw new CustomException(OCErrorConstants.INVALID_TENANT,
@@ -106,9 +111,14 @@ public class OCServiceV2 {
 	}
 
 	public OC updateOC(@Valid OCRequest ocRequest) {
-		RequestInfo requestInfo = ocRequest.getRequestInfo();
+
 		validateUpdateOC(ocRequest);
-		return null;
+
+		enrichOCUpdateRequest(ocRequest);
+
+		ocRepository.update(ocRequest);
+
+		return ocRequest.getOc();
 	}
 
 	public void setIdgenIds(OCRequest request) {
@@ -138,20 +148,23 @@ public class OCServiceV2 {
 	}
 
 	private void validateUpdateOC(@Valid OCRequest ocRequest) {
-		if (StringUtils.hasText(ocRequest.getOc().getId())) {
-			throw new CustomException(BPAErrorConstants.UPDATE_ERROR, "Application Not found in the System to Update");
+		if (!StringUtils.hasText(ocRequest.getOc().getId())) {
+			throw new CustomException(OCErrorConstants.UPDATE_ERROR, "Application Not found in the System to Update");
 		}
-
-		getOcByOcId(ocRequest);
+		getOcWithOcId(ocRequest);
 	}
 
-	private List<OC> getOcByOcId(@Valid OCRequest ocRequest) {
+	private void getOcWithOcId(@Valid OCRequest ocRequest) {
 
 		OCSearchCriteria criteria = OCSearchCriteria.builder().id(ocRequest.getOc().getId())
 				.tenantId(ocRequest.getOc().getTenantId()).build();
 
-		//		List<OC> oc = repository.getOCDetail(criteria);
-		return null;
+		List<OC> ocSearchResult = ocRepository.search(criteria);
+
+		if (CollectionUtils.isEmpty(ocSearchResult) || ocSearchResult.size() > 1) {
+			throw new CustomException(OCErrorConstants.UPDATE_ERROR, 
+					"Failed to Update the Application, Found None or multiple applications!");
+		}
 	}
 
 	public List<OC> searchOC(OCSearchCriteria criteria, RequestInfo requestInfo) {
@@ -253,10 +266,10 @@ public class OCServiceV2 {
 		ArrayList<?> landInfo = (ArrayList<?>) responseMap.get("LandInfo");
 
 		if (CollectionUtils.isEmpty(landInfo)) {
-	        return null;
-	    }
+			return null;
+		}
 
-	    return mapper.convertValue(landInfo.get(0), LandInfo.class);
+		return mapper.convertValue(landInfo.get(0), LandInfo.class);
 	}
 
 	private StringBuilder getLandSerchURLWithParams(RequestInfo requestInfo, LandSearchCriteria landcriteria) {
@@ -264,11 +277,11 @@ public class OCServiceV2 {
 		uri.append(config.getLandInfoSearch());
 		uri.append("?tenantId=");
 		uri.append(landcriteria.getTenantId());
-//		LandSearchCriteria landSearchCriteria = new LandSearchCriteria();
-//		LandInfoRequest landRequest = new LandInfoRequest();
-//		landRequest.setRequestInfo(requestInfo);
+		//		LandSearchCriteria landSearchCriteria = new LandSearchCriteria();
+		//		LandInfoRequest landRequest = new LandInfoRequest();
+		//		landRequest.setRequestInfo(requestInfo);
 		if (landcriteria.getIds() != null) {
-//			landSearchCriteria.setIds(landcriteria.getIds());
+			//			landSearchCriteria.setIds(landcriteria.getIds());
 			uri.append("&").append("ids=");
 			for (int i = 0; i < landcriteria.getIds().size(); i++) {
 				if (i != 0) {
@@ -277,10 +290,19 @@ public class OCServiceV2 {
 				uri.append(landcriteria.getIds().get(i));
 			}
 		} else if (landcriteria.getMobileNumber() != null) {
-//			landSearchCriteria.setMobileNumber(landcriteria.getMobileNumber());
+			//			landSearchCriteria.setMobileNumber(landcriteria.getMobileNumber());
 			uri.append("&").append("mobileNumber=");
 			uri.append(landcriteria.getMobileNumber());
 		}
 		return uri;
+	}
+
+	private void enrichOCUpdateRequest(@Valid OCRequest ocRequest) {
+		
+		RequestInfo requestInfo = ocRequest.getRequestInfo();
+		AuditDetails auditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
+		auditDetails.setCreatedBy(ocRequest.getOc().getAuditDetails().getCreatedBy());
+		auditDetails.setCreatedTime(ocRequest.getOc().getAuditDetails().getCreatedTime());
+		ocRequest.getOc().getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
 	}
 }
