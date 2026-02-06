@@ -1,448 +1,827 @@
-curl --location --request POST 'http://localhost:8280/egov-workflow-v2/egov-wf/businessservice/_create' \
+curl --location --request POST 'http: //localhost:8280/egov-workflow-v2/egov-wf/businessservice/_create' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "RequestInfo": {
-        "apiId": "Rainmaker",
-        "action": "",
-        "did": 1,
-        "key": "",
-        "msgId": "20230910130900|en_IN",
-        "requesterId": "",
-        "ts": 1513579888772,
-        "ver": ".01",
-        "authToken": "{{devAuth}}",
-        "userInfo": {
-            "id": 2130,
-            "uuid": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
-            "userName": "9999009999",
-            "name": "KS",
-            "mobileNumber": "9999009999",
-            "emailId": "test@test.com",
-            "locale": null,
-            "type": "CITIZEN",
-            "roles": [
-                {
-                    "name": "Citizen",
-                    "code": "CITIZEN",
-                    "tenantId": "pg"
-                }
-            ],
-            "active": true,
-            "tenantId": "pg",
-            "permanentCity": null
-        }
-    },
-    "BusinessServices": [
-        {
-            "tenantId": "as",
-            "businessService": "BPA_GMDA_GMC",
-            "business": "bpa-services",
-            "businessServiceSla": "",
-            "states": [
-                {
-                    "state": null,
-                    "actions": [
-                        {
-                            "roles": [
-                                "CITIZEN"
-                            ],
-                            "action": "APPLY",
-                            "active": true,
-                            "nextState": "PENDING_RTP_APPROVAL"
-                        }
-                    ],
-                    "isStartState": true,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "PENDING_RTP_APPROVAL",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_RTP",
-                                "BPA_ARCHITECT",
-                                "BPA_BUILDER",
-                                "BPA_ENGINEER",
-                                "BPA_STRUCTURALENGINEER",
-                                "BPA_TOWNPLANNER",
-                                "BPA_SUPERVISOR",
-                                "BPA_GEO_TECH_ENGINEER",
-                                "BPA_CIVIL_ENGINEER",
-                                "BPA_UTILITY_ENGINEER",
-                                "BPA_LANDSCAPE_ARCHITECT",
-                                "BPA_GROUP_AGENCY",
-                                "BPA_URBAN_DESIGNER"
-                            ],
-                            "action": "ACCEPT",
-                            "active": true,
-                            "nextState": "EDIT_APPLICATION"
-                        },
-                        {
-                            "roles": [
-                                "BPA_RTP",
-                                "BPA_ARCHITECT",
-                                "BPA_BUILDER",
-                                "BPA_ENGINEER",
-                                "BPA_STRUCTURALENGINEER",
-                                "BPA_TOWNPLANNER",
-                                "BPA_SUPERVISOR",
-                                "BPA_GEO_TECH_ENGINEER",
-                                "BPA_CIVIL_ENGINEER",
-                                "BPA_UTILITY_ENGINEER",
-                                "BPA_LANDSCAPE_ARCHITECT",
-                                "BPA_GROUP_AGENCY",
-                                "BPA_URBAN_DESIGNER"
-                            ],
-                            "action": "REJECT",
-                            "active": true,
-                            "nextState": "REJECTED"
-                        }
-                    ],
-                    "applicationStatus": "PENDING_RTP_APPROVAL",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "EDIT_APPLICATION",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_RTP",
-                                "BPA_ARCHITECT",
-                                "BPA_BUILDER",
-                                "BPA_ENGINEER",
-                                "BPA_STRUCTURALENGINEER",
-                                "BPA_TOWNPLANNER",
-                                "BPA_SUPERVISOR",
-                                "BPA_GEO_TECH_ENGINEER",
-                                "BPA_CIVIL_ENGINEER",
-                                "BPA_UTILITY_ENGINEER",
-                                "BPA_LANDSCAPE_ARCHITECT",
-                                "BPA_GROUP_AGENCY",
-                                "BPA_URBAN_DESIGNER"
-                            ],
-                            "action": "EDIT",
-                            "active": true,
-                            "nextState": "GIS_VALIDATION"
-                        }
-                    ],
-                    "applicationStatus": "EDIT_APPLICATION",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "GIS_VALIDATION",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_RTP",
-                                "BPA_ARCHITECT",
-                                "BPA_BUILDER",
-                                "BPA_ENGINEER",
-                                "BPA_STRUCTURALENGINEER",
-                                "BPA_TOWNPLANNER",
-                                "BPA_SUPERVISOR",
-                                "BPA_GEO_TECH_ENGINEER",
-                                "BPA_CIVIL_ENGINEER",
-                                "BPA_UTILITY_ENGINEER",
-                                "BPA_LANDSCAPE_ARCHITECT",
-                                "BPA_GROUP_AGENCY",
-                                "BPA_URBAN_DESIGNER"
-                            ],
-                            "action": "VALIDATE_GIS",
-                            "active": true,
-                            "nextState": "PENDING_FOR_SCRUTINY"
-                        }
-                    ],
-                    "applicationStatus": "GIS_VALIDATION",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "PENDING_FOR_SCRUTINY",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_RTP",
-                                "BPA_ARCHITECT",
-                                "BPA_BUILDER",
-                                "BPA_ENGINEER",
-                                "BPA_STRUCTURALENGINEER",
-                                "BPA_TOWNPLANNER",
-                                "BPA_SUPERVISOR",
-                                "BPA_GEO_TECH_ENGINEER",
-                                "BPA_CIVIL_ENGINEER",
-                                "BPA_UTILITY_ENGINEER",
-                                "BPA_LANDSCAPE_ARCHITECT",
-                                "BPA_GROUP_AGENCY",
-                                "BPA_URBAN_DESIGNER"
-                            ],
-                            "action": "APPLY_FOR_SCRUTINY",
-                            "active": true,
-                            "nextState": "CITIZEN_APPROVAL"
-                        }
-                    ],
-                    "applicationStatus": "PENDING_FOR_SCRUTINY",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "CITIZEN_APPROVAL",
-                    "actions": [
-                        {
-                            "roles": [
-                                "CITIZEN"
-                            ],
-                            "action": "APPROVE",
-                            "active": true,
-                            "nextState": "PENDING_GMDA_ENGINEER"
-                        },
-                        {
-                            "roles": [
-                                "CITIZEN"
-                            ],
-                            "action": "SEND_BACK_TO_RTP",
-                            "active": true,
-                            "nextState": "PENDING_RTP_APPROVAL"
-                        }
-                    ],
-                    "applicationStatus": "CITIZEN_APPROVAL",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "PENDING_GMDA_ENGINEER",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_ENGINEER_DA"
-                            ],
-                            "action": "SUBMIT_REPORT",
-                            "active": true,
-                            "nextState": "PENDING_TOWNPLANNER"
-                        },
-                        {
-                            "roles": [
-                                "BPA_ENGINEER_DA"
-                            ],
-                            "action": "REJECT",
-                            "active": true,
-                            "nextState": "PENDING_RTP_APPROVAL"
-                        }
-                    ],
-                    "applicationStatus": "PENDING_GMDA_ENGINEER",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "PENDING_TOWNPLANNER",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_TOWNPLANNER_DA"
-                            ],
-                            "action": "RECOMMEND_TO_CEO",
-                            "active": true,
-                            "nextState": "PENDING_CEO"
-                        },
-                        {
-                            "roles": [
-                                "BPA_TOWNPLANNER_DA"
-                            ],
-                            "action": "SEND_BACK_TO_GMDA",
-                            "active": true,
-                            "nextState": "PENDING_GMDA_ENGINEER"
-                        }
-                    ],
-                    "applicationStatus": "PENDING_TOWNPLANNER",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "PENDING_CEO",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_CEO_DA"
-                            ],
-                            "action": "APPROVE",
-                            "active": true,
-                            "nextState": "PENDING_DSC"
-                        }
-                    ],
-                    "applicationStatus": "PENDING_CEO",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "PENDING_DSC",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_CEO_DA"
-                            ],
-                            "action": "DSC",
-                            "active": true,
-                            "nextState": "PAYMENT_PENDING"
-                        }
-                    ],
-                    "applicationStatus": "PENDING_DSC",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "PAYMENT_PENDING",
-                    "actions": [
-                        {
-                            "roles": [
-                                "CITIZEN"
-                            ],
-                            "action": "PAY",
-                            "active": true,
-                            "nextState": "FORWARDED_TO_ZONAL_OFFICER"
-                        }
-                    ],
-                    "applicationStatus": "PAYMENT_PENDING",
-                    "isStartState": false,
-                    "isStateUpdatable": false,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "FORWARDED_TO_ZONAL_OFFICER",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_ZONALOFFICER_GMC"
-                            ],
-                            "action": "FORWARD",
-                            "active": true,
-                            "nextState": "FORWARDED_TO_ASSOCIATE_PLANNER"
-                        }
-                    ],
-                    "applicationStatus": "FORWARDED_TO_ZONAL_OFFICER",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "FORWARDED_TO_ASSOCIATE_PLANNER",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_ASSOCIATE_PLANNER"
-                            ],
-                            "action": "FORWARD",
-                            "active": true,
-                            "nextState": "PENDING_COMMISSIONER"
-                        }
-                    ],
-                    "applicationStatus": "FORWARDED_TO_ASSOCIATE_PLANNER",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "PENDING_COMMISSIONER",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_COMMISSIONER"
-                            ],
-                            "action": "APPROVE",
-                            "active": true,
-                            "nextState": "PENDING_FINAL_DSC"
-                        },
-                        {
-                            "roles": [
-                                "BPA_COMMISSIONER"
-                            ],
-                            "action": "REJECT",
-                            "active": true,
-                            "nextState": "FORWARDED_TO_ZONAL_OFFICER"
-                        }
-                    ],
-                    "applicationStatus": "PENDING_COMMISSIONER",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "PENDING_FINAL_DSC",
-                    "actions": [
-                        {
-                            "roles": [
-                                "BPA_COMMISSIONER"
-                            ],
-                            "action": "DSC",
-                            "active": true,
-                            "nextState": "CITIZEN_FINAL_PAYMENT"
-                        }
-                    ],
-                    "applicationStatus": "PENDING_FINAL_DSC",
-                    "isStartState": false,
-                    "isStateUpdatable": true,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "CITIZEN_FINAL_PAYMENT",
-                    "actions": [
-                        {
-                            "roles": [
-                                "CITIZEN"
-                            ],
-                            "action": "PAY",
-                            "active": true,
-                            "nextState": "APPLICATION_COMPLETED"
-                        }
-                    ],
-                    "applicationStatus": "CITIZEN_FINAL_PAYMENT",
-                    "isStartState": false,
-                    "isStateUpdatable": false,
-                    "isTerminateState": false,
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "APPLICATION_COMPLETED",
-                    "isStartState": false,
-                    "isStateUpdatable": false,
-                    "isTerminateState": true,
-                    "applicationStatus": "APPLICATION_COMPLETED",
-                    "docUploadRequired": false
-                },
-                {
-                    "state": "REJECTED",
-                    "isStartState": false,
-                    "isStateUpdatable": false,
-                    "isTerminateState": true,
-                    "applicationStatus": "REJECTED",
-                    "docUploadRequired": false
-                }
-            ]
-        }
-    ]
-}'
+	"RequestInfo": {
+		"apiId": "Rainmaker",
+		"action": "",
+		"did": 1,
+		"key": "",
+		"msgId": "20230910130900|en_IN",
+		"requesterId": "",
+		"ts": 1513579888772,
+		"ver": ".01",
+		"authToken": "{{devAuth}}",
+		"userInfo": {
+			"id": 2130,
+			"uuid": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+			"userName": "9999009999",
+			"name": "KS",
+			"mobileNumber": "9999009999",
+			"emailId": "test@test.com",
+			"locale": null,
+			"type": "CITIZEN",
+			"roles": [
+				{
+					"name": "Citizen",
+					"code": "CITIZEN",
+					"tenantId": "pg"
+				}
+			],
+			"active": true,
+			"tenantId": "pg",
+			"permanentCity": null
+		}
+	},
+	"BusinessServices": [
+	       {
+	           "tenantId": "as",
+	           "uuid": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	           "businessService": "BPA_GMDA_GMC",
+	           "business": "bpa-services",
+	           "businessServiceSla": 0,
+	           "states": [
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "edd9e325-a2ef-412c-8a4d-0b48285566d8",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": null,
+	                   "applicationStatus": null,
+	                   "docUploadRequired": false,
+	                   "isStartState": true,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "75d93340-808b-4348-8861-72d31dc3d2b4",
+	                           "tenantId": "as",
+	                           "currentState": "edd9e325-a2ef-412c-8a4d-0b48285566d8",
+	                           "action": "APPLY",
+	                           "nextState": "3e56711d-bece-4d8c-9572-9e2d7cc591e9",
+	                           "roles": [
+	                               "CITIZEN"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "3e56711d-bece-4d8c-9572-9e2d7cc591e9",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "PENDING_RTP_APPROVAL",
+	                   "applicationStatus": "PENDING_RTP_APPROVAL",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "5897c14f-c6b8-4851-81f9-76c1dec84dfa",
+	                           "tenantId": "as",
+	                           "currentState": "3e56711d-bece-4d8c-9572-9e2d7cc591e9",
+	                           "action": "ACCEPT",
+	                           "nextState": "d3f14b3a-288b-43e6-83b0-30d60004ed04",
+	                           "roles": [
+	                               "BPA_RTP",
+	                               "BPA_ARCHITECT",
+	                               "BPA_BUILDER",
+	                               "BPA_ENGINEER",
+	                               "BPA_STRUCTURALENGINEER",
+	                               "BPA_TOWNPLANNER_DA",
+	                               "BPA_SUPERVISOR",
+	                               "BPA_GEO_TECH_ENGINEER",
+	                               "BPA_CIVIL_ENGINEER",
+	                               "BPA_UTILITY_ENGINEER",
+	                               "BPA_LANDSCAPE_ARCHITECT",
+	                               "BPA_GROUP_AGENCY",
+	                               "BPA_URBAN_DESIGNER"
+	                           ],
+	                           "active": true
+	                       },
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "09581c25-2390-40b3-a4f0-29b8a6a8ee7f",
+	                           "tenantId": "as",
+	                           "currentState": "3e56711d-bece-4d8c-9572-9e2d7cc591e9",
+	                           "action": "REJECT",
+	                           "nextState": "e108229e-2bf0-4742-bbb8-5fc5ab746be3",
+	                           "roles": [
+	                               "BPA_RTP",
+	                               "BPA_ARCHITECT",
+	                               "BPA_BUILDER",
+	                               "BPA_ENGINEER",
+	                               "BPA_STRUCTURALENGINEER",
+	                               "BPA_TOWNPLANNER_DA",
+	                               "BPA_SUPERVISOR",
+	                               "BPA_GEO_TECH_ENGINEER",
+	                               "BPA_CIVIL_ENGINEER",
+	                               "BPA_UTILITY_ENGINEER",
+	                               "BPA_LANDSCAPE_ARCHITECT",
+	                               "BPA_GROUP_AGENCY",
+	                               "BPA_URBAN_DESIGNER"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "d3f14b3a-288b-43e6-83b0-30d60004ed04",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "EDIT_APPLICATION",
+	                   "applicationStatus": "EDIT_APPLICATION",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "aa8c754b-8ca8-4fc8-888c-8e9c78affb6e",
+	                           "tenantId": "as",
+	                           "currentState": "d3f14b3a-288b-43e6-83b0-30d60004ed04",
+	                           "action": "EDIT",
+	                           "nextState": "40e82ecb-77ff-42b2-862f-3dfeefae9ecd",
+	                           "roles": [
+	                               "BPA_RTP",
+	                               "BPA_ARCHITECT",
+	                               "BPA_BUILDER",
+	                               "BPA_ENGINEER",
+	                               "BPA_STRUCTURALENGINEER",
+	                               "BPA_TOWNPLANNER_DA",
+	                               "BPA_SUPERVISOR",
+	                               "BPA_GEO_TECH_ENGINEER",
+	                               "BPA_CIVIL_ENGINEER",
+	                               "BPA_UTILITY_ENGINEER",
+	                               "BPA_LANDSCAPE_ARCHITECT",
+	                               "BPA_GROUP_AGENCY",
+	                               "BPA_URBAN_DESIGNER"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "40e82ecb-77ff-42b2-862f-3dfeefae9ecd",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "GIS_VALIDATION",
+	                   "applicationStatus": "GIS_VALIDATION",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "562f2efa-b341-4f17-9737-df19bd10cfea",
+	                           "tenantId": "as",
+	                           "currentState": "40e82ecb-77ff-42b2-862f-3dfeefae9ecd",
+	                           "action": "VALIDATE_GIS",
+	                           "nextState": "96aaa262-6bb7-4940-bca1-bd9b00b11b5d",
+	                           "roles": [
+	                               "BPA_RTP",
+	                               "BPA_ARCHITECT",
+	                               "BPA_BUILDER",
+	                               "BPA_ENGINEER",
+	                               "BPA_STRUCTURALENGINEER",
+	                               "BPA_TOWNPLANNER_DA",
+	                               "BPA_SUPERVISOR",
+	                               "BPA_GEO_TECH_ENGINEER",
+	                               "BPA_CIVIL_ENGINEER",
+	                               "BPA_UTILITY_ENGINEER",
+	                               "BPA_LANDSCAPE_ARCHITECT",
+	                               "BPA_GROUP_AGENCY",
+	                               "BPA_URBAN_DESIGNER"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "96aaa262-6bb7-4940-bca1-bd9b00b11b5d",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "PENDING_FOR_SCRUTINY",
+	                   "applicationStatus": "PENDING_FOR_SCRUTINY",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "f4e46a56-d92f-4325-bf1e-d80d0af77994",
+	                           "tenantId": "as",
+	                           "currentState": "96aaa262-6bb7-4940-bca1-bd9b00b11b5d",
+	                           "action": "APPLY_FOR_SCRUTINY",
+	                           "nextState": "4ab4d609-eeca-4cec-8dc2-9894131d6477",
+	                           "roles": [
+	                               "BPA_RTP",
+	                               "BPA_ARCHITECT",
+	                               "BPA_BUILDER",
+	                               "BPA_ENGINEER",
+	                               "BPA_STRUCTURALENGINEER",
+	                               "BPA_TOWNPLANNER_DA",
+	                               "BPA_SUPERVISOR",
+	                               "BPA_GEO_TECH_ENGINEER",
+	                               "BPA_CIVIL_ENGINEER",
+	                               "BPA_UTILITY_ENGINEER",
+	                               "BPA_LANDSCAPE_ARCHITECT",
+	                               "BPA_GROUP_AGENCY",
+	                               "BPA_URBAN_DESIGNER"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "4ab4d609-eeca-4cec-8dc2-9894131d6477",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "CITIZEN_APPROVAL",
+	                   "applicationStatus": "CITIZEN_APPROVAL",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "94a79427-00b5-43f8-bb7d-1c5ae087c192",
+	                           "tenantId": "as",
+	                           "currentState": "4ab4d609-eeca-4cec-8dc2-9894131d6477",
+	                           "action": "APPROVE",
+	                           "nextState": "26ba6b8b-f8c6-4073-b10e-4768c33a70cb",
+	                           "roles": [
+	                               "CITIZEN"
+	                           ],
+	                           "active": true
+	                       },
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "557cf153-3ee5-42b7-8a00-09dc2f5bf53b",
+	                           "tenantId": "as",
+	                           "currentState": "4ab4d609-eeca-4cec-8dc2-9894131d6477",
+	                           "action": "SEND_BACK_TO_RTP",
+	                           "nextState": "3e56711d-bece-4d8c-9572-9e2d7cc591e9",
+	                           "roles": [
+	                               "CITIZEN"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "26ba6b8b-f8c6-4073-b10e-4768c33a70cb",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "PENDING_GMDA_ENGINEER",
+	                   "applicationStatus": "PENDING_GMDA_ENGINEER",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "8e0c4efc-12ae-404c-b253-d6c8118b8edc",
+	                           "tenantId": "as",
+	                           "currentState": "26ba6b8b-f8c6-4073-b10e-4768c33a70cb",
+	                           "action": "SUBMIT_REPORT",
+	                           "nextState": "270cbeea-541a-48cc-a466-bf243dcc5995",
+	                           "roles": [
+	                               "BPA_ENGINEER_DA"
+	                           ],
+	                           "active": true
+	                       },
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "f54708a7-88af-4317-869b-5207d5af723f",
+	                           "tenantId": "as",
+	                           "currentState": "26ba6b8b-f8c6-4073-b10e-4768c33a70cb",
+	                           "action": "REJECT",
+	                           "nextState": "3e56711d-bece-4d8c-9572-9e2d7cc591e9",
+	                           "roles": [
+	                               "BPA_ENGINEER_DA"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "270cbeea-541a-48cc-a466-bf243dcc5995",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "PENDING_TOWNPLANNER",
+	                   "applicationStatus": "PENDING_TOWNPLANNER",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "7a4431ab-0b2a-4c2b-b3ce-099327a8d4ae",
+	                           "tenantId": "as",
+	                           "currentState": "270cbeea-541a-48cc-a466-bf243dcc5995",
+	                           "action": "SEND_BACK_TO_GMDA",
+	                           "nextState": "26ba6b8b-f8c6-4073-b10e-4768c33a70cb",
+	                           "roles": [
+	                               "BPA_TOWNPLANNER_DA"
+	                           ],
+	                           "active": true
+	                       },
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "2b38045d-b18c-4cf8-94f2-1f686b0a6541",
+	                           "tenantId": "as",
+	                           "currentState": "270cbeea-541a-48cc-a466-bf243dcc5995",
+	                           "action": "RECOMMEND_TO_CEO",
+	                           "nextState": "c892f954-9e20-4058-9d54-9756f2996978",
+	                           "roles": [
+	                               "BPA_TOWNPLANNER_DA"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "c892f954-9e20-4058-9d54-9756f2996978",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "PENDING_CEO",
+	                   "applicationStatus": "PENDING_CEO",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "b4c422c1-eea8-42b8-9591-1d551e480684",
+	                           "tenantId": "as",
+	                           "currentState": "c892f954-9e20-4058-9d54-9756f2996978",
+	                           "action": "APPROVE",
+	                           "nextState": "91c2d027-82be-4cd2-96d8-ed41da953bea",
+	                           "roles": [
+	                               "BPA_CEO_DA"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "91c2d027-82be-4cd2-96d8-ed41da953bea",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "PENDING_DSC",
+	                   "applicationStatus": "PENDING_DSC",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "7e40ea93-6ca4-4797-a5b1-e0570d08d182",
+	                           "tenantId": "as",
+	                           "currentState": "91c2d027-82be-4cd2-96d8-ed41da953bea",
+	                           "action": "DSC",
+	                           "nextState": "34c2b7c8-4925-459a-a614-9a1339cec4c0",
+	                           "roles": [
+	                               "BPA_CEO_DA"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "34c2b7c8-4925-459a-a614-9a1339cec4c0",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "PAYMENT_PENDING",
+	                   "applicationStatus": "PAYMENT_PENDING",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": false,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "0afb566e-ab54-465a-8146-62c3ab286aa1",
+	                           "tenantId": "as",
+	                           "currentState": "34c2b7c8-4925-459a-a614-9a1339cec4c0",
+	                           "action": "PAY",
+	                           "nextState": "26c18e05-805e-4b9c-ac9d-931f39c83f64",
+	                           "roles": [
+	                               "CITIZEN"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "26c18e05-805e-4b9c-ac9d-931f39c83f64",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "FORWARDED_TO_ZONAL_OFFICER",
+	                   "applicationStatus": "FORWARDED_TO_ZONAL_OFFICER",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "6b315da5-918c-4433-9331-c30c36a475e5",
+	                           "tenantId": "as",
+	                           "currentState": "26c18e05-805e-4b9c-ac9d-931f39c83f64",
+	                           "action": "FORWARD",
+	                           "nextState": "c37785d7-dcbf-4ae6-a8f7-7194e7bb46bc",
+	                           "roles": [
+	                               "BPA_ZONALOFFICER_GMC"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "c37785d7-dcbf-4ae6-a8f7-7194e7bb46bc",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "FORWARDED_TO_ASSOCIATE_PLANNER",
+	                   "applicationStatus": "FORWARDED_TO_ASSOCIATE_PLANNER",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "d8f94fd3-dd86-476d-8dc0-691e352f0726",
+	                           "tenantId": "as",
+	                           "currentState": "c37785d7-dcbf-4ae6-a8f7-7194e7bb46bc",
+	                           "action": "FORWARD",
+	                           "nextState": "77e1ceac-054d-4e74-998a-87aac2348950",
+	                           "roles": [
+	                               "BPA_ASSOCIATE_PLANNER"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "77e1ceac-054d-4e74-998a-87aac2348950",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "PENDING_COMMISSIONER",
+	                   "applicationStatus": "PENDING_COMMISSIONER",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "0a67ea4d-05f8-46b5-91f5-5b3356650147",
+	                           "tenantId": "as",
+	                           "currentState": "77e1ceac-054d-4e74-998a-87aac2348950",
+	                           "action": "APPROVE",
+	                           "nextState": "0e8e38fa-f23e-4dff-be7b-7c37bb4e32cc",
+	                           "roles": [
+	                               "BPA_COMMISSIONER"
+	                           ],
+	                           "active": true
+	                       },
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "76bbfd71-a86e-4897-ba5b-9b2b3f53bd46",
+	                           "tenantId": "as",
+	                           "currentState": "77e1ceac-054d-4e74-998a-87aac2348950",
+	                           "action": "REJECT",
+	                           "nextState": "26c18e05-805e-4b9c-ac9d-931f39c83f64",
+	                           "roles": [
+	                               "BPA_COMMISSIONER"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "0e8e38fa-f23e-4dff-be7b-7c37bb4e32cc",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "PENDING_FINAL_DSC",
+	                   "applicationStatus": "PENDING_FINAL_DSC",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": true,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "a002d671-e0c9-4252-81b9-d62737d0100d",
+	                           "tenantId": "as",
+	                           "currentState": "0e8e38fa-f23e-4dff-be7b-7c37bb4e32cc",
+	                           "action": "DSC",
+	                           "nextState": "2daa4533-20ef-402a-8f0d-a740ac039b37",
+	                           "roles": [
+	                               "BPA_COMMISSIONER"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "2daa4533-20ef-402a-8f0d-a740ac039b37",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "CITIZEN_FINAL_PAYMENT",
+	                   "applicationStatus": "CITIZEN_FINAL_PAYMENT",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": false,
+	                   "isStateUpdatable": false,
+	                   "actions": [
+	                       {
+	                           "auditDetails": {
+	                               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                               "createdTime": 1769512307088,
+	                               "lastModifiedTime": 1769512307088
+	                           },
+	                           "uuid": "74adaeec-cd48-4f28-91ce-e1fd5c39a400",
+	                           "tenantId": "as",
+	                           "currentState": "2daa4533-20ef-402a-8f0d-a740ac039b37",
+	                           "action": "PAY",
+	                           "nextState": "d8769914-8e8d-42ac-be1e-b2cf18f19750",
+	                           "roles": [
+	                               "CITIZEN"
+	                           ],
+	                           "active": true
+	                       }
+	                   ]
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "d8769914-8e8d-42ac-be1e-b2cf18f19750",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "APPLICATION_COMPLETED",
+	                   "applicationStatus": "APPLICATION_COMPLETED",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": true,
+	                   "isStateUpdatable": false,
+	                   "actions": null
+	               },
+	               {
+	                   "auditDetails": {
+	                       "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	                       "createdTime": 1769512307088,
+	                       "lastModifiedTime": 1769512307088
+	                   },
+	                   "uuid": "e108229e-2bf0-4742-bbb8-5fc5ab746be3",
+	                   "tenantId": "as",
+	                   "businessServiceId": "f187c259-5399-46b1-862a-7c23d8dca0f8",
+	                   "sla": null,
+	                   "state": "REJECTED",
+	                   "applicationStatus": "REJECTED",
+	                   "docUploadRequired": false,
+	                   "isStartState": false,
+	                   "isTerminateState": true,
+	                   "isStateUpdatable": false,
+	                   "actions": null
+	               }
+	           ],
+	           "auditDetails": {
+	               "createdBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	               "lastModifiedBy": "f9517ac8-a630-4b4a-adbf-717a7d99fa5c",
+	               "createdTime": 1769512307088,
+	               "lastModifiedTime": 1769512307088
+	           }
+	       }
+	   ]
+	}'
