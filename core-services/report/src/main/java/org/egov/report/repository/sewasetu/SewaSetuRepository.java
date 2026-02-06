@@ -28,7 +28,7 @@ public class SewaSetuRepository {
     @Autowired
     private EncryptionService encryptionService;
 
-    private static final String MODULE_NAME = "rainmaker-obps";
+    private static final String MODULE_NAME = "rainmaker-sewasetu";
     private static final String WORKFLOW_REPORT_NAME = "sewasetu-workflow-history";
     private static final String APPLICATION_NUMBERS_REPORT_NAME = "sewasetu-application-numbers-by-date";
     private static final String INITIATED_DATA_REPORT_NAME = "sewasetu-initiated-data";
@@ -229,6 +229,8 @@ public class SewaSetuRepository {
             } else if (reportDefinition.getdecryptionPathId() != null
                     && requestInfo != null
                     && requestInfo.getUserInfo() != null) {
+                // Remove empty decryptable fields to avoid decryption errors
+                removeEmptyDecryptableFields(results, "name", "email");
                 try {
                     results = encryptionService.decryptJson(requestInfo, results,
                             reportDefinition.getdecryptionPathId(), "Retrieve Report Data", Map.class);
@@ -276,6 +278,23 @@ public class SewaSetuRepository {
         }
 
         return workflowHistoryMap;
+    }
+
+    /**
+     * Removes decryptable keys from each map when value is null or empty string,
+     * so the encryption service does not attempt to decrypt them.
+     */
+    private void removeEmptyDecryptableFields(List<Map<String, Object>> rows, String... keys) {
+        if (rows == null || keys == null) return;
+        for (Map<String, Object> row : rows) {
+            if (row == null) continue;
+            for (String key : keys) {
+                Object val = row.get(key);
+                if (val == null || (val instanceof String && ((String) val).isEmpty())) {
+                    row.remove(key);
+                }
+            }
+        }
     }
 
     private ReportRequest buildReportRequest(String applRefNo) {
