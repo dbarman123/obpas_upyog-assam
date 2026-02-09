@@ -40,5 +40,13 @@ public class VerificationServiceController {
 
 		return new ResponseEntity<CommonModuleResponse>(response, HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/_trackapplication", method = RequestMethod.POST)
+	public ResponseEntity<Object> trackApplication(
+			@RequestBody @Valid TrackApplicationRequest request)
+	{
+		Object applicationData = commonService.trackApplication(request);
+		return new ResponseEntity<Object>(applicationData, HttpStatus.OK);
+	}
 
 }
