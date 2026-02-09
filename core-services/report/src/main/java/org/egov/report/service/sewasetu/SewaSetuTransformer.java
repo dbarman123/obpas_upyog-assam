@@ -78,7 +78,11 @@ public class SewaSetuTransformer {
         applicationInitiatedData.setReferenceNo(getStringValue(initiatedDataMap.get("reference_no")));
         applicationInitiatedData.setPaymentDate(getStringValue(initiatedDataMap.get("payment_date")));
         applicationInitiatedData.setAmount(getStringValue(initiatedDataMap.get("amount")));
-        applicationInitiatedData.setPaymentStatus(getStringValue(initiatedDataMap.get("payment_status")));
+
+        String rawPaymentStatus = getStringValue(initiatedDataMap.get("payment_status"));
+        String mappedPaymentStatus =
+                "DEPOSITED".equalsIgnoreCase(rawPaymentStatus.trim()) ? "Y" : "N";
+        applicationInitiatedData.setPaymentStatus(mappedPaymentStatus);
 
         applicationInitiatedData.setDepartmentId(DEPARTMENT_ID);
         applicationInitiatedData.setDepartmentName(DEPARTMENT_NAME);
@@ -297,21 +301,4 @@ public class SewaSetuTransformer {
         return value.toString();
     }
 
-    private Double getDoubleValue(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Double) {
-            return (Double) value;
-        }
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-        try {
-            return Double.parseDouble(value.toString());
-        } catch (Exception e) {
-            log.error("Error converting to Double: {}", value, e);
-            return null;
-        }
-    }
 }
