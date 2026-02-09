@@ -63,7 +63,8 @@ public class OCDetailsRowMapper implements RowMapper<OC> {
 				.businessService(rs.getString("business_service"))
 				.auditDetails(auditDetails)
 				.signedOcFileStoreId(rs.getString("signed_oc_filestore_id"))
-				.isPanalityApplicable(rs.getBoolean("is_panality_applicable"))
+				.isPenaltyApplicable(rs.getBoolean("is_penalty_applicable"))
+				.penaltyAmount(rs.getBigDecimal("penalty_amount"))
 				.phoneNumber(rs.getString("phone_number"))
 				.email(rs.getString("email"))
 				.build();

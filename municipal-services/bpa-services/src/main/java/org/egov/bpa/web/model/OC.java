@@ -1,5 +1,6 @@
 package org.egov.bpa.web.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,7 +118,10 @@ public class OC {
 
 	private String ocFileStoreId;
 	private String signedOcFileStoreId;
-	private Boolean isPanalityApplicable = false;
+	
+	@Builder.Default
+	private Boolean isPenaltyApplicable = false;
+	private BigDecimal penaltyAmount;
 
 	// attachments
 	private String planningPermit;
