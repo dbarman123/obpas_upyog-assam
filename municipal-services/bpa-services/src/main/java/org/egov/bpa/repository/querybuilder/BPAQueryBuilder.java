@@ -153,7 +153,14 @@ public class BPAQueryBuilder {
      */
     public String getBPASearchQuery(BPASearchCriteria criteria, List<Object> preparedStmtList, List<String> edcrNos, boolean isCount) {
 
-        StringBuilder builder = new StringBuilder(BASIC_QUERY);
+        StringBuilder builder;
+        // If RTP ID is present, we need to use the detail query to include RTP table join
+        if (criteria.getRtpId() != null && !criteria.getRtpId().trim().isEmpty()) {
+            builder = new StringBuilder(DETAIL_QUERY);
+        } else {
+            builder = new StringBuilder(BASIC_QUERY);
+        }
+        
         addCommonFilters(criteria, preparedStmtList, builder);
 
         if (isCount)
@@ -310,6 +317,13 @@ public class BPAQueryBuilder {
                 builder.append(")");
             }
             addToPreparedStatement(preparedStmtList, createdBy);
+        }
+
+        String rtpId = criteria.getRtpId();
+        if (rtpId != null) {
+            addClauseIfRequired(preparedStmtList, builder);
+            builder.append(" rtp.rtp_id = ?");
+            preparedStmtList.add(rtpId);
         }
     }
 

@@ -69,6 +69,8 @@ public class BPASearchCriteria {
 
     private String district;
 
+    private String rtpId;
+    
     @JsonIgnore
     @Builder.Default
     private Boolean isInboxSearch = false;
@@ -76,7 +78,7 @@ public class BPASearchCriteria {
     public boolean isEmpty() {
         return (this.tenantId == null && this.status == null && this.ids == null && this.applicationNo == null
                 && this.mobileNumber == null && this.name == null && this.landId == null && this.edcrNumber == null && this.approvalNo == null
-                && this.approvalDate == null && this.ownerIds == null && this.district == null
+                && this.approvalDate == null && this.ownerIds == null && this.district == null && this.rtpId == null
                 && this.businessService == null && this.locality == null && this.applicationType == null && this.serviceType == null
                 && this.permitNumber == null);
     }
@@ -84,7 +86,7 @@ public class BPASearchCriteria {
     public boolean tenantIdOnly() {
         return (this.tenantId != null && this.status == null && this.ids == null && this.applicationNo == null
                 && this.mobileNumber == null && this.name == null && this.landId == null && this.edcrNumber == null && this.approvalNo == null
-                && this.approvalDate == null && this.ownerIds == null && this.district == null
+                && this.approvalDate == null && this.ownerIds == null && this.district == null && this.rtpId == null
                 && this.businessService == null && this.locality == null && this.applicationType == null && this.serviceType == null
                 && this.permitNumber == null);
     }
