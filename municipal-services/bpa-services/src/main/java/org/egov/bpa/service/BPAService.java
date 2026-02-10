@@ -191,11 +191,21 @@ public class BPAService {
         } else {
             // Check if the user has only CITIZEN role
             boolean isCitizen = isOnlyCitizen(requestInfo);
+            
+            // Check if user has any RTP role
+            boolean hasRTPRole = hasAnyRTPRole(requestInfo);
+            
             if ((criteria.tenantIdOnly() || criteria.isEmpty()) && isCitizen) {
                 log.info("loading data of created by me");
                 bpas = this.getBPACreatedByMe(criteria, requestInfo, landcriteria, edcrNos);
                 log.info("no of bpas retuning by the search query" + bpas.size());
             } else {
+                // Apply RTP filter if user has RTP role
+                if (hasRTPRole && !StringUtils.isEmpty(requestInfo.getUserInfo().getUuid())) {
+                    criteria.setRtpId(requestInfo.getUserInfo().getUuid());
+                    log.info("Applying RTP filter with uuid: {}", requestInfo.getUserInfo().getUuid());
+                }
+                
                 if (isDetailRequired) {
                     // If user has ONLY CITIZEN role, filter by createdBy to ensure citizens can only view their own applications
                     if (isCitizen && !StringUtils.isEmpty(requestInfo.getUserInfo().getUuid())) {
@@ -223,8 +233,7 @@ public class BPAService {
 
                     landcriteria.setIds(landIds);
                     if(requestInfo != null && requestInfo.getUserInfo() != null) {
-                        boolean isRTP = requestInfo.getUserInfo().getRoles().stream()
-                                .anyMatch(role -> role.getCode().equalsIgnoreCase(BPAConstants.BPA_ARCHITECT_ROLE));
+                        boolean isRTP = hasAnyRTPRole(requestInfo);
                         if(isRTP) {
                             landcriteria.setTenantId(requestInfo.getUserInfo().getTenantId());
                         }else {
@@ -922,6 +931,20 @@ public class BPAService {
         if (requestInfo.getUserInfo() != null && requestInfo.getUserInfo().getRoles() != null) {
             List<String> roles = requestInfo.getUserInfo().getRoles().stream().map(Role::getCode).collect(Collectors.toList());
             return roles.size() == 1 && roles.contains(BPAConstants.CITIZEN);
+        }
+        return false;
+    }
+    
+    /**
+     * Check if the logged in user has any RTP role
+     * @param requestInfo The RequestInfo containing user roles
+     * @return boolean indicating if the user has any RTP role
+     * */
+    private boolean hasAnyRTPRole(RequestInfo requestInfo) {
+        if (requestInfo.getUserInfo() != null && requestInfo.getUserInfo().getRoles() != null) {
+            List<String> rtpRoles = Arrays.asList(config.getRtpRoles().split(","));
+            return requestInfo.getUserInfo().getRoles().stream()
+                .anyMatch(role -> rtpRoles.contains(role.getCode()));
         }
         return false;
     }
