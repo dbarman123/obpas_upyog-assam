@@ -252,14 +252,6 @@ public class BPAQueryBuilder {
             addToPreparedStatement(preparedStmtList, applicationTypes);
         }
 
-        String rtpId = criteria.getRtpId();
-        if (rtpId != null) {
-            List<String> rtpIds = Arrays.asList(rtpId.split(","));
-            addClauseIfRequired(preparedStmtList, builder);
-            builder.append(" rtp.rtp_id IN (").append(createQuery(rtpIds)).append(")");
-            addToPreparedStatement(preparedStmtList, rtpIds);
-        }
-
         String riskType = criteria.getRiskType();
         if (riskType != null) {
             List<String> riskTypes = Arrays.asList(riskType.split(","));
@@ -325,6 +317,13 @@ public class BPAQueryBuilder {
                 builder.append(")");
             }
             addToPreparedStatement(preparedStmtList, createdBy);
+        }
+
+        String rtpId = criteria.getRtpId();
+        if (rtpId != null) {
+            addClauseIfRequired(preparedStmtList, builder);
+            builder.append(" rtp.rtp_id = ?");
+            preparedStmtList.add(rtpId);
         }
     }
 
