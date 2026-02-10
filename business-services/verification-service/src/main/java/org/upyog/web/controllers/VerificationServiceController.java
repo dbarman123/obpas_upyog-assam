@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.upyog.service.CommonService;
+import org.upyog.service.ReportServiceImpl;
 import org.upyog.web.models.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +28,9 @@ public class VerificationServiceController {
 
 	@Autowired
 	private CommonService commonService;
+	
+	@Autowired
+	private ReportServiceImpl reportService;
 
 	@RequestMapping(value = "/_search", method = RequestMethod.POST)
 	public ResponseEntity<CommonModuleResponse> v1RegistrationSearchPost(
@@ -45,7 +49,7 @@ public class VerificationServiceController {
 	public ResponseEntity<Object> trackApplication(
 			@RequestBody @Valid TrackApplicationRequest request)
 	{
-		Object applicationData = commonService.trackApplication(request);
+		Object applicationData = reportService.trackApplication(request);
 		return new ResponseEntity<Object>(applicationData, HttpStatus.OK);
 	}
 
