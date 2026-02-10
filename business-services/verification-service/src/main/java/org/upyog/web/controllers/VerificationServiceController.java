@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.upyog.service.CommonService;
-import org.upyog.service.ReportServiceImpl;
+import org.upyog.service.ReportService;
 import org.upyog.web.models.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +30,7 @@ public class VerificationServiceController {
 	private CommonService commonService;
 	
 	@Autowired
-	private ReportServiceImpl reportService;
+	private ReportService reportService;
 
 	@RequestMapping(value = "/_search", method = RequestMethod.POST)
 	public ResponseEntity<CommonModuleResponse> v1RegistrationSearchPost(
