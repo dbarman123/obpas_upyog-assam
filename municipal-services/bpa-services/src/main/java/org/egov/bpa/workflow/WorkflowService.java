@@ -7,6 +7,7 @@ import org.egov.bpa.config.BPAConfiguration;
 import org.egov.bpa.repository.ServiceRequestRepository;
 import org.egov.bpa.util.BPAConstants;
 import org.egov.bpa.util.BPAErrorConstants;
+import org.egov.bpa.util.ServiceType;
 import org.egov.bpa.web.model.*;
 import org.egov.bpa.web.model.workflow.BusinessService;
 import org.egov.bpa.web.model.workflow.BusinessServiceResponse;
@@ -53,6 +54,11 @@ public class WorkflowService {
 		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.GMDA, BuildingPermitAuthorityEnum.GRAM_PANCHAYAT), "BPA_GMDA_GP");
 	}
 
+	private static final Map<AuthorityKey, String> OC_BUSINESS_SERVICE_MAP = new HashMap<>();
+	static {
+		OC_BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.GMDA, BuildingPermitAuthorityEnum.GMC), "OC_GMDA_GMC");
+	}
+	
 	@Autowired
 	public WorkflowService(BPAConfiguration config, ServiceRequestRepository serviceRequestRepository,
 			ObjectMapper mapper) {
@@ -171,7 +177,7 @@ public class WorkflowService {
 	 * @param areaMappingDetail The AreaMappingDetail containing the permit authorities.
 	 * @return The determined business service or null if no valid combination is found.
 	 */
-	public String determineBusinessService(AreaMappingDetail areaMappingDetail) {
+	public String determineBusinessService(AreaMappingDetail areaMappingDetail, ServiceType serviceType) {
 		PlanningPermitAuthorityEnum planning = areaMappingDetail.getPlanningPermitAuthority();
 		BuildingPermitAuthorityEnum building = areaMappingDetail.getBuildingPermitAuthority();
 
@@ -185,7 +191,16 @@ public class WorkflowService {
 
 		log.debug("Evaluating business service with PlanningAuthority: {} and BuildingAuthority: {}", planning, building);
 
-		String result = BUSINESS_SERVICE_MAP.get(new AuthorityKey(planning, building));
+		String result = null;
+		
+		switch (serviceType) {
+		case BPA_SERVICE:
+			result = BUSINESS_SERVICE_MAP.get(new AuthorityKey(planning, building));
+			break;
+		case OC_SERVICE:
+			result = OC_BUSINESS_SERVICE_MAP.get(new AuthorityKey(planning, building));
+			break;
+		}
 
 		if (result != null) {
 			log.info("Matched business service: {}", result);

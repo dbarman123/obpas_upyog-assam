@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -18,6 +19,7 @@ import org.egov.bpa.repository.ServiceRequestRepository;
 import org.egov.bpa.util.BPAConstants;
 import org.egov.bpa.util.BPAErrorConstants;
 import org.egov.bpa.util.BPAUtil;
+import org.egov.bpa.util.ServiceType;
 import org.egov.bpa.validator.MDMSValidator;
 import org.egov.bpa.web.model.AuditDetails;
 import org.egov.bpa.web.model.BPA;
@@ -116,7 +118,7 @@ public class EnrichmentService {
 			bpaRequest.getBPA().setBusinessService(BPAConstants.BPA_OC_MODULE_CODE);
 			bpaRequest.getBPA().setLandId(values.get("landId"));
 		}*/
-		String businessService = workflowService.determineBusinessService(bpaRequest.getBPA().getAreaMapping());
+		String businessService = workflowService.determineBusinessService(bpaRequest.getBPA().getAreaMapping(), ServiceType.BPA_SERVICE);
 		bpaRequest.getBPA().setBusinessService(businessService);
 
         if (bpaRequest.getBPA().getRiskType() != null) {
@@ -394,8 +396,7 @@ public class EnrichmentService {
                 : new HashMap<String, String>();
 
 		//For the testing commented this
-//		String businessService = workflowService.determineBusinessService(ocRequest.getOc().getAreaMapping());
-		String businessService = "BPA-SERVICES";
+		String businessService = workflowService.determineBusinessService(ocRequest.getOc().getAreaMapping(), ServiceType.OC_SERVICE);
 		ocRequest.getOc().setBusinessService(businessService);
 
 //        if (ocRequest.getOc().getRiskType() != null) {
@@ -404,7 +405,7 @@ public class EnrichmentService {
 
 //		 BPA Documents
 		if (!CollectionUtils.isEmpty(ocRequest.getOc().getDocuments()))
-			ocRequest.getOc().getDocuments().forEach(document -> {
+			ocRequest.getOc().getDocuments().stream().filter(Objects::nonNull).forEach(document -> {
 				//TODO uncomment this if this check required in future
 			//	if (document.getId() == null) {
 					document.setId(UUID.randomUUID().toString());
