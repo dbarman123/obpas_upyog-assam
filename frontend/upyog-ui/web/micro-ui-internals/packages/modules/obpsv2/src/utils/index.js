@@ -188,7 +188,7 @@ export const bpaPayload = async(data) => {
         },
         owners: [
           {
-            aadhaarNumber: data?.applicant?.aadhaarNumber,
+            // aadhaarNumber: data?.applicant?.aadhaarNumber,
             pan: data?.applicant?.panCardNumber,
             mobileNumber: data?.applicant?.mobileNumber,
             altContactNumber: data?.applicant?.alternateNumber,
@@ -337,7 +337,7 @@ export const bpaEditPayload = async (formData) => {
       altContactNumber: formData.applicant.alternateNumber ?? updated.landInfo.owners[0].altContactNumber,
       gender: formData.applicant.gender?.code ?? updated.landInfo.owners[0].gender,
       relationship: formData.applicant.relationship?.code ?? updated.landInfo.owners[0].relationship,
-      aadhaarNumber: formData.applicant.aadhaarNumber ?? updated.landInfo.owners[0].aadhaarNumber,
+      // aadhaarNumber: formData.applicant.aadhaarNumber ?? updated.landInfo.owners[0].aadhaarNumber,
       pan: formData.applicant.panCardNumber ?? updated.landInfo.owners[0].pan,
       emailId: formData.applicant.emailId ?? updated.landInfo.owners[0].emailId,
       fatherOrHusbandName: formData.applicant.fatherName ?? updated.landInfo.owners[0].fatherOrHusbandName,
