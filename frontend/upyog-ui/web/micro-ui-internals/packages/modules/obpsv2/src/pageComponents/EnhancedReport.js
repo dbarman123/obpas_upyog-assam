@@ -68,7 +68,7 @@ const EnhancedReport = (props) => {
   const [searchData, setSearchData] = useState({});
   
   // Get tenant ID from session or default
-  const tenantId = Digit.ULBService.getCurrentTenantId() || "pg";
+  const tenantId = Digit.ULBService.getCurrentTenantId() || "as";
   // Fetch report metadata
   const { isLoading: SearchFormIsLoading, data: SearchFormUIData, error: metaError } = 
     Digit.Hooks.reports.useReportMeta.fetchMetaData(moduleName, reportName, tenantId);
