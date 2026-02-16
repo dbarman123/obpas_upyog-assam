@@ -14,7 +14,7 @@ const getSearchParamsObj = (field, data, key, t) => {
         return
       obj["name"] = key
       obj["input"] = data[key];
-      return obj
+      return obj 
       
     case "singlevaluelist":
       var defaultValueObj = field.defaultValue
@@ -146,7 +146,7 @@ const EnhancedReport = (props) => {
           margin-top: 20px;
           background-color: white;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          padding-bottom: 10px;
+          padding: 2px;
         }
         .report-scroll-container::-webkit-scrollbar {
           height: 10px;
