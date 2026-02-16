@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { OBPSIconSolidBg } from "@upyog/digit-ui-react-components";
+import { OBPSIconSolidBg, EmployeeModuleCard } from "@upyog/digit-ui-react-components";
 import {ReportModuleCard} from "./../../components/ReportModuleCard";
 
 const OBPSReportCard = () => {
@@ -10,12 +10,19 @@ const OBPSReportCard = () => {
       Icon: <OBPSIconSolidBg />,
       moduleName:<div style={{ width: "200px", wordWrap: "break-word" }}>{t("ACTION_TEST_REPORTS")}</div>,
       links: [
+        //{
+         //label: t("ES_COMMON_REPORTS"),
+          //link: `/employee/report/rainmaker-obps/obpsApplicationReport`,
+          //role: "OBPS_REPORT_VIEWER",
+          //field: "REPORT"
+        //},
         {
-          label: t("ES_COMMON_REPORTS"),
-          link: `/employee/report/rainmaker-obps/obpsApplicationReport`,
+          label: t("Reports"),
+          link: `/upyog-ui/employee/obpsv2/obpsApplicationReport`,
           role: "OBPS_REPORT_VIEWER",
           field: "REPORT"
-        },
+        }
+        
       ]
     }),[t]);
     const reportAccess=  user?.info?.roles?.some((role) => role.code === "OBPS_REPORT_VIEWER");
@@ -25,7 +32,7 @@ const OBPSReportCard = () => {
       });
     }
 
-    return reportAccess ? <ReportModuleCard {...propsForModuleCard} /> : null
+    return reportAccess ? <EmployeeModuleCard {...propsForModuleCard} /> : null
   }
 
   export default OBPSReportCard

@@ -30,6 +30,8 @@ import OBPSV2EmployeeCard from "./pages/employee/EmployeeCard";
 import SiteReport from "./pageComponents/siteReport"
 import RTASearchApplication from "./components/SearchApplication";
 import OBPSReportCard from "./pages/employee/ReportCard";
+import EnhancedReport from "./pageComponents/EnhancedReport";
+import ReportSearchApplication from "./pageComponents/ReportSearchApplication";
 const OBPSV2Module = ({ stateCode, userType, tenants }) => {
   const moduleCode = "OBPSV2";
   const { path, url } = useRouteMatch();
@@ -99,7 +101,9 @@ const componentsToRegister = {
   OBPASCitizenHomeScreen,
   RTASearchApplication,
   BPAApplicationDetails,
-  BPAEmployeeDetails
+  BPAEmployeeDetails,
+  EnhancedReport,
+  ReportSearchApplication
 }
 
 export const initOBPSV2Components = () => {
