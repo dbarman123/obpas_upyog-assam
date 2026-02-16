@@ -14,7 +14,7 @@ const ApplicantDetails = ({ t, config, onSelect, formData, searchResult }) => {
   const [fatherName, setFatherName] = useState(formData?.applicant?.fatherName || searchResult?.landInfo?.owners?.[0]?.fatherOrHusbandName || "");
   const [motherName, setMotherName] = useState(formData?.applicant?.motherName || searchResult?.landInfo?.owners?.[0]?.motherName ||"");
   const [panCardNumber, setPanCardNumber] = useState(formData?.applicant?.panCardNumber || searchResult?.landInfo?.owners?.[0]?.pan || "");
-  const [aadhaarNumber, setAadhaarNumber] = useState(formData?.applicant?.aadhaarNumber || searchResult?.landInfo?.owners?.[0]?.aadhaarNumber ||"");
+  // const [aadhaarNumber, setAadhaarNumber] = useState(formData?.applicant?.aadhaarNumber || searchResult?.landInfo?.owners?.[0]?.aadhaarNumber ||"");
   const [gender, setGender] = useState(formData?.applicant?.gender || (searchResult?.landInfo?.owners?.[0]?.gender ? { code: searchResult.landInfo.owners[0].gender, name: searchResult.landInfo.owners[0].gender, i18nKey: searchResult.landInfo.owners[0].gender } : ""));
   const [relationship, setRelationship] = useState(formData?.applicant?.relationship || (searchResult?.landInfo?.owners?.[0]?.relationship ? { code: searchResult.landInfo.owners[0].relationship, name: searchResult.landInfo.owners[0].relationship, i18nKey: searchResult.landInfo.owners[0].relationship } : ""));  
   const [error, setError] = useState(null); 
@@ -40,7 +40,7 @@ const ApplicantDetails = ({ t, config, onSelect, formData, searchResult }) => {
       fatherName,
       motherName,
       panCardNumber,
-      aadhaarNumber,
+      // aadhaarNumber,
       gender,
       relationship,
     };
@@ -65,7 +65,7 @@ const ApplicantDetails = ({ t, config, onSelect, formData, searchResult }) => {
           !emailId ||
           !fatherName ||
           !panCardNumber ||
-          !aadhaarNumber ||
+          // !aadhaarNumber ||
           !gender ||
           !relationship ||
           error
@@ -206,7 +206,7 @@ const ApplicantDetails = ({ t, config, onSelect, formData, searchResult }) => {
           />
 
           {/* Aadhaar Number */}
-          <CardLabel>{`${t("BPA_AADHAAR_NUMBER")}`} <span className="check-page-link-button">*</span></CardLabel>
+          {/* <CardLabel>{`${t("BPA_AADHAAR_NUMBER")}`} <span className="check-page-link-button">*</span></CardLabel>
           <TextInput
             t={t}
             type="text"
@@ -223,7 +223,7 @@ const ApplicantDetails = ({ t, config, onSelect, formData, searchResult }) => {
             minLength={12}
             maxLength={12}
             {...{ pattern: "[0-9]{12}", title: t("BPA_AADHAAR_ERROR_MESSAGE") }}
-          />
+          /> */}
         </div>
       </FormStep>
     </React.Fragment>
