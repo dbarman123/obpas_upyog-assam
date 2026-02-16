@@ -1,5 +1,6 @@
 package org.upyog.service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.egov.common.contract.request.RequestInfo;
@@ -7,6 +8,7 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.upyog.config.ModuleConfig;
+import org.upyog.config.MainConfiguration;
 import org.upyog.constants.VerificationSearchConstants;
 import org.upyog.mapper.CommonDetailsMapper;
 import org.upyog.mapper.CommonDetailsMapperFactory;
@@ -97,7 +99,7 @@ public class CommonServiceImpl implements CommonService {
 	 * @return A RequestInfo object containing the system user’s details.
 	 * @throws IllegalStateException if the system user is not found.
 	 */
-	private RequestInfo getSystemUserDetails() {
+	public RequestInfo getSystemUserDetails() {
 		UserDetailResponse userDetailResponse = userService.searchByUserName(
 				VerificationSearchConstants.INTERNALMICROSERVICEUSER_USERNAME, VerificationSearchConstants.VS_TENANTID);
 
