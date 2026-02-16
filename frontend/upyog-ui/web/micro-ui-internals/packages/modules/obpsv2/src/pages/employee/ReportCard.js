@@ -1,7 +1,6 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { OBPSIconSolidBg, EmployeeModuleCard } from "@upyog/digit-ui-react-components";
-import {ReportModuleCard} from "./../../components/ReportModuleCard";
 
 const OBPSReportCard = () => {
     const user = Digit.UserService.getUser();
