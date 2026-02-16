@@ -386,10 +386,10 @@ const CheckPage = ({ onSubmit, value = {} }) => {
             label={t("BPA_PAN_CARD")}
             text={checkForNA(applicant?.panCardNumber)}
           />
-          <Row
+          {/* <Row
             label={t("BPA_AADHAAR_CARD")}
             text={checkForNA(applicant?.aadhaarNumber)}
-          />
+          /> */}
         </StatusTable>
 
         <div

@@ -1196,10 +1196,10 @@ import {
                 label={t("BPA_PAN_CARD")}
                 text={primaryOwner?.pan || t("CS_NA")}
               />
-              <Row
+              {/* <Row
                 label={t("BPA_AADHAAR_CARD")}
                 text={primaryOwner?.aadhaarNumber || t("CS_NA")}
-              />
+              /> */}
             </StatusTable>
   
             <CardSubHeader style={{ fontSize: "24px" }}>{t("BPA_ADDRESS_DETAILS")}</CardSubHeader>
