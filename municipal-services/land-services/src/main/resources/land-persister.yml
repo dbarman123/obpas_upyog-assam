@@ -194,8 +194,8 @@ serviceMaps:
         - query: >
             INSERT INTO ug_land_unit (
               id, tenant_id, floor_no, unit_type, usage_category, occupancy_type,
-              occupancy_date, land_info_id, created_by, last_modified_by, created_time, last_modified_time, additional_details
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::JSONB);
+              occupancy_date, land_info_id, created_by, last_modified_by, created_time, last_modified_time, additional_details, specify_usage
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::JSONB, ?);
           basePath: landInfo.units.*
           jsonMaps:
             - jsonPath: $.landInfo.units.*.id
@@ -213,6 +213,7 @@ serviceMaps:
             - jsonPath: $.landInfo.units.*.additionalDetails
               type: JSON
               dbType: JSONB
+            - jsonPath: $.landInfo.units.*.specify_usage
 
         # Insert into audit tables
         - query: INSERT INTO ug_land_audit_details SELECT * FROM ug_land_info WHERE id = ?;
@@ -536,8 +537,8 @@ serviceMaps:
         - query: >
             INSERT INTO ug_land_unit (
               id, tenant_id, floor_no, unit_type, usage_category, occupancy_type,
-              occupancy_date, land_info_id, created_by, last_modified_by, created_time, last_modified_time, additional_details
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::JSONB)
+              occupancy_date, land_info_id, created_by, last_modified_by, created_time, last_modified_time, additional_details, specify_usage
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::JSONB, ?)
             ON CONFLICT (id) DO UPDATE SET
               tenant_id = EXCLUDED.tenant_id,
               floor_no = EXCLUDED.floor_no,
@@ -549,6 +550,7 @@ serviceMaps:
               last_modified_by = EXCLUDED.last_modified_by,
               last_modified_time = EXCLUDED.last_modified_time,
               additional_details = EXCLUDED.additional_details;
+              specify_usage = EXCLUDED.specify_usage;
           basePath: landInfo.units.*
           jsonMaps:
             - jsonPath: $.landInfo.units.*.id
@@ -566,4 +568,5 @@ serviceMaps:
             - jsonPath: $.landInfo.units.*.additionalDetails
               type: JSON
               dbType: JSONB
+            - jsonPath: $.landInfo.units.*.specify_usage
 
