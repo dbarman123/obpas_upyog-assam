@@ -140,6 +140,7 @@ public class LandRowMapper implements ResultSetExtractor<List<LandInfo>> {
 					.unitType(rs.getString("unit_type"))
 					.usageCategory(rs.getString("usage_category"))
 					.occupancyType(rs.getString("occupancy_type"))
+					.specifyUsage(rs.getString("specify_usage"))
 					.occupancyDate(occupancyDate)
 					.auditDetails(auditdetails)
 					.tenantId(tenantId)

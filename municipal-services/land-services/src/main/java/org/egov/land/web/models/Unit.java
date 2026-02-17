@@ -58,4 +58,6 @@ public class Unit {
   @ApiModelProperty(value = "Audit details of the Unit.")
   @Valid
   private AuditDetails auditDetails;
+  
+  private String specifyUsage;
 }
