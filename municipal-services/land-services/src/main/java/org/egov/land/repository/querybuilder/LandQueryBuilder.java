@@ -51,7 +51,8 @@ public class LandQueryBuilder {
 			+ "landDoc.id AS doc_id, landDoc.document_type AS doc_type, landDoc.file_store_id AS doc_filestore, landDoc.document_uid AS doc_uid, "
 
 			+ "landUnit.id AS unit_id, landUnit.floor_no AS floor_no, landUnit.unit_type AS unit_type, "
-			+ "landUnit.usage_category AS usage_category, landUnit.occupancy_type AS occupancy_type, landUnit.occupancy_date AS occupancy_date "
+			+ "landUnit.usage_category AS usage_category, landUnit.occupancy_type AS occupancy_type, landUnit.occupancy_date AS occupancy_date, "
+			+ "landUnit.specify_usage AS specify_usage "
 
 			+ "FROM {schema}.ug_land_info landInfo " + INNER_JOIN_STRING
 			+ "{schema}.ug_land_address landAddress ON landAddress.land_info_id = landInfo.id " + LEFT_OUTER_JOIN_STRING
