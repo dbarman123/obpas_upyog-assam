@@ -568,5 +568,5 @@ serviceMaps:
             - jsonPath: $.landInfo.units.*.additionalDetails
               type: JSON
               dbType: JSONB
-            - jsonPath: $.landInfo.units.*.specify_usage
+            - jsonPath: $.landInfo.units.*.specifyUsage
 
