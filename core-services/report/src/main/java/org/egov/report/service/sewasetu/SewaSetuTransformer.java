@@ -49,16 +49,6 @@ public class SewaSetuTransformer {
     private static final Double CONVENIENCE_FEE_ZERO = 0.0;
 
     /**
-     * Transform initiated data map to ApplicationInitiatedData (no tenant display-name lookup).
-     *
-     * @param initiatedDataMap Map containing initiated data
-     * @return ApplicationInitiatedData
-     */
-    public ApplicationInitiatedData transformInitiatedDataFromMap(Map<String, Object> initiatedDataMap) {
-        return transformInitiatedDataFromMap(initiatedDataMap, null);
-    }
-
-    /**
      * Transform initiated data map to ApplicationInitiatedData.
      * Applies hardcoded department/service and payment overrides; maps appl_status to Sewa Setu code.
      * When tenantCodeToDdrName is provided, submission_location is set to the tenant's ddrName (from MDMS) for the tenant code.
