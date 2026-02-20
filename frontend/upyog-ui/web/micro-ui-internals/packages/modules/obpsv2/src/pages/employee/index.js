@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import Search from "../citizen/Search";
 import EnhancedReport from "../../pageComponents/EnhancedReport";
 
-import OcBuildingPermit from "../../components/ocBuildingPermit";
 
 const EmployeeApp = ({ path }) => {
   const location = useLocation()
@@ -32,7 +31,6 @@ const EmployeeApp = ({ path }) => {
         <PrivateRoute path={`${path}/dailybackendupdatesresport`} component={(props) => <EnhancedReport {...props} parentRoute={path} moduleName="rainmaker-obps" reportName="dailybackendupdatesresport" />} />
         <PrivateRoute path={`${path}/applicationworkflowtrace`} component={(props) => <EnhancedReport {...props} parentRoute={path} moduleName="rainmaker-obps" reportName="applicationworkflowtrace" />} />
       
-        <PrivateRoute path={`${path}/ocbpa`} component={OcBuildingPermit}/>
       </Switch>
     </Fragment>
   )

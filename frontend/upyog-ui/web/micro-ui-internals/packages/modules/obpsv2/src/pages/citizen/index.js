@@ -4,7 +4,6 @@ import { Switch, useLocation, Route } from "react-router-dom";
 import { PrivateRoute, BackButton } from "@upyog/digit-ui-react-components";
 import Inbox from "../employee/Inbox"
 import Search from "./Search";
-import OcBuildingPermit from "../../components/ocBuildingPermit";
 const App = ({ path }) => {
   const location = useLocation();
   const { t } = useTranslation();
@@ -34,7 +33,6 @@ const App = ({ path }) => {
         <PrivateRoute path={`${path}/rtp/search/application`} component={(props) => <Search {...props} parentRoute={path} />} />
         <PrivateRoute path={`${path}/search/application`} component={(props) => <Search {...props} parentRoute={path} />} />
         <PrivateRoute path={`${path}/editApplication/:applicationNo/:tenantId`} component={BPAEdit}/>
-        <PrivateRoute path={`${path}/ocbpa`} component={OcBuildingPermit}/>
       </Switch>
       </div>
     </React.Fragment>
