@@ -11,6 +11,7 @@ import org.egov.report.web.model.sewasetu.SewaSetuData;
 import org.egov.report.web.model.sewasetu.SewaSetuResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -34,26 +35,25 @@ public class SewaSetuService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Value("${state.level.tenant.id:as}")
+    private String stateTenantId;
+
     /**
-     * Fetch application details for a specific application reference number
+     * Fetch application details for a specific application reference number.
+     * Uses same flow as getCompleteApplicationData so initiated_data (including submission_location as ddrName) is populated.
      *
      * @param applRefNo   Application reference number
      * @param requestInfo Request information
-     * @return SewaSetuResponse with application details
+     * @return SewaSetuResponse with application details (initiated_data, attribute_data, execution_data)
      */
     public SewaSetuResponse getApplicationDetails(String applRefNo, RequestInfo requestInfo) {
         try {
-            List<Map<String, Object>> workflowHistory = sewaSetuRepository.fetchWorkflowHistory(applRefNo, requestInfo);
-            SewaSetuData sewaSetuData = sewaSetuTransformer.transformToSewaSetuData(applRefNo, workflowHistory);
-
-            List<SewaSetuData> dataList = new ArrayList<>();
-            dataList.add(sewaSetuData);
-
-            return SewaSetuResponse.builder()
-                    .success(true)
-                    .data(dataList)
-                    .build();
-
+            if (applRefNo == null || applRefNo.isEmpty()) {
+                throw new CustomException("INVALID_APPLICATION_NUMBER", "Application number is required");
+            }
+            List<String> applicationNumbers = new ArrayList<>();
+            applicationNumbers.add(applRefNo);
+            return fetchAndTransformApplicationData(applicationNumbers, requestInfo);
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
@@ -171,6 +171,8 @@ public class SewaSetuService {
                             (existing, replacement) -> existing
                     ));
 
+            Map<String, String> tenantCodeToDdrName = sewaSetuRepository.fetchTenantCodeToDdrName(stateTenantId, requestInfo);
+
             // Transform and combine data for each application
             List<SewaSetuData> sewaSetuDataList = new ArrayList<>();
 
@@ -180,7 +182,7 @@ public class SewaSetuService {
                     Map<String, Object> initiatedData = initiatedDataMap.get(applRefNo);
                     ApplicationInitiatedData applicationInitiatedData = null;
                     if (initiatedData != null) {
-                        applicationInitiatedData = sewaSetuTransformer.transformInitiatedDataFromMap(initiatedData);
+                        applicationInitiatedData = sewaSetuTransformer.transformInitiatedDataFromMap(initiatedData, tenantCodeToDdrName);
                     } else {
                         // Create minimal initiated data if not found
                         applicationInitiatedData = new ApplicationInitiatedData();

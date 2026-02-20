@@ -49,13 +49,16 @@ public class SewaSetuTransformer {
     private static final Double CONVENIENCE_FEE_ZERO = 0.0;
 
     /**
-     * Transform initiated data map to ApplicationInitiatedData
+     * Transform initiated data map to ApplicationInitiatedData.
      * Applies hardcoded department/service and payment overrides; maps appl_status to Sewa Setu code.
+     * When tenantCodeToDdrName is provided, submission_location is set to the tenant's ddrName (from MDMS) for the tenant code.
      *
-     * @param initiatedDataMap Map containing initiated data
+     * @param initiatedDataMap     Map containing initiated data
+     * @param tenantCodeToDdrName  Optional map of tenant code -> ddrName (from MDMS tenant master); null to use raw submission_location
      * @return ApplicationInitiatedData
      */
-    public ApplicationInitiatedData transformInitiatedDataFromMap(Map<String, Object> initiatedDataMap) {
+    public ApplicationInitiatedData transformInitiatedDataFromMap(Map<String, Object> initiatedDataMap,
+                                                                 Map<String, String> tenantCodeToDdrName) {
         if (initiatedDataMap == null) {
             return null;
         }
@@ -67,7 +70,10 @@ public class SewaSetuTransformer {
         String name = getStringValue(initiatedDataMap.get("name"));
         applicationInitiatedData.setAppliedBy(name);
         applicationInitiatedData.setUserName(name);
-        applicationInitiatedData.setSubmissionLocation(getStringValue(initiatedDataMap.get("submission_location")));
+        String submissionLocationCode = getStringValue(initiatedDataMap.get("submission_location"));
+        String submissionLocation = (tenantCodeToDdrName != null && !tenantCodeToDdrName.isEmpty() && !submissionLocationCode.isEmpty() && tenantCodeToDdrName.containsKey(submissionLocationCode))
+                ? tenantCodeToDdrName.get(submissionLocationCode) : submissionLocationCode;
+        applicationInitiatedData.setSubmissionLocation(submissionLocation);
         applicationInitiatedData.setLocationId(getLongValue(initiatedDataMap.get("location_id")));
         applicationInitiatedData.setDistrict(getStringValue(initiatedDataMap.get("district")));
         applicationInitiatedData.setDistrictId(getLongValue(initiatedDataMap.get("district_id")));
