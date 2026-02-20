@@ -838,6 +838,10 @@ export const OBPSV2Services = {
           title: "BPA_OCCUPANCY_TYPE",
           value: landInfo?.units?.[0]?.occupancyType || "NA",
         },
+        {
+          title: "BPA_SPECIFY_USAGE",
+          value: landInfo?.units?.[0]?.specifyUsage || "NA",
+        },
       ],
       additionalDetails: {
         obpsDocuments: [{

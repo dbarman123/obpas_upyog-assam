@@ -631,6 +631,10 @@ const CheckPage = ({ onSubmit, value = {} }) => {
             text={checkForNA(t(land?.occupancyType?.code))}
           />
           <Row
+            label={t("BPA_SPECIFY_USAGE")}
+            text={checkForNA(land?.specifyUsage) || "NA"}
+          />
+          <Row
             label={t("BPA_TOD_BENEFITS")}
             text={checkForNA(t(land?.todBenefits?.code))}
           />
