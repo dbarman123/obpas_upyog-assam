@@ -549,7 +549,7 @@ serviceMaps:
               land_info_id = EXCLUDED.land_info_id,
               last_modified_by = EXCLUDED.last_modified_by,
               last_modified_time = EXCLUDED.last_modified_time,
-              additional_details = EXCLUDED.additional_details;
+              additional_details = EXCLUDED.additional_details,
               specify_usage = EXCLUDED.specify_usage;
           basePath: landInfo.units.*
           jsonMaps:
