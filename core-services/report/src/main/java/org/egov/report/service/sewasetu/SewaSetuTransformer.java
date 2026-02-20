@@ -49,13 +49,16 @@ public class SewaSetuTransformer {
     private static final Double CONVENIENCE_FEE_ZERO = 0.0;
 
     /**
-     * Transform initiated data map to ApplicationInitiatedData
+     * Transform initiated data map to ApplicationInitiatedData.
      * Applies hardcoded department/service and payment overrides; maps appl_status to Sewa Setu code.
+     * When tenantCodeToDdrName is provided, submission_location is set to the tenant's ddrName (from MDMS) for the tenant code.
      *
-     * @param initiatedDataMap Map containing initiated data
+     * @param initiatedDataMap     Map containing initiated data
+     * @param tenantCodeToDdrName  Optional map of tenant code -> ddrName (from MDMS tenant master); null to use raw submission_location
      * @return ApplicationInitiatedData
      */
-    public ApplicationInitiatedData transformInitiatedDataFromMap(Map<String, Object> initiatedDataMap) {
+    public ApplicationInitiatedData transformInitiatedDataFromMap(Map<String, Object> initiatedDataMap,
+                                                                 Map<String, String> tenantCodeToDdrName) {
         if (initiatedDataMap == null) {
             return null;
         }
@@ -67,7 +70,10 @@ public class SewaSetuTransformer {
         String name = getStringValue(initiatedDataMap.get("name"));
         applicationInitiatedData.setAppliedBy(name);
         applicationInitiatedData.setUserName(name);
-        applicationInitiatedData.setSubmissionLocation(getStringValue(initiatedDataMap.get("submission_location")));
+        String submissionLocationCode = getStringValue(initiatedDataMap.get("submission_location"));
+        String submissionLocation = (tenantCodeToDdrName != null && !tenantCodeToDdrName.isEmpty() && !submissionLocationCode.isEmpty() && tenantCodeToDdrName.containsKey(submissionLocationCode))
+                ? tenantCodeToDdrName.get(submissionLocationCode) : submissionLocationCode;
+        applicationInitiatedData.setSubmissionLocation(submissionLocation);
         applicationInitiatedData.setLocationId(getLongValue(initiatedDataMap.get("location_id")));
         applicationInitiatedData.setDistrict(getStringValue(initiatedDataMap.get("district")));
         applicationInitiatedData.setDistrictId(getLongValue(initiatedDataMap.get("district_id")));
@@ -78,7 +84,11 @@ public class SewaSetuTransformer {
         applicationInitiatedData.setReferenceNo(getStringValue(initiatedDataMap.get("reference_no")));
         applicationInitiatedData.setPaymentDate(getStringValue(initiatedDataMap.get("payment_date")));
         applicationInitiatedData.setAmount(getStringValue(initiatedDataMap.get("amount")));
-        applicationInitiatedData.setPaymentStatus(getStringValue(initiatedDataMap.get("payment_status")));
+
+        String rawPaymentStatus = getStringValue(initiatedDataMap.get("payment_status"));
+        String mappedPaymentStatus =
+                "DEPOSITED".equalsIgnoreCase(rawPaymentStatus.trim()) ? "Y" : "N";
+        applicationInitiatedData.setPaymentStatus(mappedPaymentStatus);
 
         applicationInitiatedData.setDepartmentId(DEPARTMENT_ID);
         applicationInitiatedData.setDepartmentName(DEPARTMENT_NAME);
@@ -297,21 +307,4 @@ public class SewaSetuTransformer {
         return value.toString();
     }
 
-    private Double getDoubleValue(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Double) {
-            return (Double) value;
-        }
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-        try {
-            return Double.parseDouble(value.toString());
-        } catch (Exception e) {
-            log.error("Error converting to Double: {}", value, e);
-            return null;
-        }
-    }
 }

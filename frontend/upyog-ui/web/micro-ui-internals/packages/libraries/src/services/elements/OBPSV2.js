@@ -654,10 +654,10 @@ export const OBPSV2Services = {
         },
         { title: "BPA_MOTHER_NAME", value: primaryOwner?.motherName || "NA" },
         { title: "BPA_PAN_CARD", value: primaryOwner?.pan || "NA" },
-        {
-          title: "BPA_AADHAAR_CARD",
-          value: primaryOwner?.aadhaarNumber || "NA",
-        },
+        // {
+        //   title: "BPA_AADHAAR_CARD",
+        //   value: primaryOwner?.aadhaarNumber || "NA",
+        // },
       ],
     };
 

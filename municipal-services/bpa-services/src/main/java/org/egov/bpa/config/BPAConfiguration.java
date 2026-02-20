@@ -399,6 +399,9 @@ public class BPAConfiguration {
 	@Value("${pending.noc.not.allowed.actions}")
 	private String pendingNocNotAllowedActions;
 
+	@Value("${bpa.rtp.roles}")
+	private String rtpRoles;
+
 
 
 }
