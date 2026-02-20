@@ -207,6 +207,7 @@ export const bpaPayload = async(data) => {
         units: [
           {
             occupancyType: data?.land?.occupancyType?.code,
+            specifyUsage: data?.land?.specifyUsage,
           },
         ],
       },
@@ -276,6 +277,7 @@ export const bpaEditPayload = async (formData) => {
         {
           ...updated.landInfo.units?.[0],
           occupancyType: formData.land.occupancyType.code,
+          specifyUsage: formData.land.specifyUsage || updated.landInfo.units?.[0]?.specifyUsage,
         }
       ] : updated.landInfo.units,
       // Update address if provided
