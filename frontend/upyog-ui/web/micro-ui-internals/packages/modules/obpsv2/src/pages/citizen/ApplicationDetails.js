@@ -1396,6 +1396,10 @@ import {
                 label={t("BPA_OCCUPANCY_TYPE")}
                 text={t(landInfo?.units?.[0]?.occupancyType) || t("CS_NA")}
               />
+              <Row
+                label={t("BPA_SPECIFY_USAGE")}
+                text={landInfo?.units?.[0]?.specifyUsage || t("CS_NA")}
+              />
 
             <br />
             {mappedNocData.length > 0 && (
