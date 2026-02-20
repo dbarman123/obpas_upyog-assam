@@ -198,6 +198,17 @@ const StaticCitizenSideBar = ({ linkData, islinkDataLoading }) => {
     return <Item />;
   };
   let profileItem;
+  const rolesCount = user?.info?.roles?.length || 0;
+  const userType = user?.info?.type;
+
+  let profileLabel = t("EDIT_PROFILE");
+
+  if (userType === "EMPLOYEE") {
+    profileLabel = t("VIEW_PROFILE");
+  } else if (userType === "CITIZEN") {
+    profileLabel =
+      rolesCount > 2 ? t("VIEW_PROFILE") : t("EDIT_PROFILE");
+  }
 
   if (isFetched && user && user.access_token) {
     profileItem = <Profile info={user?.info} stateName={stateInfo?.name} t={t} profilePhotoUrl={profilePhotoUrl}/>;
@@ -205,7 +216,7 @@ const StaticCitizenSideBar = ({ linkData, islinkDataLoading }) => {
     menuItems = [
       ...menuItems,
       {
-        text: t("EDIT_PROFILE"),
+        text: profileLabel,
         element: "PROFILE",
         icon: "EditPencilIcon",
         populators: {
