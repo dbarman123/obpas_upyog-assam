@@ -36,6 +36,7 @@ import {
   import { convertDateToEpoch, getEstimatePayload,formatEpochDateDMY} from "../../utils";
   import { OBPSV2Services } from "../../../../../libraries/src/services/elements/OBPSV2";
   import {RTPS} from "../../utils/rtpRoles"
+  import ScrutinyDownloadDetails from "../../components/ScrutinyDownloadDetails";
   // import getBPAAcknowledgementData from "../../utils/getBPAAcknowledgementData";
   
   /**
@@ -1398,7 +1399,7 @@ import {
               />
               <Row
                 label={t("BPA_SPECIFY_USAGE")}
-                text={landInfo?.units?.[0]?.specifyUsage || t("CS_NA")}
+                text={t(landInfo?.units?.[0]?.specifyUsage || t("CS_NA"))}
               />
 
             <br />
@@ -1631,6 +1632,15 @@ import {
                 <GisDetails acknowledgementIds={acknowledgementIds} tenantId={tenantId} t={t} />
               </Accordion>
             </StatusTable>
+            <StatusTable>
+            <Accordion
+              title={t("SCRUTINY_DETAILS")}
+              t={t}
+              isFlag={false}
+            >
+              <ScrutinyDownloadDetails edcrNumber={bpa_details?.edcrNumber}/>
+            </Accordion>
+          </StatusTable>
           </div>
           ):null}
             </StatusTable>
