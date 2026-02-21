@@ -982,6 +982,14 @@ export const OBPSV2Services = {
       ...(isFormData && { multipartFormData: true }),
     });
   },
+  scrutinySearch: (tenantId, edcrNumber) =>
+    Request({
+      url: Urls.obpsv2.scrutinySearch,
+      params: { tenantId, edcrNumber },
+      auth: true,
+      userService: true,
+      method: "POST"
+  }),
 
    NOCSearch: (tenantId, sourceRefId) =>
     Request({

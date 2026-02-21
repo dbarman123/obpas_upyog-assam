@@ -44,6 +44,7 @@ import useScrutinyFormDetails from "../../../../libraries/src/hooks/obpsv2/useSc
 import FormAcknowledgement from "../../../obpsv2/src/pages/citizen/Create/FormAcknowledgement";
 import Accordion from "../../../../react-components/src/atoms/Accordion";
 import GisDetails from "../../../obpsv2/src/components/GisDetails";
+import ScrutinyDownloadDetails from "../../../obpsv2/src/components/ScrutinyDownloadDetails";
 function ApplicationDetailsContent({
   applicationDetails,
   workflowDetails,
@@ -854,6 +855,15 @@ function ApplicationDetailsContent({
                 isFlag={false}
               >
                 <GisDetails acknowledgementIds={applicationData?.applicationNo} tenantId={applicationData?.tenantId} t={t} />
+              </Accordion>
+            </StatusTable>
+            <StatusTable>
+              <Accordion
+                title={t("SCRUTINY_DETAILS")}
+                t={t}
+                isFlag={false}
+              >
+                <ScrutinyDownloadDetails edcrNumber={applicationData?.edcrNumber}/>
               </Accordion>
             </StatusTable>
             </div>
