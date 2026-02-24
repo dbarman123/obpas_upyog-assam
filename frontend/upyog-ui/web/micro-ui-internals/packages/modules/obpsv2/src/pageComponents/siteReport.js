@@ -375,13 +375,21 @@ let dKey = siteQuestions.find(q => q.code === "TOTAL_AVERAGE_ROAD_WIDTH")?.field
     // it will only add the check list question and its filled value only, not all the value
     const isSiteQuestion = siteQuestions.some(q => q.fieldKey === key);
     if (isSiteQuestion) {
-        const newCheckListdata = {...inspectionCheckList,...form, [key]: value};
+        const directionFields = ["north", "south", "east", "west"];
+
+  const directionData = directionFields.reduce((acc, dir) => {
+    if (form[dir]) {
+      acc[dir] = form[dir];
+    }
+    return acc;
+  }, {});
+        const newCheckListdata = {...inspectionCheckList,...directionData, [key]: value};
         setInspectionCheckList(newCheckListdata);
     }
   
     saveSession(nocDetails); 
   };
-
+console.log("formData==",form)
    // Validation function to check if all mandatory fields are filled
   const validateForm = () => {
     // Check mandatory static fields
