@@ -56,6 +56,7 @@ public class BPAQueryBuilder {
                     "       bpa.signed_bp_filestore_id, " +
                     "       bpa.signed_pp_filestore_id, " +
                     "       bpa.signed_oc_filestore_id, " +
+                    "       bpa.signed_dxf_filestore_id, " +
                     
                     "       bpadoc.id AS bpa_doc_id, " +
                     "       bpadoc.additional_details AS doc_details, " +
