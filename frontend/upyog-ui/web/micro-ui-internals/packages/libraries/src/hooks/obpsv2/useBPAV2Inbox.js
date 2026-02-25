@@ -27,7 +27,7 @@ const useBPAV2Inbox = ({ tenantId, filters, config={} }) => {
         processSearchCriteria: {
           assignee : user.info.type=="EMPLOYEE"? "": user.info.uuid,
           moduleName: "bpa-services", 
-          businessService: ["BPA_DA_MB","BPA_DA_GP","BPA_GMDA_GMC"],
+          businessService: ["BPA_DA_MB","BPA_DA_GP","BPA_GMDA_GMC","BPA_GMDA_NGMB","BPA_GMDA_GP"],
         },
         moduleSearchCriteria: {
           ...(mobileNumber ? {mobileNumber}: {}),
