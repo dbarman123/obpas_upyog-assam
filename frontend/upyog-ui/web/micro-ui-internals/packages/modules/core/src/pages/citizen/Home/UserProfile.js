@@ -89,6 +89,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
  * - Calls the API with the tenant ID and UUID to fetch user data.
  * - Updates the `userAddresses` state with the fetched address list if available.
  */
+let rolesCount = userInfo?.roles?.length || 0;
   const userSearchNewV2 = async () => {
     const uuid = userInfo?.uuid;
     if (uuid) {
@@ -392,7 +393,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
           <React.Fragment>
             <BackButton />
             <div style={{ display: "flex", gap: "20px", marginTop: "24px" }}>
-              <button
+              {userType === "citizen" && rolesCount < 3 && ( <button
                 onClick={() => SetActiveTab("profile")}
                 style={{
                   backgroundColor: activeTab === "profile" ? "#ac2c2c" : "#ffffff",
@@ -409,9 +410,9 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                 }}
               >
                 {t("PROFILE")}
-              </button>
+              </button>)}
 
-              <button
+              {userType === "citizen" && rolesCount < 3 && (  <button
                 onClick={() => SetActiveTab("address")}
                 style={{
                   backgroundColor: activeTab === "address" ? "#ac2c2c" : "#ffffff",
@@ -428,7 +429,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                 }}
               >
                 {t("ADDRESS")}
-              </button>
+              </button>)}
             </div>
           </React.Fragment>
         ) : (
@@ -498,9 +499,9 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                 }}
                 src={!profileImg || profileImg === "" ? defaultImage : profileImg}
               />
-              <button style={{ position: "absolute", left: "50%", bottom: "-24px", transform: "translateX(-50%)" }} onClick={onClickAddPic}>
+              {userType === "citizen" && rolesCount < 3 && ( <button style={{ position: "absolute", left: "50%", bottom: "-24px", transform: "translateX(-50%)" }} onClick={onClickAddPic}>
                 <CameraIcon />
-              </button>
+              </button>)}
             </div>
           </section>
         ) : null}
@@ -538,7 +539,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                         type: "tel",
                         title: t("CORE_COMMON_PROFILE_NAME_ERROR_MESSAGE"),
                       })}
-                      disable={editScreen}
+                      disable={editScreen || !(userType === "citizen" && rolesCount < 3) }
                     />
                     {errors?.userName && <CardLabelError> {errors?.userName?.message} </CardLabelError>}
                   </div>
@@ -550,7 +551,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                     style={{ width: "100%" }}
                     className="form-field"
                     selected={gender?.length === 1 ? gender[0] : gender}
-                    disable={gender?.length === 1 || editScreen}
+                    disable={gender?.length === 1 || editScreen || !(userType === "citizen" && rolesCount < 3)}
                     option={menu}
                     select={setGenderName}
                     value={gender}
@@ -562,7 +563,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                 <LabelFieldPair>
                   <CardLabel style={editScreen ? { color: "#B1B4B6" } : {}}>{`${t("CORE_COMMON_PROFILE_DOB")}`}*</CardLabel>
                   <div style={{ width: "100%", maxWidth: "960px" }}>
-                    <DatePicker date={dob || dateOfBirth} onChange={setUserDOB} disable={true} />
+                    <DatePicker date={dob || dateOfBirth} onChange={setUserDOB} disabled={!(userType === "citizen" && rolesCount < 3)} />
                     {errors?.userName && <CardLabelError> {errors?.userName?.message} </CardLabelError>}
                   </div>
                 </LabelFieldPair>
@@ -575,7 +576,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                       name="mobileNumber"
                       placeholder="Enter a valid Mobile No."
                       onChange={(value) => setUserMobileNumber(value)}
-                      disable={true}
+                      disable={!(userType === "citizen" && rolesCount < 3)}
                       {...{ required: true, pattern: "[6-9]{1}[0-9]{9}", type: "tel", title: t("CORE_COMMON_PROFILE_MOBILE_NUMBER_INVALID") }}
                     />
                     {errors?.mobileNumber && <CardLabelError style={{ margin: 0, padding: 0 }}> {errors?.mobileNumber?.message} </CardLabelError>}
@@ -590,6 +591,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                       name="altMobileNumber"
                       placeholder="Enter a valid Mobile No."
                       onChange={(value) => setUserAltMobileNumber(value)}
+                      disable={!(userType === "citizen" && rolesCount < 3)}
                       {...{ required: true, pattern: "[6-9]{1}[0-9]{9}", type: "tel", title: t("CORE_COMMON_PROFILE_MOBILE_NUMBER_INVALID") }}
                     />
                     {errors?.altMobileNumber && (
@@ -609,13 +611,13 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                       name="email"
                       value={email}
                       onChange={(e) => setUserEmailAddress(e.target.value)}
-                      disable={editScreen}
+                      disable={editScreen || !(userType === "citizen" && rolesCount < 3)}
                     />
                     {errors?.emailAddress && <CardLabelError> {errors?.emailAddress?.message} </CardLabelError>}
                   </div>
                 </LabelFieldPair>
 
-                <button
+                {userType === "citizen" && rolesCount < 3 && ( <button
                   onClick={updateProfile}
                   style={{
                     marginTop: "24px",
@@ -628,12 +630,12 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                   }}
                 >
                   {t("CORE_COMMON_SAVE")}
-                </button>
+                </button>)}
               </React.Fragment>
             ) : activeTab === "address" ? (
               <React.Fragment>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: "15px" }}>
-                  <button
+                  {userType === "citizen" && rolesCount < 3 && (  <button
                     onClick={() => setShowModal(true)}
                     style={{
                       backgroundColor: "#ffffff",
@@ -650,7 +652,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
                     }}
                   >
                     {t("ADD_NEW_ADDRESS")}
-                  </button>
+                  </button>)}
                 </div>
 
                 {showModal && <Address actionCancelOnSubmit={() => setShowModal(false)} />}
@@ -901,7 +903,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
         </React.Fragment>
       )}
 
-      {userType === "employee" ? (
+      {/* {userType === "employee" ? (
         <div
           style={{ height: "88px", backgroundColor: "#FFFFFF", display: "flex", justifyContent: "flex-end", marginTop: "64px", alignItems: "center" }}
         >
@@ -927,7 +929,7 @@ const UserProfile = ({ stateCode, userType, cityDetails }) => {
         </div>
       ) : (
         ""
-      )}
+      )} */}
       {toast && (
         <Toast
           error={toast.key === "error"}
