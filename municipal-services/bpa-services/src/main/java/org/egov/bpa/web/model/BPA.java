@@ -149,4 +149,6 @@ public class BPA {
   private String signedOcFileStoreId;
   private String signedPpFileStoreId;
   private String signedBpFileStoreId;
+  
+  private String signedDxfFileStoreId;
 }
