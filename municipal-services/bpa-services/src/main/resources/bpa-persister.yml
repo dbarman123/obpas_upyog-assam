@@ -18,9 +18,10 @@ serviceMaps:
              building_permit_no, building_permit_date, bp_filestore_id,
              occupancy_certificate_no, occupancy_certificate_date, oc_filestore_id,
              pp_fee_receipt_filestore_id, bp_fee_receipt_filestore_id,
-             property_no, property_details, property_vendor, signed_bp_filestore_id, signed_pp_filestore_id, signed_oc_filestore_id)
+             property_no, property_details, property_vendor, signed_bp_filestore_id, signed_pp_filestore_id, signed_oc_filestore_id,
+			 signed_dxf_filestore_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::JSONB,
-             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::JSONB, ?, ?, ?, ?);
+             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::JSONB, ?, ?, ?, ?, ?);
           basePath: BPA
           jsonMaps:
             - jsonPath: $.BPA.id
@@ -59,6 +60,7 @@ serviceMaps:
             - jsonPath: $.BPA.signedBpFileStoreId
             - jsonPath: $.BPA.signedPpFileStoreId
             - jsonPath: $.BPA.signedOcFileStoreId
+			- jsonPath: $.BPA.signedDxfFileStoreId
               type: JSON
               dbType: JSONB
             - jsonPath: $.BPA.propertyVendor
@@ -201,7 +203,8 @@ serviceMaps:
               bp_fee_receipt_filestore_id = ?, 
               signed_bp_filestore_id = ?,
               signed_pp_filestore_id = ?,
-              signed_oc_filestore_id = ?
+              signed_oc_filestore_id = ?,
+			  signed_dxf_filestore_id = ?
             WHERE id = ?;
           basePath: BPA
           jsonMaps:
@@ -229,6 +232,7 @@ serviceMaps:
             - jsonPath: $.BPA.signedBpFileStoreId
             - jsonPath: $.BPA.signedPpFileStoreId
             - jsonPath: $.BPA.signedOcFileStoreId
+			- jsonPath: $.BPA.signedDxfFileStoreId
             - jsonPath: $.BPA.id
 
     - version: 1.0
@@ -300,7 +304,8 @@ serviceMaps:
               property_vendor = ?,
               signed_bp_filestore_id = ?,
               signed_pp_filestore_id = ?,
-              signed_oc_filestore_id = ?
+              signed_oc_filestore_id = ?,
+			  signed_dxf_filestore_id = ?
             WHERE id = ?;
           basePath: BPA
           jsonMaps:
@@ -340,6 +345,7 @@ serviceMaps:
             - jsonPath: $.BPA.signedBpFileStoreId
             - jsonPath: $.BPA.signedPpFileStoreId
             - jsonPath: $.BPA.signedOcFileStoreId
+			- jsonPath: $.BPA.signedDxfFileStoreId
             - jsonPath: $.BPA.id  # WHERE condition
 
         # UPDATE Area Mapping table (using UPDATE command)
