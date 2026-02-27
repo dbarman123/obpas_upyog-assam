@@ -36,6 +36,7 @@ import {
   import { convertDateToEpoch, getEstimatePayload,formatEpochDateDMY} from "../../utils";
   import { OBPSV2Services } from "../../../../../libraries/src/services/elements/OBPSV2";
   import {RTPS} from "../../utils/rtpRoles"
+  import ScrutinyDownloadDetails from "../../components/ScrutinyDownloadDetails";
   // import getBPAAcknowledgementData from "../../utils/getBPAAcknowledgementData";
   
   /**
@@ -1196,10 +1197,10 @@ import {
                 label={t("BPA_PAN_CARD")}
                 text={primaryOwner?.pan || t("CS_NA")}
               />
-              <Row
+              {/* <Row
                 label={t("BPA_AADHAAR_CARD")}
                 text={primaryOwner?.aadhaarNumber || t("CS_NA")}
-              />
+              /> */}
             </StatusTable>
   
             <CardSubHeader style={{ fontSize: "24px" }}>{t("BPA_ADDRESS_DETAILS")}</CardSubHeader>
@@ -1395,6 +1396,10 @@ import {
               <Row
                 label={t("BPA_OCCUPANCY_TYPE")}
                 text={t(landInfo?.units?.[0]?.occupancyType) || t("CS_NA")}
+              />
+              <Row
+                label={t("BPA_SPECIFY_USAGE")}
+                text={t(landInfo?.units?.[0]?.specifyUsage || t("CS_NA"))}
               />
 
             <br />
@@ -1627,6 +1632,15 @@ import {
                 <GisDetails acknowledgementIds={acknowledgementIds} tenantId={tenantId} t={t} />
               </Accordion>
             </StatusTable>
+            <StatusTable>
+            <Accordion
+              title={t("SCRUTINY_DETAILS")}
+              t={t}
+              isFlag={false}
+            >
+              <ScrutinyDownloadDetails edcrNumber={bpa_details?.edcrNumber}/>
+            </Accordion>
+          </StatusTable>
           </div>
           ):null}
             </StatusTable>

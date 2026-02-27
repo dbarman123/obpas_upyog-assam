@@ -1,18 +1,25 @@
 package org.egov.report.repository.sewasetu;
 
+import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.ReportApp;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.domain.model.ReportDefinitions;
 import org.egov.encryption.EncryptionService;
+import org.egov.mdms.model.MasterDetail;
+import org.egov.mdms.model.MdmsCriteria;
+import org.egov.mdms.model.MdmsCriteriaReq;
+import org.egov.mdms.model.ModuleDetail;
 import org.egov.report.repository.ReportRepository;
 import org.egov.swagger.model.ReportDefinition;
 import org.egov.swagger.model.ReportRequest;
 import org.egov.swagger.model.SearchParam;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,7 +35,18 @@ public class SewaSetuRepository {
     @Autowired
     private EncryptionService encryptionService;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${egov.mdms.host}")
+    private String mdmsHost;
+
+    @Value("${egov.mdms.search.endpoint}")
+    private String mdmsSearchEndpoint;
+
     private static final String MODULE_NAME = "rainmaker-sewasetu";
+    private static final String MDMS_MODULE_TENANT = "tenant";
+    private static final String MDMS_MASTER_TENANTS = "tenants";
     private static final String WORKFLOW_REPORT_NAME = "sewasetu-workflow-history";
     private static final String APPLICATION_NUMBERS_REPORT_NAME = "sewasetu-application-numbers-by-date";
     private static final String INITIATED_DATA_REPORT_NAME = "sewasetu-initiated-data";
@@ -295,6 +313,74 @@ public class SewaSetuRepository {
                 }
             }
         }
+    }
+
+    /**
+     * Fetches tenant MDMS (module tenant, master tenants) for the given state tenant and builds
+     * a map of tenant code -> display name. Display name is city.ddrName when present and non-null,
+     * otherwise tenant name.
+     *
+     * @param stateTenantId State-level tenant id (e.g. "as")
+     * @param requestInfo   Request info for MDMS call (can be null)
+     * @return Map of tenant code to ddrName (or name); empty map if MDMS call fails or returns no data
+     */
+    public Map<String, String> fetchTenantCodeToDdrName(String stateTenantId, RequestInfo requestInfo) {
+        Map<String, String> codeToDdrName = new HashMap<>();
+        if (stateTenantId == null || stateTenantId.isEmpty()) {
+            return codeToDdrName;
+        }
+        try {
+            MasterDetail masterDetail = new MasterDetail();
+            masterDetail.setName(MDMS_MASTER_TENANTS);
+            List<MasterDetail> masterDetails = new ArrayList<>();
+            masterDetails.add(masterDetail);
+            ModuleDetail moduleDetail = new ModuleDetail();
+            moduleDetail.setModuleName(MDMS_MODULE_TENANT);
+            moduleDetail.setMasterDetails(masterDetails);
+            List<ModuleDetail> moduleDetails = new ArrayList<>();
+            moduleDetails.add(moduleDetail);
+            MdmsCriteria mdmsCriteria = new MdmsCriteria();
+            mdmsCriteria.setTenantId(stateTenantId);
+            mdmsCriteria.setModuleDetails(moduleDetails);
+            MdmsCriteriaReq mdmsCriteriaReq = new MdmsCriteriaReq();
+            mdmsCriteriaReq.setMdmsCriteria(mdmsCriteria);
+            if (requestInfo != null) {
+                mdmsCriteriaReq.setRequestInfo(requestInfo);
+            }
+            String url = mdmsHost + mdmsSearchEndpoint;
+            String response = restTemplate.postForObject(url, mdmsCriteriaReq, String.class);
+            if (response == null) {
+                return codeToDdrName;
+            }
+            Object tenantsObj = JsonPath.read(response, "$.MdmsRes." + MDMS_MODULE_TENANT + "." + MDMS_MASTER_TENANTS);
+            if (tenantsObj == null || !(tenantsObj instanceof List)) {
+                return codeToDdrName;
+            }
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> tenants = (List<Map<String, Object>>) tenantsObj;
+            for (Map<String, Object> tenant : tenants) {
+                Object codeObj = tenant.get("code");
+                if (codeObj == null) continue;
+                String code = codeObj.toString().trim();
+                String displayName = null;
+                Object cityObj = tenant.get("city");
+                if (cityObj instanceof Map) {
+                    Object ddrObj = ((Map<?, ?>) cityObj).get("ddrName");
+                    if (ddrObj != null && !ddrObj.toString().trim().isEmpty()) {
+                        displayName = ddrObj.toString().trim();
+                    }
+                }
+                if (displayName == null) {
+                    Object nameObj = tenant.get("name");
+                    displayName = (nameObj != null && !nameObj.toString().trim().isEmpty())
+                            ? nameObj.toString().trim() : code;
+                }
+                codeToDdrName.put(code, displayName);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch tenant MDMS for submission_location display names: {}", e.getMessage());
+        }
+        return codeToDdrName;
     }
 
     private ReportRequest buildReportRequest(String applRefNo) {

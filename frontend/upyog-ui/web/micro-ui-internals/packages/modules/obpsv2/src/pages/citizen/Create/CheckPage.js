@@ -386,10 +386,10 @@ const CheckPage = ({ onSubmit, value = {} }) => {
             label={t("BPA_PAN_CARD")}
             text={checkForNA(applicant?.panCardNumber)}
           />
-          <Row
+          {/* <Row
             label={t("BPA_AADHAAR_CARD")}
             text={checkForNA(applicant?.aadhaarNumber)}
-          />
+          /> */}
         </StatusTable>
 
         <div
@@ -629,6 +629,10 @@ const CheckPage = ({ onSubmit, value = {} }) => {
           <Row
             label={t("BPA_OCCUPANCY_TYPE")}
             text={checkForNA(t(land?.occupancyType?.code))}
+          />
+          <Row
+            label={t("BPA_SPECIFY_USAGE")}
+            text={checkForNA(t(land?.specifyUsage) || "NA")}
           />
           <Row
             label={t("BPA_TOD_BENEFITS")}

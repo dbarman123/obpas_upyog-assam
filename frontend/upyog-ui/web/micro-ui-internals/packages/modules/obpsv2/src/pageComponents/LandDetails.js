@@ -107,6 +107,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
   const [rtpCategory, setRtpCategory] = useState(landData?.rtpCategory || (searchResult?.rtpDetails?.rtpCategory ? {"code": searchResult?.rtpDetails?.rtpCategory, "i18nKey": searchResult?.rtpDetails?.rtpCategory} : "") || "");
   const [registeredTechnicalPerson, setRegisteredTechnicalPerson] = useState(landData?.registeredTechnicalPerson || (searchResult?.rtpDetails?.rtpName ? {code: searchResult?.rtpDetails?.rtpName, uuid: searchResult?.rtpDetails?.rtpUUID, name: searchResult?.rtpDetails?.rtpName, i18nKey:searchResult?.rtpDetails?.rtpName} : "") ||  "");
   const [occupancyType, setOccupancyType] = useState(landData?.occupancyType || (searchResult?.landInfo?.units?.[0]?.occupancyType ? {"code": searchResult?.landInfo?.units[0].occupancyType, "i18nKey": searchResult?.landInfo?.units[0].occupancyType} : "") || "");
+  const [specifyUsage, setSpecifyUsage] = useState(landData?.specifyUsage || searchResult?.landInfo?.units?.[0]?.specifyUsage ||"");
 
   // TOD Benefits
   const [todBenefits, setTodBenefits] = useState(landData?.todBenefits || futureProvisionOptions.find(opt => opt.code === searchResult?.additionalDetails?.todBenefits)  || {code: "NO", name: "No", i18nKey: "BPA_NO"});
@@ -235,6 +236,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
       rtpCategory,
       registeredTechnicalPerson,
       occupancyType,
+      specifyUsage,
       todBenefits,
       todWithTdr: todBenefits?.code === "YES" ? todWithTdr : false,
       todZone: todBenefits?.code === "YES" ? todZone : "",
@@ -304,6 +306,7 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
           !rtpCategory || 
           !registeredTechnicalPerson || 
           !occupancyType || 
+          !specifyUsage ||
           (horizontalExtension?.code === "YES" && !horizontalExtensionArea) ||
           (verticalExtension?.code === "YES" && !verticalExtensionArea) ||
           (todBenefits?.code === "YES" && (!todAcknowledgement || !uploadedForm39Id || !todWithTdr || !todZone)) || // Form 39 is required
@@ -326,80 +329,73 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
           <CardLabel>{`${t("BPA_OLD_DAG_NUMBER")}`}</CardLabel>
           <TextInput
             t={t}
-            type="number"
+            type="text"
             name="oldDagNumber"
             placeholder={t("BPA_ENTER_OLD_DAG_NUMBER")}
             value={oldDagNumber}
             // onChange={(e) => setOldDagNumber(e.target.value)}
             onChange={(e) => {
               const value = e.target.value;
-              // Allow numbers between 0 and 999999 (1 to 6 digits)
-              if (/^\d{0,6}$/.test(value)) {
+
+              // Allow alphanumeric + , / space - & _
+              if (/^[A-Za-z0-9,\/\s\-&_]*$/.test(value)) {
                 setOldDagNumber(value);
               }
             }}
-            maxlength="6"
-            pattern="\d{6}"
           />
 
           {/* New Dag Number */}
           <CardLabel>{`${t("BPA_NEW_DAG_NUMBER")}`} <span className="check-page-link-button">*</span></CardLabel>
           <TextInput
             t={t}
-            type="number"
+            type="text"
             name="newDagNumber"
             placeholder={t("BPA_ENTER_NEW_DAG_NUMBER")}
             value={newDagNumber}
             // onChange={(e) => setNewDagNumber(e.target.value)}
             onChange={(e) => {
               const value = e.target.value;
-              // Allow numbers between 0 and 999999 (1 to 6 digits)
-              if (/^\d{0,6}$/.test(value)) {
+              // Allow alphanumeric + , / space - & _
+              if (/^[A-Za-z0-9,\/\s\-&_]*$/.test(value)) {
                 setNewDagNumber(value);
               }
             }}
-            maxlength="6"
-            pattern="\d{6}"
           />
 
           {/* Old Patta Number */}
           <CardLabel>{`${t("BPA_OLD_PATTA_NUMBER")}`}</CardLabel>
           <TextInput
             t={t}
-            type="number"
+            type="text"
             name="oldPattaNumber"
             placeholder={t("BPA_ENTER_OLD_PATTA_NUMBER")}
             value={oldPattaNumber}
             // onChange={(e) => setOldPattaNumber(e.target.value)}
             onChange={(e) => {
               const value = e.target.value;
-              // Allow numbers between 0 and 999999 (1 to 6 digits)
-              if (/^\d{0,6}$/.test(value)) {
+              // Allow alphanumeric + , / space - & _
+              if (/^[A-Za-z0-9,\/\s\-&_]*$/.test(value)) {
                 setOldPattaNumber(value);
               }
             }}
-            maxlength="6"
-            pattern="\d{6}"
           />
 
           {/* New Patta Number */}
           <CardLabel>{`${t("BPA_NEW_PATTA_NUMBER")}`} <span className="check-page-link-button">*</span></CardLabel>
           <TextInput
             t={t}
-            type="number"
+            type="text"
             name="newPattaNumber"
             placeholder={t("BPA_ENTER_NEW_PATTA_NUMBER")}
             value={newPattaNumber}
             // onChange={(e) => setNewPattaNumber(e.target.value)}
              onChange={(e) => {
               const value = e.target.value;
-              // Allow numbers between 0 and 999999 (1 to 6 digits)
-              if (/^\d{0,6}$/.test(value)) {
+              // Allow alphanumeric + , / space - & _
+              if (/^[A-Za-z0-9,\/\s\-&_]*$/.test(value)) {
                 setNewPattaNumber(value);
               }
             }}
-            maxlength="6"
-            pattern="\d{6}"
           />
 
           {/* Total Plot Area */}
@@ -436,7 +432,13 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             name="northOwner"
             placeholder={t("BPA_ENTER_NORTH_OWNER")}
             value={northOwner}
-            onChange={(e) => setNorthOwner(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
+            onChange={(e) => {
+              const value = e.target.value;
+               // Allow alphanumeric + , / space - & _
+              if (/^[A-Za-z0-9,\/\s\-&_]*$/.test(value)) {
+                setNorthOwner(value);
+              }
+            }}
             ValidationRequired={true}
           />
 
@@ -447,7 +449,13 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             name="southOwner"
             placeholder={t("BPA_ENTER_SOUTH_OWNER")}
             value={southOwner}
-            onChange={(e) => setSouthOwner(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Allow alphanumeric + , / space - & _
+              if (/^[A-Za-z0-9,\/\s\-&_]*$/.test(value)) {
+                setSouthOwner(value);
+              }
+            }}
           />
 
           <CardLabel>{`${t("BPA_EAST_OWNER")}`} <span className="check-page-link-button">*</span></CardLabel>
@@ -457,7 +465,13 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             name="eastOwner"
             placeholder={t("BPA_ENTER_EAST_OWNER")}
             value={eastOwner}
-            onChange={(e) => setEastOwner(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Allow alphanumeric + , / space - & _
+              if (/^[A-Za-z0-9,\/\s\-&_]*$/.test(value)) {
+                setEastOwner(value);
+              }
+            }}
           />
 
           <CardLabel>{`${t("BPA_WEST_OWNER")}`} <span className="check-page-link-button">*</span></CardLabel>
@@ -467,7 +481,13 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             name="westOwner"
             placeholder={t("BPA_ENTER_WEST_OWNER")}
             value={westOwner}
-            onChange={(e) => setWestOwner(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Allow alphanumeric + , / space - & _
+              if (/^[A-Za-z0-9,\/\s\-&_]*$/.test(value)) {
+                setWestOwner(value);
+              }
+            }}
           />
 
           {/* Future Provisions */}
@@ -560,6 +580,17 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             select={setOccupancyType}
             optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
             placeholder={t("BPA_SELECT_OCCUPANCY_TYPE")}
+          />
+
+          {/* Specify Usage */}
+          <CardLabel>{`${t("BPA_SPECIFY_USAGE")}`} <span className="check-page-link-button">*</span></CardLabel>
+          <TextInput
+            t={t}
+            type="text"
+            name="specifyUsage"
+            placeholder={t("BPA_ENTER_SPECIFY_USAGE")}
+            value={specifyUsage}
+            onChange={(e) => setSpecifyUsage(e.target.value)}
           />
 
           {/* TOD Benefits */}

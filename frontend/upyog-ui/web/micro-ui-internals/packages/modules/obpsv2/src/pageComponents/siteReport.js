@@ -19,7 +19,7 @@ const siteReport = ({submitReport, onChange, data}) => {
   const { t } = useTranslation();
   const [buildingPermitAuthority, setBuildingPermitAuthority] = useState("");
   const [siteQuestions, setSiteQuestions] = useState([]);
-  
+  const userInfo = Digit.UserService.getUser();
   const { data: siteQuestionLists } = Digit.Hooks.useEnabledMDMS(
     stateId, 
     "BPA", 
@@ -40,8 +40,10 @@ const siteReport = ({submitReport, onChange, data}) => {
       })
     }
   }, [siteQuestionLists]);
-
-  
+const aKey = siteQuestions.find(q => q.code === "ROAD_WIDTH_INFRONT_PLOT")?.fieldKey;
+const bKey = siteQuestions.find(q => q.code === "ROAD_WIDTH_NEAREST_PLOT")?.fieldKey;
+const cKey = siteQuestions.find(q => q.code === "ROAD_WIDTH_NARROWEST_PLOT")?.fieldKey;
+let dKey = siteQuestions.find(q => q.code === "TOTAL_AVERAGE_ROAD_WIDTH")?.fieldKey;
 
   const { data: nocLists, isLoading } = Digit.Hooks.useEnabledMDMS(
     stateId, 
@@ -96,6 +98,38 @@ const siteReport = ({submitReport, onChange, data}) => {
   });
 
   useEffect(() => {
+  if (!aKey || !bKey || !cKey || !dKey) return;
+
+  const aVal = parseFloat(form[aKey]);
+  const bVal = parseFloat(form[bKey]);
+  const cVal = parseFloat(form[cKey]);
+
+  if (!isNaN(aVal) && !isNaN(bVal) && !isNaN(cVal)) {
+    const avg = ((aVal + bVal + cVal) / 3).toFixed(2);
+
+    setForm(prev => ({
+      ...prev,
+      [dKey]: avg
+    }));
+      setInspectionCheckList(prev => ({
+      ...prev,
+      [dKey]: avg
+    }));
+
+  } else {
+    setForm(prev => ({
+      ...prev,
+      [dKey]: ""
+    }));
+      setInspectionCheckList(prev => ({
+      ...prev,
+      [dKey]: ""
+    }));
+  }
+
+}, [form[aKey], form[bKey], form[cKey]]);
+
+  useEffect(() => {
   if (siteQuestions && siteQuestions.length > 0) {
     const dynamicFields = {};
     const onlyChecklistFields={};
@@ -132,14 +166,16 @@ const siteReport = ({submitReport, onChange, data}) => {
       const adjoiningOwners = appData?.additionalDetails?.adjoiningOwners || {};
       const rtpDetails = appData?.rtpDetails || {};
       const architectName = rtpDetails?.rtpName ? rtpDetails.rtpName.split(',')[0] : '';
+      const inspectorName = bpaData?.inspectorName?bpaData?.inspectorName:userInfo?.info?.type === "EMPLOYEE"?userInfo?.info?.name:'';
       setBuildingPermitAuthority(areaMapping?.buildingPermitAuthority || "");
-      
+
       setForm(prev => ({
         ...prev,
         proposalNo: t(appData?.applicationNo) || t(prev.proposalNo),
         applicantName: t(primaryOwner?.name) || t(prev.applicantName),
         applicantAddress: `${address?.houseNo || ''} ${address?.addressLine1 || ''} ${address?.addressLine2 || ''}`.trim() || prev.applicantAddress,
         architectName: t(architectName) || t(prev.architectName),
+        inspectorName: t(inspectorName) || t(prev.inspectorName),
         masterPlanZone: t(areaMapping?.planningArea) || t(prev.masterPlanZone),
         revenueVillage: t(areaMapping?.revenueVillage) || t(areaMapping?.villageName) || t(prev.revenueVillage),
         pattaNo: t(landInfo?.newPattaNumber) || t(landInfo?.oldPattaNumber) || t(prev.pattaNo),
@@ -339,17 +375,25 @@ const siteReport = ({submitReport, onChange, data}) => {
     // it will only add the check list question and its filled value only, not all the value
     const isSiteQuestion = siteQuestions.some(q => q.fieldKey === key);
     if (isSiteQuestion) {
-        const newCheckListdata = {...inspectionCheckList, [key]: value};
+        const directionFields = ["north", "south", "east", "west"];
+
+  const directionData = directionFields.reduce((acc, dir) => {
+    if (form[dir]) {
+      acc[dir] = form[dir];
+    }
+    return acc;
+  }, {});
+        const newCheckListdata = {...inspectionCheckList,...directionData, [key]: value};
         setInspectionCheckList(newCheckListdata);
     }
   
     saveSession(nocDetails); 
   };
-
+console.log("formData==",form)
    // Validation function to check if all mandatory fields are filled
   const validateForm = () => {
     // Check mandatory static fields
-    if (!form.inspectorName || !form.inspectionDate) {
+    if (!form.inspectionDate) {
       return false;
     }
 
@@ -444,7 +488,7 @@ const siteReport = ({submitReport, onChange, data}) => {
     // const isAutoFilled = ['north', 'south', 'east', 'west'].includes(fieldKey) && !!form[fieldKey];
     const isDirectionField = ["north", "south", "east", "west"].includes(fieldKey);
     const isAutoFilled = isDirectionField && !!form[fieldKey];
-    
+    const isNotApplicable = mandatory === false;
     return (
       <div key={fieldKey} style={{ display: "grid", gridTemplateColumns: "250px 1fr", rowGap: "8px", columnGap: "150px", marginBottom: "16px" }}>
         <CardLabel style={{
@@ -461,6 +505,18 @@ const siteReport = ({submitReport, onChange, data}) => {
        <React.Fragment>
         {dataType === "textInput" ? (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {!isNotApplicable && (
+          <div
+            style={{
+              fontSize: "12px",
+              color: "#666",
+              fontStyle: "italic",
+              marginTop:"-5px"
+            }}
+          >
+            {t("NA_NOT_APPLICABLE")}
+          </div>
+        )}
             <TextInput
               style={{ width: "100%" }}
               value={form[fieldKey] || ""}
@@ -468,8 +524,36 @@ const siteReport = ({submitReport, onChange, data}) => {
               disabled={isDirectionField?false:isAutoFilled}
             />
           </div>
-        ) : dataType === "textArea" ? (
+        ) : dataType === "number" ? (
+  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+    <TextInput
+      style={{ width: "100%" }}
+      value={form[fieldKey] || ""}
+      disable={fieldKey === dKey}
+      onChange={(e) => {
+        const value = e.target.value;
+        const regex = /^\d*(\.\d{0,2})?$/;
+
+        if (regex.test(value)) {
+          handleChange(fieldKey, value);
+        }
+      }}
+    />
+  </div>
+): dataType === "textArea" ? (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {!isNotApplicable && (
+          <div
+            style={{
+              fontSize: "12px",
+              color: "#666",
+              fontStyle: "italic",
+              marginTop:"-5px"
+            }}
+          >
+            {t("NA_NOT_APPLICABLE")}
+          </div>
+        )}
             <TextArea
               style={{ width: "100%" }}
               value={form[fieldKey] || ""}
@@ -541,11 +625,12 @@ const siteReport = ({submitReport, onChange, data}) => {
           </div>
 
           <div style={fieldRowStyle}>
-            <CardLabel style={labelStyle}>{t("BPA_INSPECTOR_NAME")}<span style={{ color: "red" }}> *</span></CardLabel>
+            <CardLabel style={labelStyle}>{t("BPA_INSPECTOR_NAME")}</CardLabel>
             <TextInput
               style={inputStyle}
               value={form.inspectorName}
               onChange={(e) => handleChange("inspectorName", e.target.value)}
+              disable={!!form.inspectorName}
             />
           </div>
 

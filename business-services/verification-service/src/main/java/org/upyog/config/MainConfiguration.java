@@ -34,6 +34,13 @@ public class MainConfiguration {
 	
 	@Value("${egov.user.search.path}")
 	private String userSearchEndpoint;
+	
+	// Report Service Config
+	@Value("${report.service.host}")
+	private String reportServiceHost;
+	
+	@Value("${report.service.endpoint}")
+	private String reportServiceEndpoint;
     
     @PostConstruct
     public void initialize() {

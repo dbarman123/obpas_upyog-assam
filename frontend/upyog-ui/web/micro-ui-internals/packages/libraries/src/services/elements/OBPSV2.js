@@ -654,10 +654,10 @@ export const OBPSV2Services = {
         },
         { title: "BPA_MOTHER_NAME", value: primaryOwner?.motherName || "NA" },
         { title: "BPA_PAN_CARD", value: primaryOwner?.pan || "NA" },
-        {
-          title: "BPA_AADHAAR_CARD",
-          value: primaryOwner?.aadhaarNumber || "NA",
-        },
+        // {
+        //   title: "BPA_AADHAAR_CARD",
+        //   value: primaryOwner?.aadhaarNumber || "NA",
+        // },
       ],
     };
 
@@ -838,6 +838,10 @@ export const OBPSV2Services = {
           title: "BPA_OCCUPANCY_TYPE",
           value: landInfo?.units?.[0]?.occupancyType || "NA",
         },
+        {
+          title: "BPA_SPECIFY_USAGE",
+          value: landInfo?.units?.[0]?.specifyUsage || "NA",
+        },
       ],
       additionalDetails: {
         obpsDocuments: [{
@@ -978,6 +982,14 @@ export const OBPSV2Services = {
       ...(isFormData && { multipartFormData: true }),
     });
   },
+  scrutinySearch: (tenantId, edcrNumber) =>
+    Request({
+      url: Urls.obpsv2.scrutinySearch,
+      params: { tenantId, edcrNumber },
+      auth: true,
+      userService: true,
+      method: "POST"
+  }),
 
    NOCSearch: (tenantId, sourceRefId) =>
     Request({
