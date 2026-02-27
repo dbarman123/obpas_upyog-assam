@@ -409,7 +409,8 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             </CardLabel>          
           <TextInput
             t={t}
-            type="number"
+            type="text"
+            inputMode="decimal"
             name="totalPlotArea"
             placeholder={t("BPA_ENTER_TOTAL_PLOT_AREA")}
             value={totalPlotArea}
@@ -417,12 +418,12 @@ const LandDetails = ({ t, config, onSelect, formData, searchResult }) => {
             onChange={(e) => {
               const value = e.target.value;
               // Only allow numbers and max 6 digits
-              if (/^\d{0,6}$/.test(value)) {
+              if (/^\d{0,6}(\.\d{0,2})?$/.test(value)) {
                 setTotalPlotArea(value);
               }
             }}
-            maxlength="6"
-            pattern="\d{6}"
+            // maxlength="6"
+            // pattern="\d{6}"
           />
 
           {/* Name of owners of adjoining land */}
