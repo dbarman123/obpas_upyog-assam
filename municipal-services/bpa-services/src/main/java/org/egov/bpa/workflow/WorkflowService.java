@@ -48,9 +48,9 @@ public class WorkflowService {
 		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.DEVELOPMENT_AUTHORITY, BuildingPermitAuthorityEnum.GRAM_PANCHAYAT), "BPA_DA_GP");
 		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.TACP, BuildingPermitAuthorityEnum.GRAM_PANCHAYAT), "BPA_TACP_GP");
 		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.TACP, BuildingPermitAuthorityEnum.MUNICIPAL_BOARD), "BPA_TACP_MB");
-		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.GMDA, BuildingPermitAuthorityEnum.MC), "BPA_GMDA_GMC");
-		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.GMDA, BuildingPermitAuthorityEnum.NGMB), "BPA_GMDA_NGMB");
-		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.GMDA, BuildingPermitAuthorityEnum.GRAM_PANCHAYAT), "BPA_GMDA_GP");
+		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.DA, BuildingPermitAuthorityEnum.MC), "BPA_GMDA_GMC");
+		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.DA, BuildingPermitAuthorityEnum.NGMB), "BPA_GMDA_NGMB");
+		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.DA, BuildingPermitAuthorityEnum.GRAM_PANCHAYAT), "BPA_GMDA_GP");
 	}
 
 	@Autowired
