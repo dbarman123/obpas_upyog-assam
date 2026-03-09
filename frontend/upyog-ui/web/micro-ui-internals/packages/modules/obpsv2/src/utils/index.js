@@ -149,6 +149,7 @@ export const bpaPayload = async(data) => {
           villageName: data?.areaMapping?.villageName?.code,
         }),
         ...(data?.areaMapping?.bpAuthority?.code === "MUNICIPAL_CORPORATION" && {
+          revenueVillage: data?.areaMapping?.revenueVillage?.code,
           mouza: data?.areaMapping?.mouza?.code,
         }),
       },      
