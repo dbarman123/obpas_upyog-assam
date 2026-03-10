@@ -102,9 +102,16 @@ export const CitizenSideBar = ({ isOpen, isMobile = false, toggleSidebar, onLogo
     closeSidebar();
   };
   const redirectToLoginPage = () => {
-    // localStorage.clear();
+    // localStorage.clear();  
     // sessionStorage.clear();
-    history.push(`${APPLICATION_PATH}/citizen/login`);
+    const loginType = Digit.SessionStorage.get("loginType");
+    
+    if (loginType === "RTP") {
+      history.push(`${APPLICATION_PATH}/citizen/rtp/select-location`);
+    }else {
+      // Default to citizen login or login selection page
+      history.push(`${APPLICATION_PATH}/citizen/login-selection`);
+    }
     closeSidebar();
   };
   // Function to redirect the user to the EDCR scrutiny page

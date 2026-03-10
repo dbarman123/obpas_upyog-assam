@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { PageBasedInput, Loader, RadioButtons, CardHeader } from "@upyog/digit-ui-react-components";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
@@ -9,7 +9,18 @@ const LanguageSelection = () => {
 
   const { data: { languages, stateInfo } = {}, isLoading } = Digit.Hooks.useStore.getInitData();
   const selectedLanguage = Digit.StoreData.getCurrentLanguage();
-console.log("languageslanguages",languages)
+
+  useEffect(() => {
+    if (languages && !selectedLanguage) {
+      const englishLanguage = languages.find(lang => lang.value === 'en_IN' || lang.label.toLowerCase().includes('english'));
+      if (englishLanguage) {
+        Digit.LocalizationService.changeLanguage(englishLanguage.value, stateInfo?.code);
+        setTimeout(() => {
+          history.push(`/upyog-ui/citizen/login-selection`);
+        }, 100);
+      }
+    }
+  }, [languages, selectedLanguage, stateInfo, history]);
   const texts = useMemo(
     () => ({
       header: t("CS_COMMON_CHOOSE_LANGUAGE"),
@@ -28,9 +39,12 @@ console.log("languageslanguages",languages)
     }),
     [selectedLanguage, languages]
   );
+  if(selectedLanguage==="en_IN"){
+    history.push(`/upyog-ui/citizen/login-selection`);
+  }
 
   function onSubmit() {
-    history.push(`/upyog-ui/citizen/area-mapping`);
+    history.push(`/upyog-ui/citizen/login-selection`);
   }
 
   return isLoading ? (
