@@ -57,6 +57,7 @@ const ActionModal = ({ t, action, tenantId, state, id, closeModal, submitAction,
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [selectedCertificateKeyId, setSelectedCertificateKeyId] = useState(null);
   const [certificateResponse, setCertificateResponse] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const mobileView = Digit.Utils.browser.isMobile() ? true : false;
   const history = useHistory();
@@ -196,7 +197,49 @@ const ActionModal = ({ t, action, tenantId, state, id, closeModal, submitAction,
         : null
       }
     };
-    } else if (action?.action === "DSC") {
+    } else if (action?.action === "DSC" || action?.action === "DXF_DSC") {
+      if (applicationData?.status === "FORWARDED_TO_ASSOCIATE_PLANNER") {
+      const signedPPFileStoreId = await handlePlanningPermitOrder();
+                applicationData = {
+        ...applicationData,
+        signedPpFileStoreId: signedPPFileStoreId,
+        workflow:{
+          action: action?.action,
+          comment: data?.comments?.length > 0 ? data?.comments : null,
+          assignes: (["SEND_BACK_TO_RTP"].includes(action?.action) && applicationData?.status === "PENDING_DA_ENGINEER") ? [applicationData?.rtpDetails?.rtpUUID] : null,
+          varificationDocuments: uploadedFile
+          ? [
+            {
+              documentType: action?.action + " DOC",
+              fileName: file?.name,
+              fileStoreId: uploadedFile,
+            },
+          ]
+          : null
+        }
+      };
+      }
+      if (applicationData?.status === "PENDING_COMMISSIONER") {
+      const signedPPFileStoreId = await handlePlanningPermitOrder();
+                applicationData = {
+        ...applicationData,
+        signedPpFileStoreId: signedPPFileStoreId,
+        workflow:{
+          action: action?.action,
+          comment: data?.comments?.length > 0 ? data?.comments : null,
+          assignes: (["SEND_BACK_TO_RTP"].includes(action?.action) && applicationData?.status === "PENDING_DA_ENGINEER") ? [applicationData?.rtpDetails?.rtpUUID] : null,
+          varificationDocuments: uploadedFile
+          ? [
+            {
+              documentType: action?.action + " DOC",
+              fileName: file?.name,
+              fileStoreId: uploadedFile,
+            },
+          ]
+          : null
+        }
+      };
+      }
       if (applicationData?.status === "PENDING_DSC") {
       const signedPPFileStoreId = await handlePlanningPermitOrder();
                 applicationData = {
@@ -238,6 +281,28 @@ const ActionModal = ({ t, action, tenantId, state, id, closeModal, submitAction,
           : null
         }
       };
+      }
+      if (applicationData?.status === "PENDING_DXF_DSC") {
+        debugger;
+            const signedDxfFileStoreId = await handleSignedDXFFileDownload();
+                      applicationData = {
+              ...applicationData,
+              signedDxfFileStoreId: signedDxfFileStoreId,
+              workflow:{
+                action: action?.action,
+                comment: data?.comments?.length > 0 ? data?.comments : null,
+                assignes: (["SEND_BACK_TO_RTP"].includes(action?.action) && applicationData?.status === "PENDING_DA_ENGINEER") ? [applicationData?.rtpDetails?.rtpUUID] : null,
+                varificationDocuments: uploadedFile
+                ? [
+                  {
+                    documentType: action?.action + " DOC",
+                    fileName: file?.name,
+                    fileStoreId: uploadedFile,
+                  },
+                ]
+                : null
+              }
+            };
       }
     }
      else {
@@ -521,6 +586,7 @@ const fetchDscTokens = async () => {
   };
 
     const signPdfWithDSC = async (fileStoreId) => {
+      debugger
     const metaRes = await Digit.OBPSV2Services.dscGetFileMetaData({
       tenantId: applicationData?.tenantId,
       fileStoreId,
@@ -549,6 +615,36 @@ const fetchDscTokens = async () => {
       return signRes?.fileStoreId;
   };
 
+  const handleSignedDXFFileDownload = async () => {
+    const application = applicationData;
+    try {
+      setIsLoading(true);
+      const response = await Digit.OBPSV2Services.scrutinySearch(
+        "assam",
+        application?.edcrNumber
+      );
+      const detail = response?.edcrDetail?.[0] || null;
+      console.log("Scrutiny Details Response:", response);
+      if (detail?.updatedDxfFile) {
+        debugger
+        const url = detail.updatedDxfFile;
+        const urlObj = new URL(url);
+        const fileStoreId = urlObj.searchParams.get("fileStoreId");
+        if (!fileStoreId) {
+          throw new Error("fileStoreId not found in updatedDxfFile URL");
+        }
+        console.log("Extracted fileStoreId:", fileStoreId);
+        const signedFileStoreId = await signPdfWithDSC(fileStoreId);
+        return signedFileStoreId;
+      } else {
+        throw new Error("Updated DXF file not found in scrutiny details");
+      }
+    } catch (error) {
+      console.error("Scrutiny Details API Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (action) {
