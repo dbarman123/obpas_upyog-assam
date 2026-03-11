@@ -1,10 +1,25 @@
 package org.egov.wf.service;
 
-import java.util.*;
+import static org.egov.wf.util.WorkflowConstants.AUTO_ESC_EMPLOYEE_ROLE_CODE;
+import static org.egov.wf.util.WorkflowConstants.UUID_REGEX;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.jayway.jsonpath.JsonPath;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
 import org.egov.common.contract.request.User;
@@ -13,18 +28,28 @@ import org.egov.mdms.model.MdmsCriteria;
 import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.mdms.model.ModuleDetail;
 import org.egov.tracer.model.CustomException;
+import org.egov.wf.config.WorkflowConfig;
+import org.egov.wf.repository.BusinessServiceRepository;
+import org.egov.wf.repository.WorKflowRepository;
 import org.egov.wf.util.WorkflowUtil;
-import org.egov.wf.web.models.*;
+import org.egov.wf.web.models.Action;
+import org.egov.wf.web.models.AuditDetails;
+import org.egov.wf.web.models.BusinessService;
+import org.egov.wf.web.models.BusinessServiceRequest;
+import org.egov.wf.web.models.BusinessServiceSearchCriteria;
+import org.egov.wf.web.models.ProcessInstance;
+import org.egov.wf.web.models.ProcessInstanceRequest;
+import org.egov.wf.web.models.ProcessInstanceSearchCriteria;
+import org.egov.wf.web.models.ProcessStateAndAction;
+import org.egov.wf.web.models.State;
 import org.egov.wf.web.models.user.UserSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import static org.egov.wf.util.WorkflowConstants.AUTO_ESC_EMPLOYEE_ROLE_CODE;
-import static org.egov.wf.util.WorkflowConstants.UUID_REGEX;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Service
@@ -40,6 +65,15 @@ public class EnrichmentService {
 
     @Autowired
     private RestTemplate restTemplate;
+    
+    @Autowired
+    private WorkflowConfig workflowConfig;
+    
+    @Autowired
+    private BusinessServiceRepository businessServiceRepository;
+    
+    @Autowired
+    private WorKflowRepository worKflowRepository;
 
     @Value("${egov.mdms.host}")
     private String mdmsHost;
@@ -86,9 +120,419 @@ public class EnrichmentService {
                 processStateAndAction.getProcessInstanceFromRequest().setStateSla(processStateAndAction.getResultantState().getSla());
             enrichAndUpdateSlaForTransition(processStateAndAction,isStateChanging);
             setNextActions(requestInfo,processStateAndActions,true);
+            
+            // Set Assignees to the Process
+            assigningProcessInstance(requestInfo, processStateAndAction, tenantId);
         });
         enrichUsers(requestInfo,processStateAndActions);
     }
+    
+    /**
+	 * Assigning the valid assignee to the Process Instance.
+	 * 
+	 * @param requestInfo
+	 * @param processStateAndAction
+	 * @param tenantId
+	 */
+	private void assigningProcessInstance(RequestInfo requestInfo, ProcessStateAndAction processStateAndAction,
+			String tenantId) {
+		if (BooleanUtils.isTrue(processStateAndAction.getResultantState().getIsTerminateState())
+				|| !CollectionUtils.isEmpty(processStateAndAction.getProcessInstanceFromRequest().getAssignes())) {
+			return;
+		} else {
+			processStateAndAction.getProcessInstanceFromRequest();
+
+			List<User> assigneeUsers = getAssignes(requestInfo, tenantId, processStateAndAction.getResultantState(),
+					processStateAndAction.getProcessInstanceFromRequest(), null, true);
+			processStateAndAction.getProcessInstanceFromRequest().setAssignes(assigneeUsers);
+		}
+	}
+	/**
+	 * Get the valid assignee user.
+	 * 
+	 * @param requestInfo
+	 * @param tenantId
+	 * @param resultantState
+	 * @param processInstanceFromRequest
+	 * @param notAllowedAssigneeUuids
+	 * @return
+	 */
+	public List<User> getAssignes(RequestInfo requestInfo, String tenantId, State resultantState,
+			ProcessInstance processInstanceFromRequest, Set<String> notAllowedAssigneeUuids,
+			Boolean isCurrentAssignmentCheck) {
+
+		String businessService = processInstanceFromRequest.getBusinessService();
+		
+		String businessId = processInstanceFromRequest.getBusinessId();
+		
+		String currentAssigner = processInstanceFromRequest.getAssigner().getUuid();
+		
+		List<User> finalAssigneeUsers = new ArrayList<>();
+
+		if (CollectionUtils.isEmpty(notAllowedAssigneeUuids)) {
+			notAllowedAssigneeUuids = new HashSet<>();
+		}	
+		
+		Set<String> notEligibleAssigneeUUIDs = notAllowedAssigneeUuids;
+
+		List<String> rolesInState = util.getAllRolesFromState(resultantState);
+		String assigneeRole = rolesInState.get(0);
+
+		Map<String, User> idToUserMap = getAllowedAssigneeUsers(requestInfo, assigneeRole, tenantId, businessService,
+				businessId, processInstanceFromRequest.getAllowedAssignees());
+
+		logRequests(businessId, businessService, assigneeRole, idToUserMap,
+				processInstanceFromRequest.getAllowedAssignees());
+		
+		if (idToUserMap.size() == 1) {
+			User user = idToUserMap.values().stream().findAny().get();
+			finalAssigneeUsers.add(user);
+		} else {
+			
+			excludeSystemUser(idToUserMap, rolesInState);
+			
+			List<String> allowedUserUUIDs = idToUserMap.keySet().stream().collect(Collectors.toList());
+
+			List<Action> validActions = getValidActionsByRole(processInstanceFromRequest.getBusinessService(), tenantId,
+					assigneeRole);
+
+			/*
+			 * Checking if Assignee has already worked in same BusinessId and assigned to
+			 * the same user.
+			 */
+			if (isCurrentAssignmentCheck) {
+				checkAndDetermineFinalAssigneeUserForCurrentBussinessId(finalAssigneeUsers, tenantId, allowedUserUUIDs,
+						validActions, businessId, notEligibleAssigneeUUIDs);
+			}
+
+			if (CollectionUtils.isEmpty(finalAssigneeUsers)) {
+				notEligibleAssigneeUUIDs.add(currentAssigner);
+				
+				/*
+				 * Checking if Assignee has already worked in some other Process and assigned
+				 * the next user from the list in Round-Robin format.
+				 */
+				determineFinalAssigneeFromAllProcess(allowedUserUUIDs, idToUserMap, finalAssigneeUsers, tenantId,
+						notEligibleAssigneeUUIDs, businessService, businessId, isCurrentAssignmentCheck, assigneeRole);
+			}
+
+		}
+
+		// If still the finalAssigneeUsers is empty, then add the very first user as
+		// Assignee
+		if (CollectionUtils.isEmpty(finalAssigneeUsers)) {
+			finalAssigneeUsers.add(
+					idToUserMap.values().stream().filter(user -> !notEligibleAssigneeUUIDs.contains(user.getUuid())).findFirst().get());
+		}
+
+		return finalAssigneeUsers;
+	}
+	
+	/**
+	 * 
+	 * Determining the Assignee from All Process based on allowed users and assign
+	 * user in Round-Robin format.
+	 * 
+	 * @param allowedUserUUIDs
+	 * @param idToUserMap
+	 * @param finalAssigneeUsers
+	 * @param tenantId
+	 * @param notEligibleAssigneeUUIDs
+	 * @param businessService 
+	 * @param isCurrentAssignmentCheck 
+	 * @param businessId 
+	 * @param assigneeRole 
+	 */
+	private void determineFinalAssigneeFromAllProcess(List<String> allowedUserUUIDs, Map<String, User> idToUserMap,
+			List<User> finalAssigneeUsers, String tenantId, Set<String> notEligibleAssigneeUUIDs,
+			String businessService, String businessId, Boolean isCurrentAssignmentCheck, String assigneeRole) {
+		
+		String lastAssignedUserUUID = StringUtils.EMPTY;
+
+		ProcessInstanceSearchCriteria criteria = new ProcessInstanceSearchCriteria();
+		criteria.setTenantId(tenantId);
+		populateRoleStatusBasedCriteria(criteria, tenantId, assigneeRole);
+		criteria.setLimit(1);
+
+		List<ProcessInstance> allProcessInstances = worKflowRepository.getProcessInstances(criteria);
+		
+		// Filter out current business-Ids from allProcessInstances
+		if (!isCurrentAssignmentCheck) {
+			allProcessInstances = allProcessInstances.stream()
+					.filter(process -> !process.getBusinessId().equals(businessId)).collect(Collectors.toList());
+		}
+
+		// Sorting all Process with LastModifiedTime & BusinessId
+		Collections.sort(allProcessInstances, new Comparator<ProcessInstance>() {
+
+			@Override
+			public int compare(ProcessInstance p1, ProcessInstance p2) {
+				int lastModifiedCompare = p2.getAuditDetails().getLastModifiedTime()
+						.compareTo(p1.getAuditDetails().getLastModifiedTime());
+				if (lastModifiedCompare != 0) {
+					return lastModifiedCompare;
+				}
+				return p1.getBusinessId().compareTo(p2.getBusinessId());
+			}
+		});
+		
+		if (!CollectionUtils.isEmpty(allProcessInstances)) {
+
+			populateFinalAssigneeUsersFromAllProcess(allProcessInstances, finalAssigneeUsers, notEligibleAssigneeUUIDs,
+					allowedUserUUIDs);
+
+			if (!CollectionUtils.isEmpty(finalAssigneeUsers)) {
+				lastAssignedUserUUID = finalAssigneeUsers.get(0).getUuid();
+				finalAssigneeUsers.clear();
+			}
+		}
+
+		if (StringUtils.isNotEmpty(lastAssignedUserUUID)) {
+			boolean lastAssignedUserFound = false;
+			for (Entry<String, User> userMapEntry : idToUserMap.entrySet()) {
+
+				if (lastAssignedUserFound && !notEligibleAssigneeUUIDs.contains(userMapEntry.getValue().getUuid())) {
+					finalAssigneeUsers.add(userMapEntry.getValue());
+					break;
+				}
+
+				if (StringUtils.equals(userMapEntry.getKey(), lastAssignedUserUUID)) {
+					lastAssignedUserFound = true;
+				}
+			}
+
+			/*
+			 * If final Assignee not found yet, then assign the very first user from the
+			 * user-list.
+			 */
+			if (lastAssignedUserFound && CollectionUtils.isEmpty(finalAssigneeUsers)) {
+
+				String userUuid = idToUserMap.keySet().stream().filter(uuid -> !notEligibleAssigneeUUIDs.contains(uuid))
+						.findFirst().orElse(null);
+
+				if (StringUtils.isNotBlank(userUuid)) {
+					finalAssigneeUsers.add(idToUserMap.get(userUuid));
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Finalizing the Assignee for the Process Instances from comparing all Process.
+	 * 
+	 * @param businessIdProcessInstances
+	 * @param finalAssigneeUsers
+	 * @param notEligibleAssigneeUUIDs
+	 * @param allowedUserUUIDs
+	 */
+	private void populateFinalAssigneeUsersFromAllProcess(List<ProcessInstance> businessIdProcessInstances,
+			List<User> finalAssigneeUsers, Set<String> notEligibleAssigneeUUIDs, List<String> allowedUserUUIDs) {
+
+		for (ProcessInstance process : businessIdProcessInstances) {
+			String assigneeUuid = Optional.ofNullable(process.getAssignes()).orElse(Collections.emptyList()).stream()
+					.findFirst().map(User::getUuid).orElse(StringUtils.EMPTY);
+
+			if (allowedUserUUIDs.contains(assigneeUuid) && !notEligibleAssigneeUUIDs.contains(assigneeUuid)) {
+				finalAssigneeUsers.addAll(process.getAssignes());
+				break;
+			} else {
+				notEligibleAssigneeUUIDs.add(assigneeUuid);
+			}
+		}
+	}
+	
+	private void populateRoleStatusBasedCriteria(ProcessInstanceSearchCriteria criteria, String tenantId,
+			String assigneeRole) {
+		Map<String, Map<String, List<String>>> roleTenantAndStatusMapping = businessServiceRepository
+				.getRoleTenantAndStatusMapping();
+
+		if (!CollectionUtils.isEmpty(roleTenantAndStatusMapping)) {
+			Map<String, List<String>> tenantToStatuses = roleTenantAndStatusMapping.get(assigneeRole);
+
+			if (!CollectionUtils.isEmpty(tenantToStatuses)) {
+
+				List<String> allStatuses = tenantToStatuses.get(tenantId);
+
+				if (!CollectionUtils.isEmpty(allStatuses)) {
+					criteria.setStatus(allStatuses);
+					criteria.setStatusesIrrespectiveOfTenant(allStatuses);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Determine the assignee if it has already worked on the same
+	 * business-id(Employee Registration-Number), then assign the same user
+	 * 
+	 * @param finalAssigneeUsers
+	 * @param tenantId
+	 * @param allowedUserUUIDs
+	 * @param validActions
+	 * @param businessId
+	 * @param notEligibleAssigneeUUIDs
+	 */
+	private void checkAndDetermineFinalAssigneeUserForCurrentBussinessId(List<User> finalAssigneeUsers, String tenantId,
+			List<String> allowedUserUUIDs, List<Action> validActions, String businessId,
+			Set<String> notEligibleAssigneeUUIDs) {
+
+		ProcessInstanceSearchCriteria criteria = new ProcessInstanceSearchCriteria();
+		criteria.setTenantId(tenantId);
+		criteria.setBusinessIds(Arrays.asList(businessId));
+		criteria.setHistory(true);
+		criteria.setLimit(100);
+		
+		List<ProcessInstance> businessIdProcessInstances = worKflowRepository.getProcessInstances(criteria);
+
+		if (!CollectionUtils.isEmpty(businessIdProcessInstances)) {
+
+			populateFinalAssigneeUsers(businessIdProcessInstances, validActions, finalAssigneeUsers,
+					notEligibleAssigneeUUIDs, allowedUserUUIDs);
+
+		}
+	}
+	
+	/**
+	 * Finalizing the Assignee for the Process Instances.
+	 * 
+	 * @param businessIdProcessInstances
+	 * @param validActions
+	 * @param finalAssigneeUsers
+	 * @param notEligibleAssigneeUUIDs
+	 * @param allowedUserUUIDs
+	 */
+	private void populateFinalAssigneeUsers(List<ProcessInstance> businessIdProcessInstances, List<Action> validActions,
+			List<User> finalAssigneeUsers, Set<String> notEligibleAssigneeUUIDs, List<String> allowedUserUUIDs) {
+
+		int counter = 0;
+		for (ProcessInstance process : businessIdProcessInstances) {
+			String assigner = process.getAssigner().getUuid();
+			
+			String previousState = StringUtils.EMPTY;
+			if (counter < businessIdProcessInstances.size() - 1) {
+				previousState = businessIdProcessInstances.get(++counter).getState().getUuid();
+			}
+
+			for (Action action : validActions) {
+				if (allowedUserUUIDs.contains(assigner)
+						&& !notEligibleAssigneeUUIDs.contains(assigner)
+						&& (previousState.equals(action.getCurrentState()) || StringUtils.isEmpty(previousState))
+						&& action.getNextState().equals(process.getState().getUuid())
+						&& action.getAction().equals(process.getAction())) {
+					finalAssigneeUsers.add(process.getAssigner());
+					break;
+				}
+			}
+			
+			if (finalAssigneeUsers.stream().allMatch(user -> !StringUtils.equals(user.getUuid(), assigner))) {
+				notEligibleAssigneeUUIDs.add(assigner);
+			}
+			
+			if (!CollectionUtils.isEmpty(finalAssigneeUsers)) {
+				break;
+			}
+		}
+	}
+	
+	/**
+	 * Get Valid actions by the role
+	 * 
+	 * @param processInstanceFromRequest
+	 * @param tenantId
+	 * @param role
+	 * @return
+	 */
+	private List<Action> getValidActionsByRole(String businessServiceCode, String tenantId,
+			String role) {
+		BusinessServiceSearchCriteria searchCriteria = BusinessServiceSearchCriteria.builder().tenantId(tenantId)
+				.businessServices(Arrays.asList(businessServiceCode)).build();
+
+		List<BusinessService> businessServices = businessServiceRepository.getBusinessServices(searchCriteria);
+		enrichTenantIdForStateLevel(tenantId, businessServices);
+
+		return businessServices.stream()
+				.flatMap(businessService -> Optional.ofNullable(businessService.getStates())
+						.orElse(Collections.emptyList()).stream())
+				.flatMap(state -> Optional.ofNullable(state.getActions()).orElse(Collections.emptyList()).stream())
+				.collect(Collectors.toList()).stream().filter(action -> action.getRoles().contains(role))
+				.collect(Collectors.toList());
+	}
+	
+	private void logRequests(String businessId, String businessService, String assigneeRole,
+			Map<String, User> idToUserMap, List<User> allowedAssignees) {
+		log.info("getAssignes -->> logRequests -->> START");
+
+		log.info("businessId = [" + businessId + "]");
+		log.info("businessService = [" + businessService + "]");
+		log.info("assigneeRole = [" + assigneeRole + "]");
+		log.info("idToUserMap user uuids = [" + Optional.ofNullable(idToUserMap).orElse(Collections.emptyMap()).keySet()
+				+ "]");
+		log.info("allowedAssignees user uuids = [" + Optional.ofNullable(allowedAssignees)
+				.orElse(Collections.emptyList()).stream().map(User::getUuid).collect(Collectors.toSet()) + "]");
+
+		log.info("getAssignes -->> logRequests -->> END");
+	}
+	
+	private void excludeSystemUser(Map<String, User> idToUserMap, List<String> rolesInState) {
+
+		if (rolesInState.stream()
+				.noneMatch(roleCode -> StringUtils.equals(roleCode, INTERNAL_MICROSERVICE_ROLE_CODE))) {
+			idToUserMap.entrySet().removeIf(entry -> entry.getValue().getRoles().stream()
+					.anyMatch(role -> StringUtils.equals(INTERNAL_MICROSERVICE_ROLE_CODE, role.getCode())));
+		}
+	}
+	private Map<String, User> getAllowedAssigneeUsers(RequestInfo requestInfo, String assigneeRole, String tenantId,
+			String businessService, String businessId, List<User> allowedAssigneesFromRequest) {
+
+		Map<String, User> finalUuidToUserMap = new HashMap<String, User>();
+
+		if (!CollectionUtils.isEmpty(allowedAssigneesFromRequest)) {
+
+			List<String> userUuids = allowedAssigneesFromRequest.stream().map(User::getUuid).collect(Collectors.toSet())
+					.stream().collect(Collectors.toList());
+
+			UserSearchRequest request = new UserSearchRequest();
+			request.setTenantId(workflowConfig.getStateLevelTenantId());
+			request.setRoleCodes(Arrays.asList(assigneeRole));
+			request.setActive(true);
+			request.setUuid(userUuids);
+
+			Map<String, User> uuidToUserMap = userService.searchUserDetails(requestInfo, request);
+
+			uuidToUserMap.forEach((key, value) -> {
+				finalUuidToUserMap.put(key, value);
+			});
+		}
+
+		if (CollectionUtils.isEmpty(finalUuidToUserMap)) {
+
+			if (StringUtils.equals(ENTERPRISE, assigneeRole)
+					&& StringUtils.equals(businessService, ENTERPRISE_BUSINESS_SERVICE)) {
+
+				Map<String, User> idToUser = userService.searchUserByRegistrtaionNumber(requestInfo, businessId);
+
+				idToUser.forEach((key, value) -> {
+					finalUuidToUserMap.put(key, value);
+				});
+			} else {
+				UserSearchRequest request = new UserSearchRequest();
+				request.setTenantId(workflowConfig.getStateLevelTenantId());
+				request.setRoleCodes(Arrays.asList(assigneeRole));
+				request.setActive(true);
+
+				Map<String, User> uuidToUserMap = userService.searchUserDetails(requestInfo, request);
+
+				uuidToUserMap.forEach((key, value) -> {
+					if (StringUtils.equals(assigneeRole, GOA_IDC_MD_ROLE_CODE) || value.getRoles().stream()
+							.noneMatch(role -> StringUtils.equals(GOA_IDC_MD_ROLE_CODE, role.getCode()))) {
+						finalUuidToUserMap.put(key, value);
+					}
+				});
+			}
+		}
+
+		return finalUuidToUserMap;
+	}
 
 
 
