@@ -85,6 +85,10 @@
 			<name>In Project Repo</name>
 			<url>file://${project.basedir}/lib</url>
 		</repository> -->
+		<repository>
+			<id>github-maven</id>
+			<url>https://raw.githubusercontent.com/RootstackTech/obpas_upyog_assam_m2/main/repository</url>
+  		</repository>
 	</repositories>
 
 	<pluginRepositories>
