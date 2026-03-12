@@ -9,6 +9,7 @@ import TopBarSideBar from "../../components/TopBarSideBar";
 import StaticCitizenSideBar from "../../components/TopBarSideBar/SideBar/StaticCitizenSideBar";
 import CitizenHome from "./Home";
 import LanguageSelection from "./Home/LanguageSelection";
+import LoginSelection from "./Home/LoginSelection";
 import AreaMapping from "./Home/AreaMapping";
 import Login from "./Login";
 import UserProfile from "./Home/UserProfile";
@@ -219,6 +220,10 @@ const Home = ({
 
           <Route exact path={`${path}/select-language`}>
             <LanguageSelection />
+          </Route>
+
+          <Route exact path={`${path}/login-selection`}>
+            <LoginSelection />
           </Route>
 
           <Route exact path={`${path}/area-mapping`}>
