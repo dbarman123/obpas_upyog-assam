@@ -514,7 +514,6 @@ console.log("formData==",form)
               marginTop:"-5px"
             }}
           >
-            {t("NA_NOT_APPLICABLE")}
           </div>
         )}
             <TextInput
@@ -551,7 +550,6 @@ console.log("formData==",form)
               marginTop:"-5px"
             }}
           >
-            {t("NA_NOT_APPLICABLE")}
           </div>
         )}
             <TextArea
