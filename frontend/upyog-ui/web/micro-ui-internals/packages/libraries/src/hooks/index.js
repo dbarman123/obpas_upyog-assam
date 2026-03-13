@@ -358,6 +358,7 @@ import useSelectedMDMS from "./useSelectedMDMS";
 import useRouteSubscription from "./useRouteSubscription";
 import { useCustomBackNavigation } from "./UseCustomBackNavigationProps";
 import { useBusinessServiceList } from "./noc/useBusinessServiceList";
+import useOCSearchApi from "./obpsv2/useOCSearchApi";
 
 const pgr = {
   useComplaintDetails,
@@ -696,6 +697,7 @@ const cm = {
 const obpsv2={
   useBPACreateUpdateApi,
   useBPASearchApi,
+  useOCSearchApi,
   useOBPSDocuments
 };
 

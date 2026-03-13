@@ -10,6 +10,7 @@ import useApplicationActions from "../../../../../../libraries/src/hooks/obpsv2/
 import { convertDateToEpoch } from "../../../utils";
 import { OBPSV2Services } from "../../../../../../libraries/src/services/elements/OBPSV2";
 import { getEstimatePayload } from "../../../utils";
+// import OcBuildingPermit from "../../../components/ocBuildingPermit";
 const BPAEmployeeDetails = () => {
   const { t } = useTranslation();
   const { acknowledgementIds, tenantId } = useParams();
@@ -324,7 +325,7 @@ const BPAEmployeeDetails = () => {
   };
 
   if (isLoading) return <Loader />;
-
+console.log("OC workflow==",workflowDetails)
   return (
     <Fragment>
       <div className={"employee-main-application-details"}>
@@ -375,6 +376,7 @@ const BPAEmployeeDetails = () => {
       />
           )
         }
+        {/* <OcBuildingPermit/> */}
         <ApplicationDetailsTemplate
           applicationDetails={data}
           isLoading={isLoading}

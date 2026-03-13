@@ -5,7 +5,7 @@ const useBPAV2Inbox = ({ tenantId, filters, config={} }) => {
     const user = Digit.UserService.getUser();
     let { applicationStatus, district, assignee, applicationType } = filterForm;
     const { mobileNumber, applicationNo, name } = searchForm;
-    console.log("first", name);
+    // console.log("first", name);
     const { sortBy, limit, offset, sortOrder } = tableForm;
     const stateId = Digit.ULBService.getStateId();
 
@@ -26,8 +26,8 @@ const useBPAV2Inbox = ({ tenantId, filters, config={} }) => {
         tenantId,
         processSearchCriteria: {
           assignee : user.info.type=="EMPLOYEE"? "": user.info.uuid,
-          moduleName: "bpa-services", 
-          businessService: ["BPA_DA_MB","BPA_DA_GP","BPA_GMDA_GMC"],
+          // moduleName: "bpa-services", 
+          businessService: ["BPA_DA_MB","BPA_DA_GP","BPA_GMDA_GMC","OC_GMDA_GMC"],
         },
         moduleSearchCriteria: {
           ...(mobileNumber ? {mobileNumber}: {}),

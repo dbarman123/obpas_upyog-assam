@@ -3,6 +3,7 @@ import { Header, Loader, TextInput, Dropdown, SubmitBar, CardLabel, Card } from 
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import BPAApplication from "./bpa-application";
+import OCApplication from "./oc-application";
 
 export const BPAMyApplications = () => {
   const { t } = useTranslation();
@@ -10,7 +11,12 @@ export const BPAMyApplications = () => {
   const user = Digit.UserService.getUser().info;
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [shouldSearch, setShouldSearch] = useState(false);
   const [status, setStatus] = useState(null);
+  const [applicationType, setApplicationType] = useState(null);
+  const [applications, setApplications] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+const [totalCount, setTotalCount] = useState(0);
 
   const filter = window.location.href.split("/").pop();
   const t1 = !isNaN(parseInt(filter)) ? parseInt(filter) + 50 : 4;
@@ -20,21 +26,78 @@ export const BPAMyApplications = () => {
     ? { limit: "50", sortOrder: "ASC", sortBy: "createdTime", offset: off, tenantId }
     : { limit: "4", sortOrder: "ASC", sortBy: "createdTime", offset: "0", tenantId, mobileNumber: user?.mobileNumber };
 
-  const [filters, setFilters] = useState(initialFilters);
+  const [filters, setFilters] = useState(null);
+  const isBPA = applicationType?.code === "BPA";
+const isOC = applicationType?.code === "OCCUPANCY";
 
   // Use the search hook with dynamic filters
-  const { isLoading, data } = Digit.Hooks.obpsv2.useBPASearchApi({ filters });
+  // const { isLoading, data } = Digit.Hooks.obpsv2.useBPASearchApi({ filters });
 
-  const handleSearch = () => {
-    const trimmedSearchTerm = searchTerm.trim();
-    const searchFilters = {
+
+  const handleApplicationTypeChange = (value) => {
+  setApplicationType(value);
+    setApplications([]);
+  setTotalCount(0);
+  setFilters(null);
+  setStatus(null);
+};
+
+
+  // const handleSearch = () => {
+  //   debugger
+  //   const trimmedSearchTerm = searchTerm.trim();
+  //   const searchFilters = {
+  //     ...initialFilters,
+  //     applicationNo: trimmedSearchTerm || undefined,
+  //     status: status?.code || undefined,
+  //   };
+
+  //   setFilters(searchFilters);
+  // };
+
+const handleSearch = async () => {
+  if (!applicationType?.code) return;
+console.log("filters==",initialFilters)
+  setIsLoading(true);
+  setApplications([]);
+  try {
+    // 🔹 BPA SEARCH
+    if (applicationType?.code === "BPA") {
+  const payload = {
+    filters: {
       ...initialFilters,
-      applicationNo: trimmedSearchTerm || undefined,
+      applicationNo: searchTerm?.trim() || undefined,
       status: status?.code || undefined,
-    };
-
-    setFilters(searchFilters);
+    },
   };
+      const response = await Digit.OBPSV2Services.search(payload);
+      setApplications(response?.bpa || []);
+      setTotalCount(response?.count || 0);
+    }
+
+    // 🔹 OC SEARCH
+    if (applicationType?.code === "OCCUPANCY") {
+  const payload = {
+    filters: {
+      ...initialFilters,
+      applicationNo: searchTerm?.trim() || undefined,
+      status: status?.code || undefined,
+    },
+  };
+
+      const response = await Digit.OBPSV2Services.ocsearch(payload);
+      setApplications(response?.ocs || []);
+      setTotalCount(response?.count || 0);
+    }
+  } catch (error) {
+    console.error("Search failed", error);
+    setApplications([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
 
   const handleLoadMore = () => {
     const newFilters = {
@@ -48,9 +111,9 @@ export const BPAMyApplications = () => {
     setFilters(newFilters);
   };
 
-  if (isLoading) {
-    return <Loader />;
-  }
+//   if (isBPA && isBPALoading) return <Loader />;
+// if (isOC && isOCLoading) return <Loader />;
+
 
   const statusOptions = [
     { i18nKey: "Pending RTP Approval", code: "PENDING_RTP_APPROVAL", value: t("BPA_PENDING_RTP_APPROVAL") },
@@ -71,8 +134,16 @@ export const BPAMyApplications = () => {
     { i18nKey: "Rejected", code: "REJECTED", value: t("BPA_REJECTED") }
   ].sort((a, b) => a.code.localeCompare(b.code));
 
-  const filteredApplications = data?.bpa || [];
+  const applicationTypeOptions = [
+  { i18nKey: "BPA", code: "BPA", value: t("BPA_APPLICATION_TYPE_BPA") },
+  { i18nKey: "Occupancy", code: "OCCUPANCY", value: t("BPA_APPLICATION_TYPE_OCCUPANCY") }
+].sort((a, b) => a.code.localeCompare(b.code));
 
+
+  // const filteredApplications = data?.bpa || [];
+const filteredApplications = applications;
+
+console.log("filteredApplications==",filteredApplications)
   return (
     <React.Fragment>
       <Header>{`${t("BPA_MY_APPLICATIONS_HEADER")} (${filteredApplications.length})`}</Header>
@@ -105,15 +176,31 @@ export const BPAMyApplications = () => {
                 />
               </div>
             </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <CardLabel>{t("APPLICATION TYPE")}</CardLabel>
+                <Dropdown
+                  className="form-field"
+                  selected={applicationType}
+                  select={handleApplicationTypeChange}
+                  option={applicationTypeOptions}
+                  placeholder={t("SELECT_APP_TYPE")}
+                  optionKey="value"
+                  style={{ width: "100%" }}
+                  t={t}
+                />
+              </div>
+            </div>
             <div>
               <div style={{ marginTop: "17%" }}>
-                <SubmitBar label={t("ES_COMMON_SEARCH")} onSubmit={handleSearch} />
+                <SubmitBar label={t("ES_COMMON_SEARCH")} disabled={!applicationType?.code} onSubmit={handleSearch} />
                 <p
                   className="link"
                   style={{ marginLeft: "30%", marginTop: "10px", display: "block" }}
                   onClick={() => {
                     setSearchTerm("");
                     setStatus(null);
+                    setApplicationType(null);
                     setFilters(initialFilters);
                   }}
                 >
@@ -128,17 +215,26 @@ export const BPAMyApplications = () => {
         </div>
       </Card>
       <div>
-        {filteredApplications.length > 0 &&
+        {!isLoading && filteredApplications.length > 0 && applicationType?.code === "BPA" &&
           filteredApplications.map((application, index) => (
             <div key={index}>
               <BPAApplication application={application} tenantId={tenantId} buttonLabel={t("BPA_VIEW_DETAILS")} />
             </div>
           ))}
-        {filteredApplications.length === 0 && !isLoading && (
+          {!isLoading && filteredApplications.length > 0 && applicationType?.code === "OCCUPANCY" &&
+          filteredApplications.map((application, index) => (
+            <div key={index}>
+              <OCApplication application={application} tenantId={tenantId} buttonLabel={t("OC_VIEW_DETAILS")} />
+            </div>
+          ))}
+        {!isLoading && filteredApplications.length === 0 && isBPA && (
           <p style={{ marginLeft: "16px", marginTop: "16px" }}>{t("BPA_NO_APPLICATION_FOUND_MSG")}</p>
         )}
+        {!isLoading && filteredApplications.length === 0 && isOC && (
+          <p style={{ marginLeft: "16px", marginTop: "16px" }}>{t("OC_NO_APPLICATION_FOUND_MSG")}</p>
+        )}
 
-        {filteredApplications.length !== 0 && data?.count > t1 && (
+        {filteredApplications.length !== 0 && totalCount > t1 && (
           <div>
             <p style={{ marginLeft: "16px", marginTop: "16px" }}>
               <span className="link" onClick={handleLoadMore}>

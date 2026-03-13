@@ -48,9 +48,16 @@ const useInboxTableConfig = ({ parentRoute, onPageSizeChange, formState, totalCo
             Cell: ({ row }) => {
             return (
                 <div>
-                <Link to={window.location.href.includes("/employee") ? `${parentRoute}/application/${row?.original["applicationId"]}/${row?.original["tenantId"]}` : `${parentRoute}/inbox/bpa/${row.original["applicationId"]}`}>
+                {/* <Link to={    window.location.href.includes("/employee")         ? `${parentRoute}/application/${row?.original["applicationId"]}/${row?.original["tenantId"]}`       : `${parentRoute}/inbox/bpa/${row.original["applicationId"]}`  }>
                     <span className="link">{row?.original["applicationId"]||"NA"}</span>
-                </Link>
+                </Link> */}
+                <Link to={
+    window.location.href.includes("/employee")
+      ? row?.original?.nextActions?.businessService === "OC_GMDA_GMC"
+        ? `${parentRoute}/oc/application/${row?.original?.applicationId}/${row?.original?.tenantId}`
+        : `${parentRoute}/application/${row?.original?.applicationId}/${row?.original?.tenantId}`
+      : `${parentRoute}/inbox/bpa/${row?.original?.applicationId}`
+  }><span className="link">{row?.original["applicationId"]||"NA"}</span></Link>
                 </div>
             );
             },

@@ -15,6 +15,7 @@ const App = ({ path }) => {
   const RTPCreate= Digit?.ComponentRegistryService?.getComponent("RTPCreate");
   const BPAMyApplications = Digit?.ComponentRegistryService?.getComponent("BPAMyApplications");
   const BPAApplicationDetails = Digit?.ComponentRegistryService?.getComponent("BPAApplicationDetails");
+  const OcApplicationDetails = Digit?.ComponentRegistryService?.getComponent("OcBuildingPermit");
   const BPAEdit= Digit?.ComponentRegistryService?.getComponent("BPAEdit");
   const OBPASCitizenHomeScreen = Digit?.ComponentRegistryService?.getComponent("OBPASCitizenHomeScreen")
   const isDocScreenAfterEdcr = sessionStorage.getItem("clickOnBPAApplyAfterEDCR") === "true" ? true : false
@@ -28,6 +29,7 @@ const App = ({ path }) => {
         <PrivateRoute path={`${path}/rtp/home`} component={OBPASCitizenHomeScreen}/>
         <PrivateRoute path={`${path}/my-applications`} component={BPAMyApplications}></PrivateRoute>
         <PrivateRoute path={`${path}/application/:acknowledgementIds/:tenantId`} component={BPAApplicationDetails}></PrivateRoute>
+        <PrivateRoute path={`${path}/application/:acknowledgementIds/:tenantId`} component={OcApplicationDetails}></PrivateRoute>
         <PrivateRoute path={`${path}/building-permit`} component={BPACreate}/>
         <PrivateRoute path={`${path}/rtp/apply`} component={RTPCreate}/>
         <PrivateRoute path={`${path}/rtp/inbox`} component={(props) => <RTPInbox {...props} parentRoute={path} />} />

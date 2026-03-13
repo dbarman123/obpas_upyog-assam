@@ -261,6 +261,26 @@ export const OBPSV2Services = {
       auth: true,
       multipartFormData: true,
     }),
+occreate: (data, params = {}) =>
+  Request({
+    url: Urls.obpsv2.occreate,
+    data,
+    params,
+    method: "POST",
+    userService: true,
+    useCache: false,
+    auth: true,
+  }),
+  ocupdate: (data, params = {}) =>
+  Request({
+    url: Urls.obpsv2.ocupdate,
+    data,
+    params,
+    method: "POST",
+    userService: true,
+    useCache: false,
+    auth: true,
+  }),
   anonymousCreate: (data, tenantId) =>
     Request({
       url: Urls.edcr.anonymousCreate,
@@ -296,6 +316,17 @@ export const OBPSV2Services = {
       userService: auth === false ? auth : true,
       params: { tenantId, ...filters },
     }),
+
+    ocsearch: ({ tenantId, filters, auth }) =>
+    Request({
+      url: Urls.obpsv2.ocsearch,
+      useCache: false,
+      method: "POST",
+      auth: auth === false ? auth : true,
+      userService: auth === false ? auth : true,
+      params: { tenantId, ...filters },
+    }),
+
   rtpsearch: (details) =>
       Request({
         url: Urls.obpsv2.rtpsearch,
@@ -442,6 +473,7 @@ export const OBPSV2Services = {
       }),
 
   BPAApplicationDetails: async (tenantId, filters) => {
+    //debugger
     const response = await OBPSV2Services.search({
       tenantId,
       filters,

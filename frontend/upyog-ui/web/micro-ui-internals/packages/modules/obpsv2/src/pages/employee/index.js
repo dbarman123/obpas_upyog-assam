@@ -13,6 +13,7 @@ const EmployeeApp = ({ path }) => {
   const Inbox = Digit.ComponentRegistryService.getComponent("OBPSV2Inbox");
   const RTPInbox = Digit.ComponentRegistryService.getComponent("RTPInbox");
   const BPAApplicationDetails = Digit?.ComponentRegistryService?.getComponent("BPAEmployeeDetails");
+  const OcApplicationDetails = Digit?.ComponentRegistryService?.getComponent("OcBuildingPermit");
   console.log("testtststststtss",path)
 
   return (
@@ -23,6 +24,7 @@ const EmployeeApp = ({ path }) => {
         
         <PrivateRoute path={`${path}/inbox`} component={(props) => <Inbox {...props} parentRoute={path} />} />
          <PrivateRoute path={`${path}/application/:acknowledgementIds/:tenantId`} component={BPAApplicationDetails}></PrivateRoute>
+         <PrivateRoute path={`${path}/oc/application/:acknowledgementIds/:tenantId`} component={OcApplicationDetails}></PrivateRoute>
         <PrivateRoute path={`${path}/rtp/inbox`} component={(props) => <RTPInbox {...props} parentRoute={path} />} />
         <PrivateRoute path={`${path}/search/application`} component={(props) => <Search {...props} parentRoute={path} />} />
         <PrivateRoute path={`${path}/obpsApplicationReport`} component={(props) => <EnhancedReport {...props} parentRoute={path} moduleName="rainmaker-obps" reportName="obpsApplicationReport" />} />

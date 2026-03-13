@@ -138,6 +138,11 @@ const ActionModal = ({ t, action, tenantId, state, id, closeModal, submitAction,
   }
 
   async function submit(data) {
+    // debugger
+    // if(applicationData?.status === "FORWARDED_TO_ZONAL_OFFICER"){
+    //   const storedData = JSON.parse(sessionStorage.getItem("SUBMIT_REPORT_DATA")) || {};
+    //   //function call(pass stored data)
+    // }
     if (action?.action === "SUBMIT_REPORT") {
     const storedData = JSON.parse(sessionStorage.getItem("SUBMIT_REPORT_DATA")) || {};
     const submitReport = getSubmitReport(applicationData);

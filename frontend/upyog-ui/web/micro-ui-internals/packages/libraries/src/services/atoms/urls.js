@@ -1,8 +1,8 @@
 const Urls = {
   MDMS: `/egov-mdms-service/v1/_search`,
   MDMSV2: `/mdms-v2/v1/_search`,
-  WorkFlow: `/egov-workflow-v2/egov-wf/businessservice/_search`,
-  WorkFlowProcessSearch: `/egov-workflow-v2/egov-wf/process/_search`,
+  WorkFlow: `http://127.0.0.1:8280/egov-workflow-v2/egov-wf/businessservice/_search`,
+  WorkFlowProcessSearch: `http://127.0.0.1:8280/egov-workflow-v2/egov-wf/process/_search`,
   localization: `/localization/messages/v1/_search`,
   location: {
     localities: `/egov-location/location/v11/boundarys/_search?hierarchyTypeCode=ADMIN&boundaryType=Locality`,
@@ -164,11 +164,14 @@ const Urls = {
   obpsv2: {
     create: "/bpa-services/v1/bpa/_create",
     update: "/bpa-services/v1/bpa/_update",
-    search: "/bpa-services/v1/bpa/_search",
+    search: "http://127.0.0.1:8098/bpa-services/v1/bpa/_search",
+    ocsearch: "http://127.0.0.1:8098/bpa-services/v1/oc/_search",
     rtpcreate: "/bpa-services/v1/rtp/_create",
     rtpsearch: "/bpa-services/v1/bpa/_rtpsearch",
     gisService: "/gis-service/find-zone",
     propertyValidate: "/bpa-services/v1/property/validate",
+    occreate: "http://127.0.0.1:8098/bpa-services/v1/oc/_create",
+    ocupdate: "http://localhost:8098/bpa-services/v1/oc/_update",
     gisSearch: "/gis-service/zone/_search",
     estimate: "/bpa-services/v2/bpa/_estimate",
     updateNOC: "/noc-services/v1/noc/_update",

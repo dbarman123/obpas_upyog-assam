@@ -20,87 +20,17 @@ const [propertyDetails, setPropertyDetails] = useState(null);
 const [loading, setLoading] = useState(false);
 const [error, setError] = useState(null);
 const tenantId = Digit.ULBService.getCitizenCurrentTenant(true);
-
+const userInfo = Digit.UserService.getUser();
+let propertyDetail;
     const history = useHistory();
+    const areaMappingSession =
+  Digit.SessionStorage.get("CITIZEN.AREA.MAPPING") || {};
   // const handleOcYes = () => {
   //   setShowOcPopup(false);
   //   history.push("/upyog-ui/citizen/obpsv2/ocbpa");
   // };
 
-const handleBuildingpermitSubmit = async () => {
-    setShowBuildingpermitModal(false);
-    setBuildingPermitNumber("");
-  try {
-    const tenantId = Digit.ULBService.getCurrentTenantId();
-
-    // Call your BPA search API with propertyNumber
-    const filters = { applicationNo: buildingpermitNumber };
-    const bpaRes = await Digit.OBPSV2Services.search({ tenantId, filters });
-    const application = bpaRes?.bpa?.[0];
-
-    if (!application) {
-      alert("No BPA record found for this building permit number");
-      return;
-    }
-        if (propertyId) {
-      const isPropertyValid = await getPropertyDetails();
-      if (!isPropertyValid){ 
-        alert("Property not found");
-        return
-      };
-    }
-debugger
-    // Build prefill data
-    const prefillData = {
-      nameOfMasterPlan: application?.additionalDetails?.masterPlanName,
-      nameOfUlbPanchayat: application?.additionalDetails?.ulbPanchayatName,
-      phoneNumber: application?.landInfo?.owners[0]?.mobileNumber,
-      email: application?.landInfo?.owners[0]?.emailId,
-      nameOfApplicant: application?.landInfo?.owners[0]?.name,
-        siteAddressHouseNo: application?.additionalDetails?.siteAddress?.houseNo,
-  siteAddressAddressLineOne: application?.additionalDetails?.siteAddress?.addressLine1,
-  siteAddressAddressLineTwo: application?.additionalDetails?.siteAddress?.addressLine2,
-  siteAddressState: application?.additionalDetails?.siteAddress?.state,
-  siteAddressDistrict: application?.additionalDetails?.siteAddress?.district,
-  siteAddressCityVillage: application?.additionalDetails?.siteAddress?.city,
-  siteAddressPincode: application?.additionalDetails?.siteAddress?.pincode,
-    correspondenceAddressHouseNo: application?.additionalDetails?.correspondenceAddress?.houseNo,
-  correspondenceAddressAddressLineOne: application?.additionalDetails?.correspondenceAddress?.addressLine1,
-  correspondenceAddressAddressLineTwo: application?.additionalDetails?.correspondenceAddress?.addressLine2,
-  correspondenceAddressState: application?.additionalDetails?.correspondenceAddress?.state,
-  correspondenceAddressDistrict: application?.additionalDetails?.correspondenceAddress?.district,
-  correspondenceAddressCityVillage: application?.additionalDetails?.correspondenceAddress?.city,
-  correspondenceAddressPincode: application?.additionalDetails?.correspondenceAddress?.pincode,
-    propertyID: application?.additionalDetails?.propertyID,
-
-  ulb: application?.additionalDetails?.propertyDetails?.details?.ulb,
-  ward: application?.additionalDetails?.propertyDetails?.details?.ward,
-  ownerName: application?.additionalDetails?.propertyDetails?.details?.ownerName,
-  guardianName: application?.additionalDetails?.propertyDetails?.details?.guardianName,
-  phone: application?.additionalDetails?.propertyDetails?.details?.phone,
-  address: application?.additionalDetails?.propertyDetails?.details?.address,
-  propertyVendor: application?.additionalDetails?.propertyDetails?.details?.propertyVendor,
-  buildingUse: application?.additionalDetails?.propertyDetails?.details?.buildingUse,
-    nocNo: application?.additionalDetails?.nocNo,
-  nocDate: application?.additionalDetails?.nocDate,
-  nameOfRtp: application?.additionalDetails?.nameOfRtp,
-  registrationNoRtp: application?.additionalDetails?.registrationNoRtp,
-  proposedUseOfBuilding: application?.additionalDetails?.proposedUseOfBuilding,
-  noOfFloors: application?.additionalDetails?.noOfFloors
-
-      // add other mappings
-    };
-    // Navigate with state
-    history.push({
-      pathname: "/upyog-ui/citizen/obpsv2/ocbpa",
-      state: { prefillData, buildingpermitNumber },
-    });
-  } catch (err) {
-    console.error("Error searching building permit number:", err);
-  }
-};
-
-  const getPropertyDetails = async () => {
+    const getPropertyDetails = async () => {
   if (!propertyId) {
     setPropertyDetails(null);
     setError("Invalid Property ID. Please enter a valid TIN number.");
@@ -116,13 +46,153 @@ debugger
       setError(property?.message || "Invalid Property ID");
       return false;
     }
-
     setPropertyDetails(property?.details);
-    return true;
+    return property.details;
   } catch (error) {
     setPropertyDetails(null);
     setError("Error fetching property details");
     return false;
+  }
+};
+
+const handleBuildingpermitSubmit = async () => {
+    setShowBuildingpermitModal(false);
+    setBuildingPermitNumber("");
+  try {
+    // const tenantId = Digit.ULBService.getCurrentTenantId();
+     const tenantId = 'as.gmc';
+
+    // Call your BPA search API with propertyNumber
+    const filters = { applicationNo: buildingpermitNumber };
+    const bpaRes = await OBPSV2Services.search({ tenantId, filters });
+    const application = (bpaRes?.bpa).length >1 ?[]:bpaRes?.bpa?.[0];
+
+if (propertyId) {
+  propertyDetail = await getPropertyDetails();
+  if (!propertyDetail) {
+    alert("Property not found");
+    return;
+  }
+}
+    // Build prefill data
+    const prefillData = {
+      nameOfMasterPlan: application?.additionalDetails?.masterPlanName,
+      nameOfUlbPanchayat: application?.additionalDetails?.ulbPanchayatName,
+      // phoneNumber: application?.landInfo?.owners[0]?.mobileNumber,
+      // email: application?.landInfo?.owners[0]?.emailId,
+      // nameOfApplicant: application?.landInfo?.owners[0]?.name,
+      phoneNumber: userInfo?.info?.mobileNumber,
+      email: userInfo?.info?.emailId,
+      nameOfApplicant: userInfo?.info?.name,
+        siteAddressHouseNo: application?.landInfo?.owners[0]?.permanentAddress?.houseNo,
+  siteAddressAddressLineOne: application?.landInfo?.owners[0]?.permanentAddress?.addressLine1,
+  siteAddressAddressLineTwo: application?.landInfo?.owners[0]?.permanentAddress?.addressLine2,
+  siteAddressState: application?.landInfo?.owners[0]?.permanentAddress?.state,
+  siteAddressDistrict: application?.landInfo?.owners[0]?.permanentAddress?.district,
+  siteAddressCityVillage: application?.landInfo?.owners[0]?.permanentAddress?.city,
+  siteAddressPincode: application?.landInfo?.owners[0]?.permanentAddress?.pincode,
+    correspondenceAddressHouseNo: application?.landInfo?.owners[0]?.correspondenceAddress?.houseNo,
+  correspondenceAddressAddressLineOne: application?.landInfo?.owners[0]?.correspondenceAddress?.addressLine1,
+  correspondenceAddressAddressLineTwo: application?.landInfo?.owners[0]?.correspondenceAddress?.addressLine2,
+  correspondenceAddressState: application?.landInfo?.owners[0]?.correspondenceAddress?.state,
+  correspondenceAddressDistrict: application?.landInfo?.owners[0]?.correspondenceAddress?.district,
+  correspondenceAddressCityVillage: application?.landInfo?.owners[0]?.correspondenceAddress?.city,
+  correspondenceAddressPincode: application?.landInfo?.owners[0]?.correspondenceAddress?.pincode,
+    propertyID: propertyId,
+
+  ulb: propertyDetail?.ulb,
+  ward: propertyDetail?.ward,
+  ownerName: propertyDetail?.ownerName,
+  guardianName: propertyDetail?.guardianName,
+  phone: propertyDetail?.phone,
+  address: propertyDetail?.address,
+  propertyVendor: propertyDetail?.propertyVendor,
+  buildingUse: propertyDetail?.buildingUse,
+    nocNo: application?.additionalDetails?.nocNo,
+  nocDate: application?.additionalDetails?.nocDate,
+  nameOfRtp: application?.additionalDetails?.nameOfRtp,
+  registrationNoRtp: application?.additionalDetails?.registrationNoRtp,
+  proposedUseOfBuilding: application?.additionalDetails?.proposedUseOfBuilding,
+  noOfFloors: application?.additionalDetails?.noOfFloors,
+    //   ppAuthority: areaMappingSession?.ppAuthority || "",
+    // bpAuthority: areaMappingSession?.bpAuthority || "",
+    // concernedAuthority: areaMappingSession?.concernedAuthority || "",
+    // siteAddressDistrict: areaMappingSession?.district || "",
+    // planningArea: areaMappingSession?.planningArea || "",
+    // mouza: areaMappingSession?.mouza || "",
+    // revenueVillage: areaMappingSession?.revenueVillage || ""
+    district: areaMappingSession?.district
+    ? {
+        code: areaMappingSession.district.code,
+        name: areaMappingSession.district.name,
+        i18nKey: areaMappingSession.district.i18nKey
+      }
+    : "",
+    ppAuthority: areaMappingSession?.ppAuthority
+    ? {
+        code: areaMappingSession.ppAuthority.code,
+        name: areaMappingSession.ppAuthority.name,
+        i18nKey: areaMappingSession.ppAuthority.i18nKey
+      }
+    : "",
+
+  bpAuthority: areaMappingSession?.bpAuthority
+    ? {
+        code: areaMappingSession.bpAuthority.code,
+        name: areaMappingSession.bpAuthority.name,
+        i18nKey: areaMappingSession.bpAuthority.i18nKey
+      }
+    : "",
+
+  concernedAuthority: areaMappingSession?.concernedAuthority
+    ? {
+        code: areaMappingSession.concernedAuthority.code,
+        name: areaMappingSession.concernedAuthority.name,
+        i18nKey: areaMappingSession.concernedAuthority.i18nKey
+      }
+    : "",
+  planningArea: areaMappingSession?.planningArea
+    ? {
+        code: areaMappingSession.planningArea.code,
+        name: areaMappingSession.planningArea.name,
+        i18nKey: areaMappingSession.planningArea.i18nKey
+      }
+    : "",
+
+  mouza: areaMappingSession?.mouza
+    ? {
+        code: areaMappingSession.mouza.code,
+        name: areaMappingSession.mouza.name,
+        i18nKey: areaMappingSession.mouza.i18nKey
+      }
+    : "",
+
+  revenueVillage: areaMappingSession?.revenueVillage
+    ? {
+        code: areaMappingSession.revenueVillage.code,
+        name: areaMappingSession.revenueVillage.name,
+        i18nKey: areaMappingSession.revenueVillage.i18nKey
+      }
+    : ""
+
+      // add other mappings
+    };
+        if (!application) {
+      alert("No BPA record found for this building permit number");
+          history.push({
+      pathname: "/upyog-ui/citizen/obpsv2/ocbpa",
+      state: { prefillData, propertyId },
+    });
+    }
+    console.log("area data==",areaMappingSession);
+    console.log("prefillData==",prefillData)
+    // Navigate with state
+    history.push({
+      pathname: "/upyog-ui/citizen/obpsv2/ocbpa",
+      state: { prefillData, buildingpermitNumber, propertyId },
+    });
+  } catch (err) {
+    console.error("Error searching building permit number:", err);
   }
 };
 
@@ -159,12 +229,11 @@ debugger
     }));
   }
   let updatedData = replaceDigitUiWithUpyogUi(links);
-    // Filter out RTP registration link based on login type, if logged in as citizen hide the link else show it
-  const isRTPLogin = Digit.SessionStorage.get("isRTPLogin");
-
-  if (!isRTPLogin) {
-    updatedData = updatedData.filter(item => item.name !== "BPA_APPLY_FOR_REGISTER_AS_RTP");
-  }
+  //   // Filter out RTP registration link based on login type, if logged in as citizen hide the link else show it
+  // const isRTPLogin = Digit.SessionStorage.get("isRTPLogin");
+  // if (!isRTPLogin) {
+  //   updatedData = updatedData.filter(item => item.name !== "BPA_APPLY_FOR_REGISTER_AS_RTP");
+  // }
   const rtpObject=updatedData?.[2]
   
   updatedData=[
