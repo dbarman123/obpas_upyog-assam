@@ -2,7 +2,7 @@ package org.egov.wf.service;
 
 import static org.egov.wf.util.WorkflowConstants.AUTO_ESC_EMPLOYEE_ROLE_CODE;
 import static org.egov.wf.util.WorkflowConstants.UUID_REGEX;
-
+import static org.egov.wf.util.WorkflowConstants.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -476,9 +476,9 @@ public class EnrichmentService {
 	private void excludeSystemUser(Map<String, User> idToUserMap, List<String> rolesInState) {
 
 		if (rolesInState.stream()
-				.noneMatch(roleCode -> StringUtils.equals(roleCode, INTERNAL_MICROSERVICE_ROLE_CODE))) {
+				.noneMatch(roleCode -> StringUtils.equals(roleCode, INTERNALMICROSERVICEROLE_CODE))) {
 			idToUserMap.entrySet().removeIf(entry -> entry.getValue().getRoles().stream()
-					.anyMatch(role -> StringUtils.equals(INTERNAL_MICROSERVICE_ROLE_CODE, role.getCode())));
+					.anyMatch(role -> StringUtils.equals(INTERNALMICROSERVICEROLE_CODE, role.getCode())));
 		}
 	}
 	private Map<String, User> getAllowedAssigneeUsers(RequestInfo requestInfo, String assigneeRole, String tenantId,
@@ -506,15 +506,15 @@ public class EnrichmentService {
 
 		if (CollectionUtils.isEmpty(finalUuidToUserMap)) {
 
-			if (StringUtils.equals(ENTERPRISE, assigneeRole)
-					&& StringUtils.equals(businessService, ENTERPRISE_BUSINESS_SERVICE)) {
-
-				Map<String, User> idToUser = userService.searchUserByRegistrtaionNumber(requestInfo, businessId);
-
-				idToUser.forEach((key, value) -> {
-					finalUuidToUserMap.put(key, value);
-				});
-			} else {
+////			if (StringUtils.equals(ENTERPRISE, assigneeRole)
+//					&& StringUtils.equals(businessService, ENTERPRISE_BUSINESS_SERVICE)) {
+//
+//				Map<String, User> idToUser = userService.searchUserByRegistrtaionNumber(requestInfo, businessId);
+//
+//				idToUser.forEach((key, value) -> {
+//					finalUuidToUserMap.put(key, value);
+//				});
+//			} else {
 				UserSearchRequest request = new UserSearchRequest();
 				request.setTenantId(workflowConfig.getStateLevelTenantId());
 				request.setRoleCodes(Arrays.asList(assigneeRole));
@@ -523,12 +523,12 @@ public class EnrichmentService {
 				Map<String, User> uuidToUserMap = userService.searchUserDetails(requestInfo, request);
 
 				uuidToUserMap.forEach((key, value) -> {
-					if (StringUtils.equals(assigneeRole, GOA_IDC_MD_ROLE_CODE) || value.getRoles().stream()
-							.noneMatch(role -> StringUtils.equals(GOA_IDC_MD_ROLE_CODE, role.getCode()))) {
+//					if (StringUtils.equals(assigneeRole, GOA_IDC_MD_ROLE_CODE) || value.getRoles().stream()
+//							.noneMatch(role -> StringUtils.equals(GOA_IDC_MD_ROLE_CODE, role.getCode()))) {
 						finalUuidToUserMap.put(key, value);
-					}
+//					}
 				});
-			}
+//			}
 		}
 
 		return finalUuidToUserMap;
