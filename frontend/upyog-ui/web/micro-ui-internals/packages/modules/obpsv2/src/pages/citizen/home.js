@@ -34,7 +34,7 @@ const OBPASCitizenHomeScreen = ({ parentRoute }) => {
   const { isLoading: bpaLoading, data: bpaInboxData } = useBPAV2Inbox({
     tenantId: stateCode,
     moduleName: "bpa-services",
-    businessService: ["BPA_DA_MB","BPA_DA_GP","BPA_GMDA_GMC","BPA_GMDA_NGMB","BPA_GMDA_GP","BPA_TACP_MB","BPA_TACP_GP","BPA_DA_MC"],
+    businessService: ["BPA_DA_MB","BPA_DA_GP","BPA_GMDA_GMC","BPA_GMDA_NGMB","BPA_GMDA_GP","BPA_TACP_MB","BPA_TACP_GP"],
     filters: {
       searchForm: { ...searchParams },
       tableForm: {
