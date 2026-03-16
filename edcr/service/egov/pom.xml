@@ -66,6 +66,10 @@
 			<id>javaxt.com</id>
 			<url>https://www.javaxt.com/maven</url>
 		</repository>
+		<repository>
+			<id>github-maven</id>
+			<url>https://raw.githubusercontent.com/RootstackTech/obpas_upyog_assam_m2/main/repository</url>
+  		</repository>
 	</repositories>
 
 	<pluginRepositories>
