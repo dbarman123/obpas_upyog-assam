@@ -907,8 +907,8 @@ export const OBPSV2Services = {
     if (bpa?.additionalDetails?.propertyDetails) {
       let values = Object.entries(bpa?.additionalDetails?.propertyDetails.details || {}).map(([key, value]) => ({
         title: `BPA_${key.toUpperCase()}`,
-      value: value ?? "NA",
-    }))
+        value: value !== null && value !== undefined ? value : "NA"
+      }));
     if (bpa?.additionalDetails?.propertyID) {
       values.push({
         title: "BPA_PROPERTY_ID",
