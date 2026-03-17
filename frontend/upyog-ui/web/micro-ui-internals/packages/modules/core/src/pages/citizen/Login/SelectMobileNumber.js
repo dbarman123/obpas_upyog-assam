@@ -100,7 +100,7 @@ const SelectMobileNumber = ({ t, onSelect, showRegisterLink, mobileNumber, onMob
       value={mobileNumber}
     >
       <div style={{ position: "relative" }}>
-        <Link 
+        {/* <Link 
           to={`/upyog-ui/citizen/rtp/select-location`}
           style={{
             position: "absolute",
@@ -110,7 +110,7 @@ const SelectMobileNumber = ({ t, onSelect, showRegisterLink, mobileNumber, onMob
           }}
         >
           <LinkButton label={t("BPA_RTP_LOGIN")} />
-        </Link>
+        </Link> */}
       {error && <p style={{color:"red"}}>{error}</p>}
       {isCCFEnabled?.isCitizenConsentFormEnabled && (
       <div>
