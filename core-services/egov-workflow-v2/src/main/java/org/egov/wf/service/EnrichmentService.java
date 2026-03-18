@@ -492,7 +492,8 @@ public class EnrichmentService {
 					.stream().collect(Collectors.toList());
 
 			UserSearchRequest request = new UserSearchRequest();
-			request.setTenantId(workflowConfig.getStateLevelTenantId());
+//			request.setTenantId(workflowConfig.getStateLevelTenantId());
+			request.setTenantId(tenantId);
 			request.setRoleCodes(Arrays.asList(assigneeRole));
 			request.setActive(true);
 			request.setUuid(userUuids);
@@ -516,7 +517,8 @@ public class EnrichmentService {
 //				});
 //			} else {
 				UserSearchRequest request = new UserSearchRequest();
-				request.setTenantId(workflowConfig.getStateLevelTenantId());
+//				request.setTenantId(workflowConfig.getStateLevelTenantId());
+				request.setTenantId(tenantId);
 				request.setRoleCodes(Arrays.asList(assigneeRole));
 				request.setActive(true);
 
