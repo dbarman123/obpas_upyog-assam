@@ -19,6 +19,7 @@ COPY ${WORK_DIR} .
 RUN ls -lah
 
 #RUN node web/envs.js
+RUN yarn config set ignore-engines true
 RUN cd web/ \
     && node envs.js \
     && node -e 'console.log(v8.getHeapStatistics().heap_size_limit/(16384*16384))' \
