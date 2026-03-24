@@ -11,6 +11,7 @@ import org.egov.common.contract.request.User;
 import org.egov.encryption.EncryptionService;
 import org.egov.encryption.audit.AuditService;
 import org.egov.tracer.model.CustomException;
+import org.egov.user.domain.model.UserSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -178,6 +179,25 @@ public class EncryptionDecryptionUtil {
                 .type(userInfo.getType()).mobileNumber(userInfo.getMobileNumber()).emailId(userInfo.getEmailId())
                 .roles(newRoleList).tenantId(userInfo.getTenantId()).uuid(userInfo.getUuid()).build();
         return newuserInfo;
+    }
+
+    public <T> T encryptObjectByTenentId(Object objectToEncrypt, String key, Class<T> classType, String tenantId) {
+        try {
+            if (objectToEncrypt == null) {
+                return null;
+            }
+            T encryptedObject = encryptionService.encryptJson(objectToEncrypt, key, tenantId, classType);
+            if (encryptedObject == null) {
+                throw new CustomException("ENCRYPTION_NULL_ERROR", "Null object found on performing encryption");
+            }
+            return encryptedObject;
+        } catch (IOException | HttpClientErrorException | HttpServerErrorException | ResourceAccessException e) {
+            log.error("Error occurred while encrypting", e);
+            throw new CustomException("ENCRYPTION_ERROR", "Error occurred in encryption process");
+        } catch (Exception e) {
+            log.error("Unknown Error occurred while encrypting", e);
+            throw new CustomException("UNKNOWN_ERROR", "Unknown error occurred in encryption process");
+        }
     }
 
 }
