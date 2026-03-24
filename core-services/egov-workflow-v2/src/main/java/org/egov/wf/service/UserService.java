@@ -140,6 +140,42 @@ public class UserService {
         return  d.getTime();
     }
 
+    /**
+     * Calls search api of user to fetch the user for the given uuid
+     * @param uuids The list of uuid of the user's
+     * @return OwnerInfo of the user with the given uuid
+     */
+	public Map<String, User> searchUserDetails(RequestInfo requestInfo, UserSearchRequest userSearchRequest) {
+        
+        StringBuilder url = new StringBuilder(config.getUserHost());
+        url.append(config.getUserSearchEndpoint());
+        UserDetailResponse userDetailResponse = userCall(userSearchRequest,url);
+        if(CollectionUtils.isEmpty(userDetailResponse.getUser()))
+            throw new CustomException("INVALID USER","No user found for the userSearchRequest: " + userSearchRequest);
+        Map<String,User> idToUserMap = new HashMap<>();
+        userDetailResponse.getUser().forEach(user -> {
+            idToUserMap.put(user.getUuid(),user);
+        });
+        return idToUserMap;
+    }
+	public Map<String, User> searchUserByRegistrtaionNumber(RequestInfo requestInfo, String registrationNumber) {
+		UserSearchRequest userSearchRequest = new UserSearchRequest();
+		userSearchRequest.setRequestInfo(requestInfo);
+		userSearchRequest.setRegistrationNumber(registrationNumber);
+		userSearchRequest.setSort(Collections.singletonList("createddate"));
+		StringBuilder url = new StringBuilder(config.getUserHost());
+		url.append(config.getUserSearchEndpoint());
+		UserDetailResponse userDetailResponse = userCall(userSearchRequest, url);
+		if (CollectionUtils.isEmpty(userDetailResponse.getUser()))
+			throw new CustomException("INVALID USER",
+					"No user found for the registrationNumber: " + registrationNumber);
+		Map<String, User> idToUserMap = new HashMap<>();
+		userDetailResponse.getUser().forEach(user -> {
+			idToUserMap.put(user.getUuid(), user);
+		});
+		return idToUserMap;
+	}
+
 
 
 
