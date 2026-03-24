@@ -174,7 +174,7 @@ export const ScrutinyFormService = {
         plan?.blocks?.[0]?.building?.floors?.map((f, i) => {
           const occ = f?.occupancies?.[0] || {};
           return {
-            label: f?.name ? f.name : `Floor ${f?.number != null ? f.number : i + 1}`,
+            label: f?.name || `Floor ${f?.number ?? i + 1}`,
             existing: occ?.builtUpArea || "",
             proposed: occ?.proposed || "",
             total: occ?.total || "",
@@ -182,10 +182,10 @@ export const ScrutinyFormService = {
         }) || [];
 
       const sanitaryDetails = [
-        { description: "NUMBER OF URINALS", total: plan?.totalUrinals != null ? plan.totalUrinals : 0 },
-        { description: "NUMBER OF BATHROOMS", total: plan?.totalBathrooms != null ? plan.totalBathrooms : 0 },
-        { description: "NUMBER OF LATRINES", total: plan?.totalLatrines != null ? plan.totalLatrines : 0 },
-        { description: "NUMBER OF KITCHENS", total: plan?.totalKitchens != null ? plan.totalKitchens : 0 },
+        { description: "NUMBER OF URINALS", total: plan?.totalUrinals ?? 0 },
+        { description: "NUMBER OF BATHROOMS", total: plan?.totalBathrooms ?? 0 },
+        { description: "NUMBER OF LATRINES", total: plan?.totalLatrines ?? 0 },
+        { description: "NUMBER OF KITCHENS", total: plan?.totalKitchens ?? 0 },
       ];
 
       const form23B = {
