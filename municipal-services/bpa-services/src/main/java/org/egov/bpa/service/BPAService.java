@@ -28,6 +28,7 @@ import org.egov.bpa.web.model.CalculationReq;
 import org.egov.bpa.web.model.CalulationCriteria;
 import org.egov.bpa.web.model.Floor;
 import org.egov.bpa.web.model.Workflow;
+import org.egov.bpa.web.model.NOC.enums.ApplicationStatus;
 import org.egov.bpa.web.model.idgen.IdResponse;
 import org.egov.bpa.web.model.landInfo.LandInfo;
 import org.egov.bpa.web.model.landInfo.LandSearchCriteria;
@@ -462,9 +463,13 @@ public class BPAService {
         
         Object mdmsStateData = mdmsCacheService.getMdmsData(requestInfo, stateTenantId);
 
-        // Validate action for pending NOC applications if not approved then update not allowed
-        bpaValidator.validateActionForPendingNoc(bpaRequest);
-
+        if (ApplicationStatus.isValid(bpaRequest.getBPA().getStatus())) {
+        	ApplicationStatus appStatus = ApplicationStatus.valueOf(bpaRequest.getBPA().getStatus());
+        	if(ApplicationStatus.contains(appStatus)) {
+        		// Validate action for pending NOC applications if not approved then update not allowed
+        		bpaValidator.validateActionForPendingNoc(bpaRequest);
+        	}
+        }
         // Validate the update request
         bpaValidator.validateUpdate(bpaRequest, mdmsTenantData, mdmsStateData);
 

@@ -51,5 +51,17 @@ public class WorkflowConstants {
     public static final String AUTO_ESC_EMPLOYEE_ROLE_CODE = "AUTO_ESCALATE";
     
     public static final String  FSM_MODULE="FSM";
+    
+    public static final String INTERNALMICROSERVICEROLE_NAME = "Internal Microservice Role";
+
+	public static final String INTERNALMICROSERVICEROLE_CODE = "INTERNAL_MICROSERVICE_ROLE";
+
+	public static final String INTERNALMICROSERVICEUSER_NAME = "Internal Microservice User";
+
+	public static final String INTERNALMICROSERVICEUSER_USERNAME = "INTERNAL_USER";
+
+	public static final String INTERNALMICROSERVICEUSER_MOBILENO = "9999999999";
+
+	public static final String INTERNALMICROSERVICEUSER_TYPE = "SYSTEM";
 
 }

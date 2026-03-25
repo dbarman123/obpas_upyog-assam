@@ -197,10 +197,14 @@ public class UserService {
 
     public List<org.egov.user.domain.model.User> searchUsers(UserSearchCriteria searchCriteria,
                                                              boolean isInterServiceCall, RequestInfo requestInfo) {
-
+    	String tenantId = null;
+    	 
+    	if (searchCriteria.getTenantId() != null && !searchCriteria.getTenantId().isEmpty()) {
+    	    tenantId = searchCriteria.getTenantId();
+    	}
         searchCriteria.validate(isInterServiceCall);
 
-        searchCriteria.setTenantId(getStateLevelTenantForCitizen(searchCriteria.getTenantId(), searchCriteria.getType()));
+        searchCriteria.setTenantId(getStateLevelTenantForCitizen(tenantId, searchCriteria.getType()));
 
             String altmobnumber = null;
 
@@ -208,8 +212,11 @@ public class UserService {
                 altmobnumber = searchCriteria.getMobileNumber();
             }
 
-            searchCriteria = encryptionDecryptionUtil.encryptObject(searchCriteria, "User", UserSearchCriteria.class);
-
+            if (tenantId != null && !tenantId.isEmpty()) {
+            	searchCriteria = encryptionDecryptionUtil.encryptObjectByTenentId(searchCriteria, "User", UserSearchCriteria.class,tenantId);
+            }else {
+            	searchCriteria = encryptionDecryptionUtil.encryptObject(searchCriteria, "User", UserSearchCriteria.class);
+            }
             if (altmobnumber != null) {
                 searchCriteria.setAlternatemobilenumber(altmobnumber);
             }
