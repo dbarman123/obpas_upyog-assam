@@ -204,7 +204,7 @@ public class UserService {
     	}
         searchCriteria.validate(isInterServiceCall);
 
-        searchCriteria.setTenantId(getStateLevelTenantForCitizen(searchCriteria.getTenantId(), searchCriteria.getType()));
+        searchCriteria.setTenantId(getStateLevelTenantForCitizen(tenantId, searchCriteria.getType()));
 
             String altmobnumber = null;
 
