@@ -110,6 +110,9 @@ public class ProcessInstance   {
 
         @JsonProperty("rating")
         private Integer rating = null;
+        
+        @JsonProperty("assignee")
+        private User assignee;
 
         @JsonProperty("escalated")
         private Boolean escalated = false;
