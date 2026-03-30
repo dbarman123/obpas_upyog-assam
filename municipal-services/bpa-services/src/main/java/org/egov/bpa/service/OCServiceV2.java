@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -15,7 +16,6 @@ import org.egov.bpa.config.BPAConfiguration;
 import org.egov.bpa.repository.IdGenRepository;
 import org.egov.bpa.repository.OCRepository;
 import org.egov.bpa.repository.ServiceRequestRepository;
-import org.egov.bpa.util.BPAConstants;
 import org.egov.bpa.util.BPAErrorConstants;
 import org.egov.bpa.util.BPAUtil;
 import org.egov.bpa.util.OCErrorConstants;
@@ -26,9 +26,13 @@ import org.egov.bpa.web.model.OC;
 import org.egov.bpa.web.model.OCRequest;
 import org.egov.bpa.web.model.OCSearchCriteria;
 import org.egov.bpa.web.model.RequestInfoWrapper;
+import org.egov.bpa.web.model.Workflow;
 import org.egov.bpa.web.model.idgen.IdResponse;
 import org.egov.bpa.web.model.landInfo.LandInfo;
 import org.egov.bpa.web.model.landInfo.LandSearchCriteria;
+import org.egov.bpa.web.model.workflow.BusinessService;
+import org.egov.bpa.workflow.WorkflowIntegrator;
+import org.egov.bpa.workflow.WorkflowService;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.utils.MultiStateInstanceUtil;
 import org.egov.tracer.model.CustomException;
@@ -37,7 +41,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +82,13 @@ public class OCServiceV2 {
 	
 	@Autowired
 	private MdmsCacheService mdmsCacheService;
+	
+	@Autowired
+    private WorkflowIntegrator wfIntegrator;
+	
+	@Autowired
+	private WorkflowService workflowService;
+
 
 	public OC createOC(OCRequest ocRequest) {
 		if (null != ocRequest.getOc()) {
@@ -103,9 +113,11 @@ public class OCServiceV2 {
 
 			enrichmentService.enrichOCCreateRequest(ocRequest, null);
 
-			// wfIntegrator.callWorkFlow(ocRequest);
 			log.info("OC Request:: {}", ocRequest);
 			ocRepository.save(ocRequest);
+			
+			// wfIntegrator.callWorkFlow(ocRequest);
+			wfIntegrator.callWorkFlowForOc(ocRequest);
 		}
 		return ocRequest.getOc();
 	}
@@ -114,9 +126,37 @@ public class OCServiceV2 {
 
 		validateUpdateOC(ocRequest);
 
+		OC bpa = ocRequest.getOc();
+
+		BusinessService businessService = workflowService.getBusinessService(bpa.getTenantId(),bpa.getBusinessService(), ocRequest.getRequestInfo(),
+				bpa.getApplicationNo());
+
+		OC existingOc = getOcWithOcId(ocRequest);
+
 		enrichOCUpdateRequest(ocRequest);
 
 		ocRepository.update(ocRequest);
+
+		//workflow
+		ocRequest.getOc().setAuditDetails(existingOc.getAuditDetails());
+
+		String action = Optional.ofNullable(bpa.getWorkflow()).map(Workflow::getAction).orElse("");
+
+		switch (action.toUpperCase()) {
+
+		case "FORWARD":
+			enrichOCUpdateRequest(ocRequest);
+			wfIntegrator.callWorkFlowForOc(ocRequest);
+			ocRepository.update(ocRequest);
+			//landService.updateLandInfo(bpaRequest);
+			break;
+
+		default:
+			enrichOCUpdateRequest(ocRequest);
+			wfIntegrator.callWorkFlowForOc(ocRequest);
+			ocRepository.update(ocRequest);
+			break;
+		}
 
 		return ocRequest.getOc();
 	}
@@ -154,7 +194,7 @@ public class OCServiceV2 {
 		getOcWithOcId(ocRequest);
 	}
 
-	private void getOcWithOcId(@Valid OCRequest ocRequest) {
+	private OC getOcWithOcId(@Valid OCRequest ocRequest) {
 
 		OCSearchCriteria criteria = OCSearchCriteria.builder().id(ocRequest.getOc().getId())
 				.tenantId(ocRequest.getOc().getTenantId()).build();
@@ -165,6 +205,7 @@ public class OCServiceV2 {
 			throw new CustomException(OCErrorConstants.UPDATE_ERROR, 
 					"Failed to Update the Application, Found None or multiple applications!");
 		}
+		return  ocSearchResult.get(0);
 	}
 
 	public List<OC> searchOC(OCSearchCriteria criteria, RequestInfo requestInfo) {

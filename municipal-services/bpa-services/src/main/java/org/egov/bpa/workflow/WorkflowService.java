@@ -16,6 +16,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -76,8 +77,8 @@ public class WorkflowService {
 	 *            The RequestInfo object of the request
 	 * @return BusinessService for the the given tenantId
 	 */
-	public BusinessService getBusinessService(BPA bpa, RequestInfo requestInfo, String applicationNo) {
-		StringBuilder url = getSearchURLWithParams(bpa, true, null);
+	public BusinessService getBusinessService(String tenentId,String businessService, RequestInfo requestInfo, String applicationNo) {
+		StringBuilder url = getSearchURLWithParams(tenentId,businessService, true, null);
 		RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
 		Object result = serviceRequestRepository.fetchResult(url, requestInfoWrapper);
 		BusinessServiceResponse response = null;
@@ -86,7 +87,10 @@ public class WorkflowService {
 		} catch (IllegalArgumentException e) {
 			throw new CustomException(BPAErrorConstants.PARSING_ERROR, "Failed to parse response of calculate");
 		}
-		return response.getBusinessServices().get(0);
+		if(!CollectionUtils.isEmpty(response.getBusinessServices())) {
+			return response.getBusinessServices().get(0);
+		}
+		return null;
 	}
 
 	/**
@@ -96,7 +100,7 @@ public class WorkflowService {
 	 *            The tenantId for which url is generated
 	 * @return The search url
 	 */
-	private StringBuilder getSearchURLWithParams(BPA bpa, boolean businessService, String applicationNo) {
+	private StringBuilder getSearchURLWithParams(String tenentId,String modelBusinessService, boolean businessService, String applicationNo) {
 		StringBuilder url = new StringBuilder(config.getWfHost());
 		if (businessService) {
 			url.append(config.getWfBusinessServiceSearchPath());
@@ -104,10 +108,10 @@ public class WorkflowService {
 			url.append(config.getWfProcessPath());
 		}
 		url.append("?tenantId=");
-		url.append(bpa.getTenantId());
+		url.append(tenentId);
 		if (businessService) {
 				url.append("&businessServices=");
-				url.append(bpa.getBusinessService());
+				url.append(modelBusinessService);
 		} else {
 			url.append("&businessIds=");
 			url.append(applicationNo);
