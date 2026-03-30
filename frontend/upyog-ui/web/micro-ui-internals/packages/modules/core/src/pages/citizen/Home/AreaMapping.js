@@ -65,8 +65,15 @@ const AreaMapping = () => {
     };
     
     Digit.SessionStorage.set("CITIZEN.AREA.MAPPING", areaMappingStep);
-     // Set citizen login flag (not RTP login) in session so that we determine the user type throughout the application and hide Login as RTP button
+    
+    // Set login type flags based on the selected login type
+    const loginType = Digit.SessionStorage.get("loginType");
+    if (loginType === "RTP") {
+      Digit.SessionStorage.set("isRTPLogin", true);
+    } else if (loginType === "CITIZEN") {
       Digit.SessionStorage.set("isRTPLogin", false);
+    }
+    // For EMPLOYEE login type, we don't set isRTPLogin as it's handled differently
     
     // Set the selected tenant
     if (concernedAuthority?.code) {
@@ -88,7 +95,7 @@ const AreaMapping = () => {
             <span>{t("BPA_AREA_MAPPING")}</span>
           </CardHeader>
           
-          <Link 
+          {/* <Link 
             to={`/upyog-ui/citizen/rtp/select-location`}
             style={{
               position: "absolute",
@@ -98,7 +105,7 @@ const AreaMapping = () => {
             }}
           >
             <LinkButton label={t("BPA_RTP_LOGIN")} />
-          </Link>
+          </Link> */}
         </div>
         
         <CommonAreaMapping
