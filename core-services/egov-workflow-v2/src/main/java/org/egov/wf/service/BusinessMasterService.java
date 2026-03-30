@@ -15,6 +15,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -95,6 +96,7 @@ public class BusinessMasterService {
     }
     
     public Long getMaxBusinessServiceSla(ProcessInstanceSearchCriteria criteria) {
+    	Long maxSla = 0L;
         BusinessServiceSearchCriteria searchCriteria = new BusinessServiceSearchCriteria();
         String tenantId = criteria.getTenantId();
         searchCriteria.setTenantId(tenantId);
@@ -102,7 +104,9 @@ public class BusinessMasterService {
         List<BusinessService> businessServices = repository.getBusinessServices(searchCriteria);
         enrichmentService.enrichTenantIdForStateLevel(tenantId,businessServices);
 
-        Long maxSla = businessServices.get(0).getBusinessServiceSla();
+        if(!CollectionUtils.isEmpty(businessServices)) {
+        	maxSla = businessServices.get(0).getBusinessServiceSla();
+        }
         return maxSla;
     }
 

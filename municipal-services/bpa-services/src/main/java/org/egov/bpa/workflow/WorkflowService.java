@@ -7,6 +7,7 @@ import org.egov.bpa.config.BPAConfiguration;
 import org.egov.bpa.repository.ServiceRequestRepository;
 import org.egov.bpa.util.BPAConstants;
 import org.egov.bpa.util.BPAErrorConstants;
+import org.egov.bpa.util.ServiceType;
 import org.egov.bpa.web.model.*;
 import org.egov.bpa.web.model.workflow.BusinessService;
 import org.egov.bpa.web.model.workflow.BusinessServiceResponse;
@@ -15,6 +16,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,6 +56,11 @@ public class WorkflowService {
 		BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.GMDA, BuildingPermitAuthorityEnum.GRAM_PANCHAYAT), "BPA_GMDA_GP");
 	}
 
+	private static final Map<AuthorityKey, String> OC_BUSINESS_SERVICE_MAP = new HashMap<>();
+	static {
+		OC_BUSINESS_SERVICE_MAP.put(new AuthorityKey(PlanningPermitAuthorityEnum.GMDA, BuildingPermitAuthorityEnum.GMC), "OC_GMDA_GMC");
+	}
+	
 	@Autowired
 	public WorkflowService(BPAConfiguration config, ServiceRequestRepository serviceRequestRepository,
 			ObjectMapper mapper) {
@@ -71,8 +78,8 @@ public class WorkflowService {
 	 *            The RequestInfo object of the request
 	 * @return BusinessService for the the given tenantId
 	 */
-	public BusinessService getBusinessService(BPA bpa, RequestInfo requestInfo, String applicationNo) {
-		StringBuilder url = getSearchURLWithParams(bpa, true, null);
+	public BusinessService getBusinessService(String tenentId,String businessService, RequestInfo requestInfo, String applicationNo) {
+		StringBuilder url = getSearchURLWithParams(tenentId,businessService, true, null);
 		RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
 		Object result = serviceRequestRepository.fetchResult(url, requestInfoWrapper);
 		BusinessServiceResponse response = null;
@@ -81,7 +88,10 @@ public class WorkflowService {
 		} catch (IllegalArgumentException e) {
 			throw new CustomException(BPAErrorConstants.PARSING_ERROR, "Failed to parse response of calculate");
 		}
-		return response.getBusinessServices().get(0);
+		if(!CollectionUtils.isEmpty(response.getBusinessServices())) {
+			return response.getBusinessServices().get(0);
+		}
+		return null;
 	}
 
 	/**
@@ -91,7 +101,7 @@ public class WorkflowService {
 	 *            The tenantId for which url is generated
 	 * @return The search url
 	 */
-	private StringBuilder getSearchURLWithParams(BPA bpa, boolean businessService, String applicationNo) {
+	private StringBuilder getSearchURLWithParams(String tenentId,String modelBusinessService, boolean businessService, String applicationNo) {
 		StringBuilder url = new StringBuilder(config.getWfHost());
 		if (businessService) {
 			url.append(config.getWfBusinessServiceSearchPath());
@@ -99,10 +109,10 @@ public class WorkflowService {
 			url.append(config.getWfProcessPath());
 		}
 		url.append("?tenantId=");
-		url.append(bpa.getTenantId());
+		url.append(tenentId);
 		if (businessService) {
 				url.append("&businessServices=");
-				url.append(bpa.getBusinessService());
+				url.append(modelBusinessService);
 		} else {
 			url.append("&businessIds=");
 			url.append(applicationNo);
@@ -172,7 +182,7 @@ public class WorkflowService {
 	 * @param areaMappingDetail The AreaMappingDetail containing the permit authorities.
 	 * @return The determined business service or null if no valid combination is found.
 	 */
-	public String determineBusinessService(AreaMappingDetail areaMappingDetail) {
+	public String determineBusinessService(AreaMappingDetail areaMappingDetail, ServiceType serviceType) {
 		PlanningPermitAuthorityEnum planning = areaMappingDetail.getPlanningPermitAuthority();
 		BuildingPermitAuthorityEnum building = areaMappingDetail.getBuildingPermitAuthority();
 
@@ -186,7 +196,16 @@ public class WorkflowService {
 
 		log.debug("Evaluating business service with PlanningAuthority: {} and BuildingAuthority: {}", planning, building);
 
-		String result = BUSINESS_SERVICE_MAP.get(new AuthorityKey(planning, building));
+		String result = null;
+		
+		switch (serviceType) {
+		case BPA_SERVICE:
+			result = BUSINESS_SERVICE_MAP.get(new AuthorityKey(planning, building));
+			break;
+		case OC_SERVICE:
+			result = OC_BUSINESS_SERVICE_MAP.get(new AuthorityKey(planning, building));
+			break;
+		}
 
 		if (result != null) {
 			log.info("Matched business service: {}", result);

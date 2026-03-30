@@ -56,7 +56,6 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.VerticalAlignment;
-
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 
@@ -487,7 +486,7 @@ public class BPAService {
      //   String applicationType = edcrResponse.get(BPAConstants.APPLICATIONTYPE);
      //   log.debug("applicationType is " + applicationType);
 
-        BusinessService businessService = workflowService.getBusinessService(bpa, bpaRequest.getRequestInfo(),
+        BusinessService businessService = workflowService.getBusinessService(bpa.getTenantId(), bpa.getBusinessService(), bpaRequest.getRequestInfo(),
                 bpa.getApplicationNo());
 
         List<BPA> searchResult = getBPAWithBPAId(bpaRequest);

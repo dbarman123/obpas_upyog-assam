@@ -1,14 +1,16 @@
 package org.egov.bpa.workflow;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedList;
 
 import org.egov.bpa.config.BPAConfiguration;
 import org.egov.bpa.util.BPAErrorConstants;
 import org.egov.bpa.web.model.BPA;
 import org.egov.bpa.web.model.BPARequest;
+import org.egov.bpa.web.model.OC;
+import org.egov.bpa.web.model.OCRequest;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -217,4 +219,79 @@ public class WorkflowIntegrator {
 
 		log.info("RTP reassignment completed successfully for BPA: {}", bpa.getApplicationNo());
 	}
+	
+	public void callWorkFlowForOc(OCRequest ocRequest) {
+		log.info("Integrating with workflow for OC: {}", ocRequest.getOc().getApplicationNo());
+		String wfTenantId = ocRequest.getOc().getTenantId();
+		JSONArray array = new JSONArray();
+		OC oc = ocRequest.getOc();
+		JSONObject obj = new JSONObject();
+		obj.put(BUSINESSIDKEY, oc.getApplicationNo());
+		obj.put(TENANTIDKEY, wfTenantId);
+		obj.put(BUSINESSSERVICEKEY, oc.getBusinessService());
+		obj.put(MODULENAMEKEY, MODULENAMEVALUE);
+		obj.put(ACTIONKEY, oc.getWorkflow().getAction());
+		obj.put(COMMENTKEY, oc.getWorkflow().getComments());
+
+		if (!CollectionUtils.isEmpty(oc.getWorkflow().getAssignes())) {
+			List<Map<String, String>> uuidmaps = new LinkedList<>();
+			oc.getWorkflow().getAssignes().forEach(assignee -> {
+				Map<String, String> uuidMap = new HashMap<>();
+				uuidMap.put(UUIDKEY, assignee);
+				uuidmaps.add(uuidMap);
+			});
+			obj.put(ASSIGNEEKEY, uuidmaps);
+		}
+
+		obj.put(DOCUMENTSKEY, oc.getWorkflow().getVarificationDocuments());
+		array.add(obj);
+		JSONObject workFlowRequest = new JSONObject();
+		workFlowRequest.put(REQUESTINFOKEY, ocRequest.getRequestInfo());
+		workFlowRequest.put(WORKFLOWREQUESTARRAYKEY, array);
+		String response = null;
+		try {
+			response = rest.postForObject(
+					config.getWfHost().concat(config.getWfTransitionPath()),
+					workFlowRequest,
+					String.class
+					);
+
+		} catch (HttpClientErrorException e) {
+			String responseBody = e.getResponseBodyAsString();
+			log.error("Workflow API returned HttpClientErrorException: {}", responseBody, e);
+
+			try {
+				DocumentContext responseContext = JsonPath.parse(responseBody);
+				List<Object> errors = responseContext.read("$.Errors");
+				throw new CustomException(BPAErrorConstants.EG_WF_ERROR, errors.toString());
+			} catch (PathNotFoundException pnfe) {
+				String msg = "Unable to read the json path in error object: " + pnfe.getMessage();
+				log.error(BPAErrorConstants.EG_BPA_WF_ERROR_KEY_NOT_FOUND + " - {}", msg, pnfe);
+				throw new CustomException(BPAErrorConstants.EG_BPA_WF_ERROR_KEY_NOT_FOUND, msg);
+			}
+
+		} catch (Exception e) {
+			String msg = "Exception occurred while integrating with workflow: " + e.getMessage();
+			log.error(BPAErrorConstants.EG_WF_ERROR + " - {}", msg, e);
+			throw new CustomException(BPAErrorConstants.EG_WF_ERROR, msg);
+		}
+
+
+		/*
+		 * on success result from work-flow read the data and set the status
+		 * back to BPA object
+		 */
+		DocumentContext responseContext = JsonPath.parse(response);
+		List<Map<String, Object>> responseArray = responseContext.read(PROCESSINSTANCESJOSNKEY);
+		Map<String, String> idStatusMap = new HashMap<>();
+		responseArray.forEach(object -> {
+
+			DocumentContext instanceContext = JsonPath.parse(object);
+			idStatusMap.put(instanceContext.read(BUSINESSIDJOSNKEY), instanceContext.read(STATUSJSONKEY));
+		});
+		// setting the status back to BPA object from wf response
+		oc.setStatus(idStatusMap.get(oc.getApplicationNo()));
+		log.info("Workflow integration completed for OC: {} with status: {}", oc.getApplicationNo(), oc.getStatus());
+
+}
 }

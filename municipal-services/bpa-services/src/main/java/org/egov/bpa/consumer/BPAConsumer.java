@@ -28,7 +28,8 @@ public class BPAConsumer {
 	        "${persister.update.buildingplan.topic}",        // Updates building plan application
 	        "${persister.update.allbuildingplan.topic}",     // Updates building plan application in 'EDIT' action of workflow
 	        // "${persister.update.buildingplan.workflow.topic}", // Workflow-related updates
-	        "${persister.save.buildingplan.topic}"           // Saves new building plan application
+	        "${persister.save.buildingplan.topic}",          // Saves new building plan application
+	        "${persister.save.oc.topic}"                     // saves new oc application
 	})
 	public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 		ObjectMapper mapper = new ObjectMapper();

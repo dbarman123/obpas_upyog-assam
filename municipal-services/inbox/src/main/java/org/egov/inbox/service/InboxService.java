@@ -84,9 +84,12 @@ public class InboxService {
 		ProcessInstanceSearchCriteria processCriteria = criteria.getProcessSearchCriteria();
 		HashMap moduleSearchCriteria = criteria.getModuleSearchCriteria();
 		processCriteria.setTenantId(criteria.getTenantId());
-
+		String moduleName = "";
+		
 		Integer totalCount = 0;
-		log.info(processCriteria.getModuleName().toString());
+		if(!StringUtils.isEmpty(processCriteria.getModuleName())) {
+			log.info(processCriteria.getModuleName().toString());
+		}
 		totalCount = workflowService.getProcessCount(criteria.getTenantId(), requestInfo, processCriteria);
 		Integer nearingSlaProcessCount = 0;
 			nearingSlaProcessCount = workflowService.getNearingSlaProcessCount(criteria.getTenantId(), requestInfo,
@@ -110,16 +113,28 @@ public class InboxService {
 		List<String> roles = requestInfo.getUserInfo().getRoles().stream().map(Role::getCode)
 				.collect(Collectors.toList());
 
-		String moduleName = processCriteria.getModuleName();
+		if(!StringUtils.isEmpty(processCriteria.getModuleName())) {
+			moduleName = processCriteria.getModuleName();
+		}
+
 		List<HashMap<String, Object>> statusCountMap = workflowService.getProcessStatusCount(requestInfo,
 				processCriteria);
-		processCriteria.setModuleName(moduleName);
+		if(!StringUtils.isEmpty(moduleName)) {
+			processCriteria.setModuleName(moduleName);
+		}
 		processCriteria.setStatus(inputStatuses);
 		processCriteria.setAssignee(assigneeUuid.toString());
-		List<String> businessServiceName = processCriteria.getBusinessService();
+//		List<String> businessServiceName = processCriteria.getBusinessService();
+		
+		//divided bpa & oc services to do operation separately
+		List<List<String>> businessServiceNameList = fetchBusinessServiceForBpa(processCriteria.getBusinessService());
+
 		List<Inbox> inboxes = new ArrayList<Inbox>();
 		InboxResponse response = new InboxResponse();
 		JSONArray businessObjects = null;
+		for(List<String> businessServiceName : businessServiceNameList) {
+			processCriteria.setBusinessService(businessServiceName);
+
 		Map<String, String> srvMap = fetchAppropriateServiceMap(businessServiceName, moduleName);
 		if (CollectionUtils.isEmpty(businessServiceName)) {
 			throw new CustomException(ErrorConstants.MODULE_SEARCH_INVLAID,
@@ -136,9 +151,11 @@ public class InboxService {
 			for (String businessSrv : businessServiceName) {
 				BusinessService businessService = workflowService.getBusinessService(criteria.getTenantId(),
 						requestInfo, businessSrv);
+				if(businessService != null) {
 				bussinessSrvs.add(businessService);
 				businessServiceSlaMap.put(businessService.getBusinessService(),
 						businessService.getBusinessServiceSla());
+				}
 			}
 			HashMap<String, String> StatusIdNameMap = workflowService.getActionableStatusesForRole(requestInfo,
 					bussinessSrvs, processCriteria);
@@ -444,7 +461,7 @@ public class InboxService {
 			}
 
 		}
-
+    }
 		log.info("statusCountMap size :::: " + statusCountMap.size());
 
 		response.setTotalCount(totalCount);
@@ -456,12 +473,27 @@ public class InboxService {
 
 	private Map<String, String> fetchAppropriateServiceMap(List<String> businessServiceName, String moduleName) {
 		StringBuilder appropriateKey = new StringBuilder();
+		StringBuilder appropriateKeyForBpa = new StringBuilder();
+		StringBuilder appropriateKeyForOC = new StringBuilder();
+
 		for (String businessServiceKeys : config.getServiceSearchMapping().keySet()) {
 			if (businessServiceKeys.contains(businessServiceName.get(0))) {
 				appropriateKey.append(businessServiceKeys);
+				appropriateKeyForBpa.append(businessServiceKeys);
 				break;
 			}
 		}
+		
+//      // Get the last element in businessServiceName
+//      String lastBusinessService = businessServiceName.get(businessServiceName.size() - 1);
+//      for (String businessServiceKeys : config.getServiceSearchMapping().keySet()) {
+//              if (businessServiceKeys.contains(lastBusinessService)) {
+//                      appropriateKey.append(", ").append(businessServiceKeys);
+//                      appropriateKeyForOC.append(businessServiceKeys);
+//                      break;
+//              }
+//      }
+		
 		if (ObjectUtils.isEmpty(appropriateKey)) {
 			throw new CustomException("EG_INBOX_SEARCH_ERROR",
 					"Inbox service is not configured for the provided business services");
@@ -472,8 +504,36 @@ public class InboxService {
 					throw new CustomException("EG_INBOX_SEARCH_ERROR", "Cross module search is NOT allowed.");
 				}
 		}
+//      Map<String, String> map = buildAppropriateServiceMap(appropriateKeyForBpa,appropriateKeyForOC,config.getServiceSearchMapping());
 		return config.getServiceSearchMapping().get(appropriateKey.toString());
 	}
+
+	 private Map<String, String> buildAppropriateServiceMap(StringBuilder appropriateKeyForBpa,
+			 StringBuilder appropriateKeyForOC, Map<String, Map<String, String>> serviceSearchMapping) {
+		 // Initialize the map to store the result
+		 Map<String, String> map = new HashMap<>();
+
+		 // Fetch the value corresponding to the appropriate keys for BPA and OC
+		 String bpaKey = appropriateKeyForBpa.toString();
+		 String ocKey = appropriateKeyForOC.toString();
+
+		 // Check if the key exists in the serviceSearchMapping before adding to the map
+		 if (serviceSearchMapping.containsKey(bpaKey)) {
+			 map.put(bpaKey, serviceSearchMapping.get(bpaKey).toString());
+		 } else {
+			 // Handle the case where the key is not found (optional)
+			 map.put(bpaKey, "No matching value found for BPA key.");
+		 }
+
+		 if (serviceSearchMapping.containsKey(ocKey)) {
+			 map.put(ocKey, serviceSearchMapping.get(ocKey).toString());
+		 } else {
+			 // Handle the case where the key is not found (optional)
+			 map.put(ocKey, "No matching value found for OC key.");
+		 }
+
+		 return map;
+}
 
 	private JSONArray fetchModuleObjects(HashMap moduleSearchCriteria, List<String> businessServiceName,
 										 String tenantId, RequestInfo requestInfo, Map<String, String> srvMap, String moduleName, InboxSearchCriteria criteria) {
@@ -576,5 +636,24 @@ public class InboxService {
 		}
 		return list;
 	}
+	
+	private List<List<String>> fetchBusinessServiceForBpa(List<String> businessServiceName) {
+        // Get the last element in businessServiceName
+        String lastBusinessService = businessServiceName.get(businessServiceName.size() - 1);
+
+        // Create a new list for the last element
+        List<String> lastElementList = new ArrayList<>();
+        lastElementList.add(lastBusinessService);
+
+        // Remove the last element from the original list
+        businessServiceName.remove(businessServiceName.size() - 1);
+
+        // Create a list of lists: one with the remaining business services and one with the last business service
+        List<List<String>> resultList = new ArrayList<>();
+        resultList.add(businessServiceName); // List with all except the last element
+        resultList.add(lastElementList);     // List with just the last element
+
+        return resultList;
+    }
 
 }

@@ -1,7 +1,15 @@
 package org.egov.bpa.service;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -11,12 +19,13 @@ import org.egov.bpa.repository.ServiceRequestRepository;
 import org.egov.bpa.util.BPAConstants;
 import org.egov.bpa.util.BPAErrorConstants;
 import org.egov.bpa.util.BPAUtil;
+import org.egov.bpa.util.ServiceType;
 import org.egov.bpa.validator.MDMSValidator;
 import org.egov.bpa.web.model.AuditDetails;
 import org.egov.bpa.web.model.BPA;
 import org.egov.bpa.web.model.BPARequest;
+import org.egov.bpa.web.model.OCRequest;
 import org.egov.bpa.web.model.Workflow;
-import org.egov.bpa.web.model.edcr.RequestInfoWrapper;
 import org.egov.bpa.web.model.idgen.IdResponse;
 import org.egov.bpa.web.model.workflow.BusinessService;
 import org.egov.bpa.workflow.WorkflowIntegrator;
@@ -24,16 +33,9 @@ import org.egov.bpa.workflow.WorkflowService;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.utils.MultiStateInstanceUtil;
 import org.egov.tracer.model.CustomException;
-import org.egov.tracer.model.ServiceCallException;
-import org.json.JSONObject;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
 
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
@@ -79,6 +81,9 @@ public class EnrichmentService {
 
 	@Autowired
 	private MultiStateInstanceUtil centralInstanceUtil;
+	
+	@Autowired
+	private OCServiceV2 ocServiceV2;
 	/**
 	 * encrich create BPA Reqeust by adding audidetails and uuids
 	 *
@@ -113,7 +118,7 @@ public class EnrichmentService {
 			bpaRequest.getBPA().setBusinessService(BPAConstants.BPA_OC_MODULE_CODE);
 			bpaRequest.getBPA().setLandId(values.get("landId"));
 		}*/
-		String businessService = workflowService.determineBusinessService(bpaRequest.getBPA().getAreaMapping());
+		String businessService = workflowService.determineBusinessService(bpaRequest.getBPA().getAreaMapping(), ServiceType.BPA_SERVICE);
 		bpaRequest.getBPA().setBusinessService(businessService);
 
         if (bpaRequest.getBPA().getRiskType() != null) {
@@ -380,4 +385,33 @@ public class EnrichmentService {
 		return idResponses.get(0).getId();
 	}
 
+	public void enrichOCCreateRequest(OCRequest ocRequest, Map<String, String> edcrValues) {
+		RequestInfo requestInfo = ocRequest.getRequestInfo();
+		AuditDetails auditDetails = bpaUtil.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+		ocRequest.getOc().setAuditDetails(auditDetails);
+		ocRequest.getOc().setId(UUID.randomUUID().toString());
+		ocRequest.getOc().getAreaMapping().setId(BPAUtil.generateUUID());
+
+		Map<String, String> additionalDetails = ocRequest.getOc().getAdditionalDetails() != null
+                ? (Map<String, String>) ocRequest.getOc().getAdditionalDetails()
+                : new HashMap<String, String>();
+
+		//For the testing commented this
+		String businessService = workflowService.determineBusinessService(ocRequest.getOc().getAreaMapping(), ServiceType.OC_SERVICE);
+		ocRequest.getOc().setBusinessService(businessService);
+
+//        if (ocRequest.getOc().getRiskType() != null) {
+//            additionalDetails.put(BPAConstants.RISKTYPE, ocRequest.getBPA().getRiskType());
+//        }
+
+//		 BPA Documents
+		if (!CollectionUtils.isEmpty(ocRequest.getOc().getDocuments()))
+			ocRequest.getOc().getDocuments().stream().filter(Objects::nonNull).forEach(document -> {
+				//TODO uncomment this if this check required in future
+			//	if (document.getId() == null) {
+					document.setId(UUID.randomUUID().toString());
+			//	}
+			});
+		ocServiceV2.setIdgenIds(ocRequest);
+	}
 }
