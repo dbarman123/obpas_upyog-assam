@@ -108,4 +108,31 @@ public class SewaSetuController {
             throw new CustomException("ERROR_GETTING_APPLICATION_SUMMARY_COUNT", e.getMessage());
         }
     }
+
+    /**
+     * Fetch complete application data for Sewa Setu integration
+     * 
+     * @param request SewaSetuApplicationRequest containing application reference number and tenant ID
+     * @return SewaSetuResponse with complete initiated_data, attribute_data, and execution_data
+     */
+    @PostMapping("/_getapplicationdata")
+    public ResponseEntity<SewaSetuResponse> getCompleteApplicationData(
+            @Valid @RequestBody SewaSetuApplicationRequest request) {
+        
+        try {
+            SewaSetuResponse response = sewaSetuService.getCompleteApplicationData(
+                    request.getApplRefNo(), 
+                    request.getRequestInfo()
+            );
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+            
+        } catch (CustomException ex) {
+            throw ex;
+        } catch (Exception e) {
+            log.error("Unexpected error in getCompleteApplicationData", e);
+            throw new CustomException("ERROR_FETCHING_COMPLETE_APPLICATION_DATA", 
+                    "Error fetching complete application data: " + e.getMessage());
+        }
+    }
 }

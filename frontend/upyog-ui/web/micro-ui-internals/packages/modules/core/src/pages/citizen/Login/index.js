@@ -68,9 +68,10 @@ useEffect(() => {
   }
 }, [history]);
 
-  // Function to determine if it's RTP login, based on URL path, check the path and if it includes '/rtp-login' returns true
+  // Function to determine if it's RTP login, check loginType from session or URL path
    const isRtpLogin = () => {
-    return location.pathname.includes('/rtp-login');
+    const loginType = Digit.SessionStorage.get("loginType");
+    return loginType === "RTP" || location.pathname.includes('/rtp-login');
   };
 
 
@@ -297,11 +298,20 @@ const ePramaanRegister = async () => {
     }
   };
 
+  const handleBackButton = () => {
+    const loginType = Digit.SessionStorage.get("loginType");
+    if (loginType === "RTPlk") {
+      history.push("/upyog-ui/citizen/login-selection");
+    } else {
+      history.goBack();
+    }
+  };
+
   return (
     <div className="citizen-form-wrapper">
       <Switch>
         <AppContainer>
-          <BackButton />
+          <BackButton onClick={handleBackButton} />
           <Route path={`${path}`} exact>
             {isRtpLogin() ? (
               <SelectRtpMobileNumber

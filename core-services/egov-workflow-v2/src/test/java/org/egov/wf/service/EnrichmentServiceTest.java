@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -18,10 +18,11 @@ import java.util.Set;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
-
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
-
+import org.egov.wf.config.WorkflowConfig;
+import org.egov.wf.repository.BusinessServiceRepository;
+import org.egov.wf.repository.WorKflowRepository;
 import org.egov.wf.util.WorkflowUtil;
 import org.egov.wf.web.models.Action;
 import org.egov.wf.web.models.AuditDetails;
@@ -32,7 +33,7 @@ import org.egov.wf.web.models.ProcessInstance;
 import org.egov.wf.web.models.ProcessInstanceSearchCriteria;
 import org.egov.wf.web.models.ProcessStateAndAction;
 import org.egov.wf.web.models.State;
-import org.junit.jupiter.api.Disabled;
+import org.egov.wf.web.models.user.UserSearchRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,15 @@ class EnrichmentServiceTest {
 
     @MockBean
     private WorkflowUtil workflowUtil;
+    
+    @MockBean
+    private WorKflowRepository worKflowRepository;
+    
+    @MockBean
+    private BusinessServiceRepository businessServiceRepository;
+    
+    @MockBean
+    private WorkflowConfig workflowConfig;
 
 
     @Test
@@ -379,7 +389,7 @@ class EnrichmentServiceTest {
         doNothing().when(auditDetails).setLastModifiedTime((Long) any());
         auditDetails.setLastModifiedTime(4L);
         when(this.workflowUtil.getAuditDetails((String) any(), (Boolean) any())).thenReturn(auditDetails);
-        when(this.userService.searchUser((RequestInfo) any(), (java.util.List<String>) any())).thenReturn(new HashMap<>());
+        when(this.userService.searchUserDetails((RequestInfo) any(), (UserSearchRequest) any())).thenReturn(new HashMap<>());
         RequestInfo requestInfo = new RequestInfo();
         requestInfo.setUserInfo(new User());
         AuditDetails auditDetails1 = new AuditDetails();
@@ -392,14 +402,17 @@ class EnrichmentServiceTest {
 
         ProcessInstance processInstance = new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
                 state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
-                new AuditDetails(), 1, true);
+                new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null);
         processInstance.setAuditDetails(auditDetails1);
         ProcessStateAndAction processStateAndAction = mock(ProcessStateAndAction.class);
         when(processStateAndAction.getProcessInstanceFromDb()).thenReturn(processInstance);
-        when(processStateAndAction.getResultantState()).thenReturn(new State());
+        when(processStateAndAction.getResultantState()).thenReturn(State.builder().isTerminateState(true).build());
         ArrayList<String> roles = new ArrayList<>();
-        when(processStateAndAction.getAction()).thenReturn(new Action("01234567-89AB-CDEF-FEDC-BA9876543210", "42",
-                "Current State", "Action", "Next State", roles, new AuditDetails(), true));
+        when(processStateAndAction.getAction()).thenReturn(
+                new Action("01234567-89AB-CDEF-FEDC-BA9876543210",
+                        "42", "Current State", "Action", "Next State",
+                        roles, new AuditDetails(), true)
+        );
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(new ProcessInstance());
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
@@ -419,7 +432,8 @@ class EnrichmentServiceTest {
         verify(this.workflowUtil).getAuditDetails((String) any(), (Boolean) any());
         verify(auditDetails).getLastModifiedTime();
         verify(auditDetails).setLastModifiedTime((Long) any());
-        verify(this.userService).searchUser((RequestInfo) any(), (java.util.List<String>) any());
+//        verify(this.userService).searchUserDetails((RequestInfo) any(), (UserSearchRequest) any());
+        verify(this.userService).searchUser((RequestInfo) any(), (List<String>) any());
         verify(processStateAndAction, atLeast(1)).getAction();
         verify(processStateAndAction, atLeast(1)).getProcessInstanceFromDb();
         verify(processStateAndAction, atLeast(1)).getProcessInstanceFromRequest();
@@ -481,7 +495,7 @@ class EnrichmentServiceTest {
         ArrayList<Action> nextActions = new ArrayList<>();
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(
                 new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name", state, "Comment", documents,
-                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true));
+                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null));
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
         doNothing().when(processStateAndAction).setProcessInstanceFromDb((ProcessInstance) any());
@@ -521,7 +535,7 @@ class EnrichmentServiceTest {
         ArrayList<Action> nextActions = new ArrayList<>();
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(
                 new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name", state, "Comment", documents,
-                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true));
+                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null));
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
         doNothing().when(processStateAndAction).setProcessInstanceFromDb((ProcessInstance) any());
@@ -563,7 +577,7 @@ class EnrichmentServiceTest {
         ArrayList<Action> nextActions = new ArrayList<>();
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(
                 new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name", state, "Comment", documents,
-                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true));
+                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null));
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
         doNothing().when(processStateAndAction).setProcessInstanceFromDb((ProcessInstance) any());
@@ -603,7 +617,7 @@ class EnrichmentServiceTest {
         ArrayList<Action> nextActions = new ArrayList<>();
         ProcessInstance processInstance = new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
                 state, "Comment", documents, assigner, userList, nextActions, 1L, 1L, "Previous Status", "Entity",
-                new AuditDetails(), 1, true);
+                new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null);
 
         ProcessStateAndAction processStateAndAction = mock(ProcessStateAndAction.class);
         when(processStateAndAction.getProcessInstanceFromDb()).thenReturn(new ProcessInstance());
@@ -1436,7 +1450,7 @@ class EnrichmentServiceTest {
         ArrayList<Action> nextActions = new ArrayList<>();
         ProcessInstance processInstance = new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
                 state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
-                new AuditDetails(), 1, true);
+                new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null);
         processInstance.setAuditDetails(auditDetails);
         ArrayList<ProcessInstance> processInstanceList = new ArrayList<>();
         processInstanceList.add(processInstance);
@@ -1456,7 +1470,7 @@ class EnrichmentServiceTest {
 
         ProcessInstance processInstance = new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
                 state, "Comment", documents, assigner, assignes, nextActions, null, 1L, "Previous Status", "Entity",
-                new AuditDetails(), 1, true);
+                new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null);
         processInstance.setAuditDetails(auditDetails);
 
         ArrayList<ProcessInstance> processInstanceList = new ArrayList<>();
@@ -1479,7 +1493,7 @@ class EnrichmentServiceTest {
 
         ProcessInstance processInstance = new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
                 state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
-                new AuditDetails(), 1, true);
+                new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null);
         processInstance.setAuditDetails(auditDetails);
 
         ArrayList<ProcessInstance> processInstanceList = new ArrayList<>();

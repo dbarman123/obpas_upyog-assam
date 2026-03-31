@@ -131,8 +131,8 @@ public class RampService_Assam extends RampService {
      */
     @Override
     public Plan validate(Plan pl) {
-        validateRampMeasurements(pl);
-        validateDARamps(pl);
+//        validateRampMeasurements(pl);
+//        validateDARamps(pl);
         return pl;
     }
 
@@ -320,19 +320,23 @@ public class RampService_Assam extends RampService {
                     rampServiceExpectedSlopeCompareFalse = rule.getRampServiceExpectedSlopeCompareFalse();
                     rampServiceMinHeightEntrance = rule.getRampServiceMinHeightEntrance();
                 }
+                
+				BigDecimal buildingHeight = block.getBuilding().getBuildingHeight();
 
-                processDARampSlopeValidation(pl, block, rampServiceValueOne, rampServiceExpectedSlopeOne,
-                        rampServiceDivideExpectedSlope, rampServiceSlopValue, scrutinyDetail1, scrutinyDetail2);
-                processRampSlopeValidation(pl, block, floor, rampServiceValueOne, rampServiceExpectedSlopeOne,
-                        rampServiceDivideExpectedSlopeOne, rampServiceSlopValue, scrutinyDetail1, scrutinyDetail8);
+				if (rampServiceBuildingHeight.compareTo(buildingHeight) <= 0) {
+					processDARampSlopeValidation(pl, block, rampServiceValueOne, rampServiceExpectedSlopeOne,
+							rampServiceDivideExpectedSlope, rampServiceSlopValue, scrutinyDetail1, scrutinyDetail2);
+					processRampSlopeValidation(pl, block, floor, rampServiceValueOne, rampServiceExpectedSlopeOne,
+							rampServiceDivideExpectedSlopeOne, rampServiceSlopValue, scrutinyDetail1, scrutinyDetail8);
 
-                processDARoomValidation(pl, block, rampServiceBuildingHeight, scrutinyDetail3);
-                
-                validateMinHeightEntrance(pl, block, rampServiceMinHeightEntrance, scrutinyDetail6);
-                
-                validateDARampDimensions(pl, block, scrutinyDetail7);
-                
-                validateRampDimensions(pl, block, floor, scrutinyDetail8);
+					processDARoomValidation(pl, block, rampServiceBuildingHeight, scrutinyDetail3);
+
+					validateMinHeightEntrance(pl, block, rampServiceMinHeightEntrance, scrutinyDetail6);
+
+					validateDARampDimensions(pl, block, scrutinyDetail7);
+
+					validateRampDimensions(pl, block, floor, scrutinyDetail8);
+				}
 
             }
         }

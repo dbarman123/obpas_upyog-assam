@@ -90,33 +90,23 @@ const Download = {
     const element = ReactDOM.findDOMNode(node.current);
 
 
-    return domtoimage.toJpeg(element, {
+    return domtoimage.toPng(element, {
       quality: 1,
       bgcolor: 'white',
-      filter:node=>!node?.className?.includes?.("divToBeHidden"),
-      style:{
-        margin:'25px'
-      }
+      filter:node=>!node?.className?.includes?.("divToBeHidden")
      }).then(function (dataUrl) {
-/*  to enable pdf
-    var htmlImage = new Image();
-      htmlImage.src = dataUrl;
-      var pdf = new jsPDF( 'l', 'pt', [element.offsetWidth, element.offsetHeight] );
-      pdf.setFontStyle?.("Bold");
-      pdf.setFontSize?.(30);
-      pdf.text?.(325, 40, 'Certificate');
-      // e(imageData, format, x, y, width, height, alias, compression, rotation)
-      pdf.addImage?.( htmlImage, 25, 50, 50, element.offsetWidth, element.offsetHeight );
-      pdf.save?.( fileName +'.pdf' );
-      */
-            changeClasses("dss-white-pre-temp",'dss-white-pre-line');
-
-     revertCss();
-     var blobData = dataURItoBlob(dataUrl);
+       var pdf = new jsPDF('p', 'pt', 'a4');
+       const imgProps = pdf.getImageProperties(dataUrl);
+       const margin = 20;
+       const pdfWidth = pdf.internal.pageSize.getWidth() - (2 * margin);
+       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+       pdf.addImage(dataUrl, 'PNG', margin, margin, pdfWidth, pdfHeight);
+       
+       changeClasses("dss-white-pre-temp",'dss-white-pre-line');
        revertCss();
        return share
-       ? resolve(new File([blobData], `${fileName}.jpeg`, { type: "image/jpeg" }))
-       : saveAs(dataUrl, `${fileName}.jpeg`)
+       ? resolve(new File([pdf.output('blob')], `${fileName}.pdf`, { type: "application/pdf" }))
+       : saveAs(pdf.output('datauristring'), `${fileName}.pdf`);
         });
     
 

@@ -157,10 +157,22 @@ public class LiftService extends FeatureProcess {
 		    Optional<LiftRequirement> matchedRule = getRequiredLiftCount(plan);
 		    if (matchedRule.isPresent()) {
 		    	LiftRequirement rule = matchedRule.get();
-		    	BigDecimal requiredLifts = rule.getPermissible();
+		    	BigDecimal requiredLifts = BigDecimal.ZERO;
 		    if (!isHighRiseLiftRequired(plan)) return;
-	
-		    boolean valid = BigDecimal.valueOf(Double.parseDouble(block.getNumberOfLifts())).compareTo(requiredLifts) >= 0;
+		    BigDecimal buildingHeight = block.getBuilding().getBuildingHeight();
+		    boolean valid = false;
+		    if(rule.getFromBuildingHeight() !=null) {
+		    	if(buildingHeight.compareTo(rule.getFromBuildingHeight())>0) {
+		    		requiredLifts = rule.getPermissible();
+		    		valid = BigDecimal.valueOf(Double.parseDouble(block.getNumberOfLifts())).compareTo(requiredLifts) >= 0;
+		    	}else {
+		    		valid = true;
+		    	}
+		    }else {
+		    	requiredLifts = rule.getPermissible();
+		    	valid = BigDecimal.valueOf(Double.parseDouble(block.getNumberOfLifts())).compareTo(requiredLifts) >= 0;
+		    }
+		   
 		    setReportOutputDetails(plan, SUBRULE_48, SUBRULE_48_DESCRIPTION,
 		            requiredLifts.toString(), block.getNumberOfLifts(),
 		            valid ? Result.Accepted.getResultVal() : Result.Not_Accepted.getResultVal(),

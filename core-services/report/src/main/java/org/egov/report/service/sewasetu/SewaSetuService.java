@@ -11,6 +11,7 @@ import org.egov.report.web.model.sewasetu.SewaSetuData;
 import org.egov.report.web.model.sewasetu.SewaSetuResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -34,32 +35,59 @@ public class SewaSetuService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Value("${state.level.tenant.id:as}")
+    private String stateTenantId;
+
     /**
-     * Fetch application details for a specific application reference number
+     * Fetch application details for a specific application reference number.
+     * Uses same flow as getCompleteApplicationData so initiated_data (including submission_location as ddrName) is populated.
      *
      * @param applRefNo   Application reference number
      * @param requestInfo Request information
-     * @return SewaSetuResponse with application details
+     * @return SewaSetuResponse with application details (initiated_data, attribute_data, execution_data)
      */
     public SewaSetuResponse getApplicationDetails(String applRefNo, RequestInfo requestInfo) {
         try {
-            List<Map<String, Object>> workflowHistory = sewaSetuRepository.fetchWorkflowHistory(applRefNo, requestInfo);
-            SewaSetuData sewaSetuData = sewaSetuTransformer.transformToSewaSetuData(applRefNo, workflowHistory);
-
-            List<SewaSetuData> dataList = new ArrayList<>();
-            dataList.add(sewaSetuData);
-
-            return SewaSetuResponse.builder()
-                    .success(true)
-                    .data(dataList)
-                    .build();
-
+            if (applRefNo == null || applRefNo.isEmpty()) {
+                throw new CustomException("INVALID_APPLICATION_NUMBER", "Application number is required");
+            }
+            List<String> applicationNumbers = new ArrayList<>();
+            applicationNumbers.add(applRefNo);
+            return fetchAndTransformApplicationData(applicationNumbers, requestInfo);
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
             log.error("Error in getApplicationDetails", e);
             throw new CustomException("ERROR_FETCHING_APPLICATION_DETAILS",
                     "Error fetching application details: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Fetch complete application data for a specific application reference number
+     *
+     * @param applRefNo   Application reference number
+     * @param requestInfo Request information
+     * @return SewaSetuResponse with complete application details (initiated_data, attribute_data, execution_data)
+     */
+    public SewaSetuResponse getCompleteApplicationData(String applRefNo, RequestInfo requestInfo) {
+        try {
+            if (applRefNo == null || applRefNo.isEmpty()) {
+                throw new CustomException("INVALID_APPLICATION_NUMBER", "Application number is required");
+            }
+
+            List<String> applicationNumbers = new ArrayList<>();
+            applicationNumbers.add(applRefNo);
+
+            // Reuse existing logic from datewise applications
+            return fetchAndTransformApplicationData(applicationNumbers, requestInfo);
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error in getCompleteApplicationData", e);
+            throw new CustomException("ERROR_FETCHING_COMPLETE_APPLICATION_DATA",
+                    "Error fetching complete application data: " + e.getMessage());
         }
     }
 
@@ -82,17 +110,53 @@ public class SewaSetuService {
                         .build();
             }
 
-            // Step 2: Fetch initiated data for all applications (with decryption when requestInfo has userInfo)
+            // Reuse common method
+            return fetchAndTransformApplicationData(applicationNumbers, requestInfo);
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error in getApplicationDetailsBySubmissionDate", e);
+            throw new CustomException("ERROR_FETCHING_APPLICATION_DETAILS_BY_DATE",
+                    "Error fetching application details by submission date: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Common method to fetch and transform application data
+     *
+     * @param applicationNumbers List of application numbers
+     * @param requestInfo       Request information
+     * @return SewaSetuResponse with complete application details
+     */
+    private SewaSetuResponse fetchAndTransformApplicationData(List<String> applicationNumbers, RequestInfo requestInfo) {
+        try {
+            if (applicationNumbers == null || applicationNumbers.isEmpty()) {
+                return SewaSetuResponse.builder()
+                        .success(true)
+                        .data(new ArrayList<>())
+                        .build();
+            }
+
+            // Fetch initiated data
             List<Map<String, Object>> initiatedDataList = sewaSetuRepository.fetchInitiatedData(applicationNumbers, requestInfo);
 
-            // Step 3: Fetch attribute data for all applications (with decryption when requestInfo has userInfo)
+            // If no data found, return empty response
+            if (initiatedDataList == null || initiatedDataList.isEmpty()) {
+                return SewaSetuResponse.builder()
+                        .success(true)
+                        .data(new ArrayList<>())
+                        .build();
+            }
+
+            // Fetch attribute data
             List<Map<String, Object>> attributeDataList = sewaSetuRepository.fetchAttributeData(applicationNumbers, requestInfo);
 
-            // Step 4: Fetch execution data (workflow history) for all applications
+            // Fetch workflow history for all applications
             Map<String, List<Map<String, Object>>> workflowHistoryMap =
                     sewaSetuRepository.fetchWorkflowHistoryForApplications(applicationNumbers, requestInfo);
 
-            // Step 5: Create maps for easy lookup
+            // Create maps for easy lookup
             Map<String, Map<String, Object>> initiatedDataMap = initiatedDataList.stream()
                     .collect(Collectors.toMap(
                             data -> getStringValue(data.get("application_no")),
@@ -107,7 +171,9 @@ public class SewaSetuService {
                             (existing, replacement) -> existing
                     ));
 
-            // Step 6: Transform and combine data for each application
+            Map<String, String> tenantCodeToDdrName = sewaSetuRepository.fetchTenantCodeToDdrName(stateTenantId, requestInfo);
+
+            // Transform and combine data for each application
             List<SewaSetuData> sewaSetuDataList = new ArrayList<>();
 
             for (String applRefNo : applicationNumbers) {
@@ -116,7 +182,7 @@ public class SewaSetuService {
                     Map<String, Object> initiatedData = initiatedDataMap.get(applRefNo);
                     ApplicationInitiatedData applicationInitiatedData = null;
                     if (initiatedData != null) {
-                        applicationInitiatedData = sewaSetuTransformer.transformInitiatedDataFromMap(initiatedData);
+                        applicationInitiatedData = sewaSetuTransformer.transformInitiatedDataFromMap(initiatedData, tenantCodeToDdrName);
                     } else {
                         // Create minimal initiated data if not found
                         applicationInitiatedData = new ApplicationInitiatedData();
@@ -159,12 +225,10 @@ public class SewaSetuService {
                     .data(sewaSetuDataList)
                     .build();
 
-        } catch (CustomException e) {
-            throw e;
         } catch (Exception e) {
-            log.error("Error in getApplicationDetailsBySubmissionDate", e);
-            throw new CustomException("ERROR_FETCHING_APPLICATION_DETAILS_BY_DATE",
-                    "Error fetching application details by submission date: " + e.getMessage());
+            log.error("Error in fetchAndTransformApplicationData", e);
+            throw new CustomException("ERROR_FETCHING_APPLICATION_DATA",
+                    "Error fetching application data: " + e.getMessage());
         }
     }
 

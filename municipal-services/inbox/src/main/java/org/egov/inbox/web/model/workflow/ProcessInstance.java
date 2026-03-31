@@ -1,7 +1,11 @@
 package org.egov.inbox.web.model.workflow;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -11,6 +15,7 @@ import org.egov.common.contract.request.User;
 import org.egov.inbox.web.model.AuditDetails;
 import org.egov.inbox.web.model.Document;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -105,6 +110,32 @@ public class ProcessInstance   {
         @JsonProperty("escalated")
         private boolean escalated;
 
+        @JsonProperty("notes")
+        private String notes = null;
+        
+        @JsonProperty("assignerName")
+        private String assignerName = null;
+        
+        @JsonProperty("assignerDesignation")
+        private String assignerDesignation = null;
+        
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMM dd, yyyy hh:mm:ss a", timezone = "IST")
+        @JsonProperty("assignedDate")
+        private Date assignedDate = null;
+        
+        @JsonProperty("additionalDetails")
+        private Object additionalDetails = null;
+        
+        @JsonProperty("applicationSubmissionDatetime")
+        private Long applicationSubmissionDatetime = null;
+        
+        @JsonProperty("latestApplicationSubmissionDatetime")
+        private Long latestApplicationSubmissionDatetime = null;
+        
+        @JsonProperty("allowedAssignees")
+        private List<User> allowedAssignees = null;
+
+
         public ProcessInstance addDocumentsItem(Document documentsItem) {
             if (this.documents == null) {
             this.documents = new ArrayList<>();
@@ -119,8 +150,21 @@ public class ProcessInstance   {
             if (this.nextActions == null) {
             this.nextActions = new ArrayList<>();
             }
-        this.nextActions.add(nextActionsItem);
-        return this;
+            this.nextActions.add(nextActionsItem);
+            return this;
         }
 
+        public ProcessInstance addUsersItem(User usersItem) {
+                if (this.assignes == null) {
+                        this.assignes = new ArrayList<>();
+                }
+                if(!this.assignes.contains(usersItem))
+                        this.assignes.add(usersItem);
+
+                return this;
+        }
+        public List<User> getAssignes() {
+			return Optional.ofNullable(assignes).orElseGet(ArrayList::new).stream().filter(Objects::nonNull)
+					.collect(Collectors.toList());
+		}
 }

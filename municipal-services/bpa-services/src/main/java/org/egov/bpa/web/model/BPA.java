@@ -151,4 +151,5 @@ public class BPA {
   private String signedBpFileStoreId;
   
   private String geoTaggedPhotoFilestoreId;
+  private String signedDxfFileStoreId;
 }
