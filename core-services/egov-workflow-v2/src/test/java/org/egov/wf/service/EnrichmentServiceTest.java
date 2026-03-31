@@ -397,12 +397,13 @@ class EnrichmentServiceTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
 
         ProcessInstance processInstance = new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
                 state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
-                new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null);
+                new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null);
         processInstance.setAuditDetails(auditDetails1);
         ProcessStateAndAction processStateAndAction = mock(ProcessStateAndAction.class);
         when(processStateAndAction.getProcessInstanceFromDb()).thenReturn(processInstance);
@@ -491,11 +492,13 @@ class EnrichmentServiceTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(
-                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name", state, "Comment", documents,
-                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null));
+                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
+                        state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
+                        new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null));
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
         doNothing().when(processStateAndAction).setProcessInstanceFromDb((ProcessInstance) any());
@@ -531,11 +534,13 @@ class EnrichmentServiceTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(
-                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name", state, "Comment", documents,
-                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null));
+                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
+                        state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
+                        new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null));
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
         doNothing().when(processStateAndAction).setProcessInstanceFromDb((ProcessInstance) any());
@@ -573,11 +578,13 @@ class EnrichmentServiceTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(
-                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name", state, "Comment", documents,
-                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null));
+                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
+                        state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
+                        new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null));
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
         doNothing().when(processStateAndAction).setProcessInstanceFromDb((ProcessInstance) any());
@@ -614,10 +621,11 @@ class EnrichmentServiceTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<Action> nextActions = new ArrayList<>();
         ProcessInstance processInstance = new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
                 state, "Comment", documents, assigner, userList, nextActions, 1L, 1L, "Previous Status", "Entity",
-                new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null);
+                new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null);
 
         ProcessStateAndAction processStateAndAction = mock(ProcessStateAndAction.class);
         when(processStateAndAction.getProcessInstanceFromDb()).thenReturn(new ProcessInstance());
@@ -1446,11 +1454,12 @@ class EnrichmentServiceTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
         ProcessInstance processInstance = new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
                 state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
-                new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null);
+                new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null);
         processInstance.setAuditDetails(auditDetails);
         ArrayList<ProcessInstance> processInstanceList = new ArrayList<>();
         processInstanceList.add(processInstance);
@@ -1465,12 +1474,13 @@ class EnrichmentServiceTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
 
         ProcessInstance processInstance = new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
-                state, "Comment", documents, assigner, assignes, nextActions, null, 1L, "Previous Status", "Entity",
-                new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null);
+                state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
+                new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null);
         processInstance.setAuditDetails(auditDetails);
 
         ArrayList<ProcessInstance> processInstanceList = new ArrayList<>();
@@ -1488,12 +1498,13 @@ class EnrichmentServiceTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
 
         ProcessInstance processInstance = new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
                 state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
-                new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null);
+                new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null);
         processInstance.setAuditDetails(auditDetails);
 
         ArrayList<ProcessInstance> processInstanceList = new ArrayList<>();
