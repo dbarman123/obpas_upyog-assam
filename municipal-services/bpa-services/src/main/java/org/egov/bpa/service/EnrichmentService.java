@@ -275,6 +275,9 @@ public class EnrichmentService {
 		updateFileStoreId(existingBPA::setSignedOcFileStoreId, existingBPA.getSignedOcFileStoreId(), bpa.getSignedOcFileStoreId());
 		updateFileStoreId(existingBPA::setSignedPpFileStoreId, existingBPA.getSignedPpFileStoreId(),bpa.getSignedPpFileStoreId());
 		updateFileStoreId(existingBPA::setSignedBpFileStoreId, existingBPA.getSignedBpFileStoreId(),bpa.getSignedBpFileStoreId());
+		
+		//update geoTaggedPhoto filestore id
+		updateFileStoreId(existingBPA::setGeoTaggedPhotoFilestoreId, existingBPA.getGeoTaggedPhotoFilestoreId(),bpa.getGeoTaggedPhotoFilestoreId());
 
 		return true;
 	}
