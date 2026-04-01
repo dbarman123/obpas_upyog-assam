@@ -54,6 +54,7 @@ const ActionModal = ({ t, action, tenantId, state, id, closeModal, submitAction,
   const [selectedDscToken, setSelectedDscToken] = useState(null);
   const [dscCertificates, setDscCertificates] = useState([]);
   const [isCertLoading, setIsCertLoading] = useState(false);
+  const [tokenPassword, setTokenPassword] = useState("");
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [selectedCertificateKeyId, setSelectedCertificateKeyId] = useState(null);
   const [certificateResponse, setCertificateResponse] = useState([]);
@@ -354,6 +355,10 @@ const fetchDscTokens = async () => {
     }
   }, [dscTokens, isDscLoading]);
 
+  useEffect(() => {
+    setTokenPassword("");
+  },[selectedCertificate,selectedDscToken]);
+
     const fetchDscCertificates = async () => {
     try {
       setIsCertLoading(true);
@@ -529,6 +534,10 @@ const fetchDscTokens = async () => {
   };
 
     const signPdfWithDSC = async (fileStoreId) => {
+    if(!tokenPassword) {
+    alert(t("WF_ENTER_TOKEN_PASSWORD_ERROR"));
+    return;
+  }
     const metaRes = await Digit.OBPSV2Services.dscGetFileMetaData({
       tenantId: applicationData?.tenantId,
       fileStoreId,
@@ -536,7 +545,7 @@ const fetchDscTokens = async () => {
 
     const inputRes = await Digit.OBPSV2Services.dscGetPdfSignInput({
       tokenDisplayName: selectedDscToken.code,
-      keyStorePassPhrase: "12345678",
+      keyStorePassPhrase: tokenPassword,
       keyId: selectedCertificateKeyId,
       file: fileStoreId,
       fileName: metaRes.fileName,
@@ -588,6 +597,8 @@ const fetchDscTokens = async () => {
       dscCertificates,
       selectedCertificate,
       setSelectedCertificate,
+      tokenPassword,
+      setTokenPassword
         })
       );
     }
