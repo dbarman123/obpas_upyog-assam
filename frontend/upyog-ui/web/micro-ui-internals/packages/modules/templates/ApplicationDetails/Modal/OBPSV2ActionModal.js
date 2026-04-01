@@ -525,12 +525,11 @@ const fetchDscTokens = async () => {
           window.open(fileStore[fileStoreId], "_blank");
   };
 
-  if(!tokenPassword) {
+    const signPdfWithDSC = async (fileStoreId) => {
+    if(!tokenPassword) {
     alert(t("WF_ENTER_TOKEN_PASSWORD_ERROR"));
     return;
   }
-
-    const signPdfWithDSC = async (fileStoreId) => {
     const metaRes = await Digit.OBPSV2Services.dscGetFileMetaData({
       tenantId: applicationData?.tenantId,
       fileStoreId,
