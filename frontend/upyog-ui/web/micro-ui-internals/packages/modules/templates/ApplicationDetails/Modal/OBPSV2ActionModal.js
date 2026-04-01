@@ -165,21 +165,29 @@ const ActionModal = ({ t, action, tenantId, state, id, closeModal, submitAction,
          adjoiningOwners: {
             ...applicationData?.additionalDetails?.adjoiningOwners,
 
-            north:
-              applicationData?.additionalDetails?.submitReportinspection_pending?.north ??
-              applicationData?.additionalDetails?.adjoiningOwners?.north,
+           north: 
+           (applicationData?.additionalDetails?.submitReportinspection_pending?.north !== undefined &&
+               applicationData?.additionalDetails?.submitReportinspection_pending?.north !== null)
+              ? applicationData.additionalDetails.submitReportinspection_pending.north
+              : applicationData?.additionalDetails?.adjoiningOwners?.north,
 
             south:
-              applicationData?.additionalDetails?.submitReportinspection_pending?.south ??
-              applicationData?.additionalDetails?.adjoiningOwners?.south,
+            (applicationData?.additionalDetails?.submitReportinspection_pending?.south !== undefined &&
+               applicationData?.additionalDetails?.submitReportinspection_pending?.south !== null)
+              ? applicationData.additionalDetails.submitReportinspection_pending.south
+              : applicationData?.additionalDetails?.adjoiningOwners?.south,
 
-            east:
-              applicationData?.additionalDetails?.submitReportinspection_pending?.east ??
-              applicationData?.additionalDetails?.adjoiningOwners?.east,
+            east: 
+            (applicationData?.additionalDetails?.submitReportinspection_pending?.east !== undefined &&
+              applicationData?.additionalDetails?.submitReportinspection_pending?.east !== null)
+             ? applicationData.additionalDetails.submitReportinspection_pending.east
+             : applicationData?.additionalDetails?.adjoiningOwners?.east,
 
             west:
-              applicationData?.additionalDetails?.submitReportinspection_pending?.west ??
-              applicationData?.additionalDetails?.adjoiningOwners?.west,
+              (applicationData?.additionalDetails?.submitReportinspection_pending?.west !== undefined &&
+               applicationData?.additionalDetails?.submitReportinspection_pending?.west !== null)
+              ? applicationData.additionalDetails.submitReportinspection_pending.west
+              : applicationData?.additionalDetails?.adjoiningOwners?.west,
           }
       },
        workflow:{
