@@ -3,7 +3,7 @@ package org.egov.wf.validator;
 import static org.egov.wf.util.WorkflowConstants.CITIZEN_TYPE;
 import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_TENANT;
 import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_PARENT_TENANT_ID;
-import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_PARENT_TENANT_CODE;
+import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_TENANT_CODE;
 import static org.egov.wf.util.WorkflowConstants.MDMS_TENANTS;
 import static org.egov.wf.util.WorkflowConstants.RATE_ACTION;
 import static org.egov.wf.util.WorkflowConstants.SENDBACKTOCITIZEN;
@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
@@ -34,7 +36,6 @@ import org.egov.wf.web.models.BusinessService;
 import org.egov.wf.web.models.ProcessInstance;
 import org.egov.wf.web.models.ProcessStateAndAction;
 import org.egov.wf.web.models.State;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -231,21 +232,42 @@ public class WorkflowValidator {
         }
     }
     
+	@SuppressWarnings("unchecked")
 	private String fetchParentTenantByApplicationTenantId(Map<String, Map<String, JSONArray>> response,
 			String tenantId) {
 
-		if (response == null || response.get(MDMS_MODULE_TENANT) == null
-				|| response.get(MDMS_MODULE_TENANT).get(MDMS_TENANTS) == null) {
+		if (response == null || tenantId == null) {
 			return null;
 		}
 
-		JSONArray tenants = response.get(MDMS_MODULE_TENANT).get(MDMS_TENANTS);
+		Map<String, JSONArray> tenantModule = response.get(MDMS_MODULE_TENANT);
+		if (tenantModule == null) {
+			return null;
+		}
 
-		for (int i = 0; i < tenants.size(); i++) {
-			JSONObject tenant = (JSONObject) tenants.get(i);
+		JSONArray tenants = tenantModule.get(MDMS_TENANTS);
+		if (tenants == null || tenants.isEmpty()) {
+			return null;
+		}
 
-			if (tenantId.equalsIgnoreCase((String) tenant.get(MDMS_MODULE_PARENT_TENANT_CODE))) {
-				return (String) tenant.get(MDMS_MODULE_PARENT_TENANT_ID); 
+		for (Object obj : tenants) {
+
+			if (obj == null || !(obj instanceof Map)) {
+				continue;
+			}
+
+			Map<String, Object> tenant = (Map<String, Object>) obj;
+
+			Object codeObj = tenant.get(MDMS_MODULE_TENANT_CODE);
+			if (codeObj == null) {
+				continue;
+			}
+
+			String code = String.valueOf(codeObj);
+
+			if (tenantId.equalsIgnoreCase(code)) {
+				Object parentTenant = tenant.get(MDMS_MODULE_PARENT_TENANT_ID);
+				return parentTenant != null ? String.valueOf(parentTenant) : null;
 			}
 		}
 

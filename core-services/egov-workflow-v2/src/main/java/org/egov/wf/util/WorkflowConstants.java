@@ -28,7 +28,7 @@ public class WorkflowConstants {
     
     public static final String MDMS_MODULE_PARENT_TENANT_ID= "parentTenantId";
     
-    public static final String MDMS_MODULE_PARENT_TENANT_CODE= "code";
+    public static final String MDMS_MODULE_TENANT_CODE= "code";
     
     public static final String MDMS_WF_SLA_CONFIG = "wfSlaConfig";
 
