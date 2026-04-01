@@ -12,38 +12,55 @@ import Timeline from "../components/Timeline";
 
 const Form23B = ({ config, onSelect, userType, formData }) => {
   const { t } = useTranslation();
-  const planDetail = formData?.form?.scrutinyDetails?.planDetail ?? {};
+  const planDetail = (formData &&
+ formData.form &&
+ formData.form.scrutinyDetails &&
+ formData.form.scrutinyDetails.planDetail != null)
+  ? formData.form.scrutinyDetails.planDetail
+  : {}
 
-  const [purpose, setPurpose] = useState(planDetail?.planInformation?.occupancy ?? "");
-  const [noOfInhabitants, setNoOfInhabitants] = useState(planDetail?.noOfInhabitants ?? "");
-  const [waterSource, setWaterSource] = useState(planDetail?.waterSource ?? "");
-  const [distanceFromSewer, setDistanceFromSewer] = useState(planDetail?.distanceFromSewer ?? "");
-  const [materials, setMaterials] = useState(planDetail?.materials ?? "");
-  const [architectName, setArchitectName] = useState(planDetail?.architectName ?? "");
-  const [registrationNumber, setRegistrationNumber] = useState(planDetail?.registrationNumber ?? "");
-  const [architectAddress, setArchitectAddress] = useState(planDetail?.architectAddress ?? "");
-  const [constructionValidUpto, setConstructionValidUpto] = useState(planDetail?.constructionValidUpto ?? null);
-  const [leaseExtensionUpto, setLeaseExtensionUpto] = useState(planDetail?.leaseExtensionUpto ?? null);
-  const [dwellingUnitSize, setDwellingUnitSize] = useState(planDetail?.dwellingUnitSize ?? "");
+  const [purpose, setPurpose] = useState((planDetail &&
+ planDetail.planInformation &&
+ planDetail.planInformation.occupancy != null)
+  ? planDetail.planInformation.occupancy
+  : "");
+  const [noOfInhabitants, setNoOfInhabitants] = useState((planDetail && planDetail.noOfInhabitants != null) ? planDetail.noOfInhabitants : "");
+  const [waterSource, setWaterSource] = useState((planDetail && planDetail.waterSource != null) ? planDetail.waterSource : "");
+  const [distanceFromSewer, setDistanceFromSewer] = useState((planDetail && planDetail.distanceFromSewer != null) ? planDetail.distanceFromSewer : "");
+  const [materials, setMaterials] = useState((planDetail && planDetail.materials != null) ? planDetail.materials : "");
+  const [architectName, setArchitectName] = useState((planDetail && planDetail.architectName != null) ? planDetail.architectName : "");
+  const [registrationNumber, setRegistrationNumber] = useState((planDetail && planDetail.registrationNumber != null) ? planDetail.registrationNumber : "");
+  const [architectAddress, setArchitectAddress] = useState((planDetail && planDetail.architectAddress != null) ? planDetail.architectAddress : "");
+  const [constructionValidUpto, setConstructionValidUpto] = useState((planDetail && planDetail.constructionValidUpto != null) ? planDetail.constructionValidUpto : null);
+  const [leaseExtensionUpto, setLeaseExtensionUpto] = useState((planDetail && planDetail.leaseExtensionUpto != null) ? planDetail.leaseExtensionUpto : null);
+  const [dwellingUnitSize, setDwellingUnitSize] = useState((planDetail && planDetail.dwellingUnitSize != null) ? planDetail.dwellingUnitSize : "");
 
-  const initialFloorsSource = planDetail?.blocks?.[0]?.building?.floors ?? [];
+  const initialFloorsSource = (planDetail &&
+ planDetail.blocks &&
+ planDetail.blocks[0] &&
+ planDetail.blocks[0].building &&
+ planDetail.blocks[0].building.floors != null)
+  ? planDetail.blocks[0].building.floors
+  : []
   const [floorsData, setFloorsData] = useState(() =>
     initialFloorsSource.map((f, i) => {
-      const occ = f?.occupancies?.[0] ?? {};
+      const occ = (f && f.occupancies && f.occupancies[0] != null) ? f.occupancies[0] : {};
       return {
-        label: f?.name ?? `Floor ${f?.number ?? i + 1}`,
-        existing: occ?.builtUpArea ?? "",
-        proposed: occ?.proposed ?? "",
-        total: occ?.total ?? ""
+        label: (f && f.name != null) 
+          ? f.name 
+          : `Floor ${(f && f.number != null) ? f.number : (i + 1)}`,
+existing: (occ && occ.builtUpArea != null) ? occ.builtUpArea : "",
+proposed: (occ && occ.proposed != null) ? occ.proposed : "",
+total: (occ && occ.total != null) ? occ.total : ""
       };
     })
   );
 
   const [sanitaryDetails, setSanitaryDetails] = useState([
-    { description: "NUMBER OF URINALS", total: planDetail?.totalUrinals ?? "" },
-    { description: "NUMBER OF BATHROOMS", total: planDetail?.totalBathrooms ?? "" },
-    { description: "NUMBER OF LATRINES", total: planDetail?.totalLatrines ?? "" },
-    { description: "NUMBER OF KITCHENS", total: planDetail?.totalKitchens ?? "" }
+    { description: "NUMBER OF URINALS", total: (planDetail && planDetail.totalUrinals != null) ? planDetail.totalUrinals : "" },
+    { description: "NUMBER OF BATHROOMS", total: (planDetail && planDetail.totalBathrooms != null) ? planDetail.totalBathrooms : "" },
+    { description: "NUMBER OF LATRINES", total: (planDetail && planDetail.totalLatrines != null) ? planDetail.totalLatrines : "" },
+    { description: "NUMBER OF KITCHENS", total: (planDetail && planDetail.totalKitchens != null) ? planDetail.totalKitchens : "" }
   ]);
 
   const updateFloorField = (index, key, value) => {
@@ -124,11 +141,13 @@ const Form23B = ({ config, onSelect, userType, formData }) => {
             </thead>
             <tbody>
               {floorsData.map((floor, idx) => (
-                <tr key={floor.id ?? idx}>
-                  <td style={tdStyle}>{`${t("FLOOR")} ${floor.number ?? idx + 1}`}</td>
+                <tr key={floor.id != null ? floor.id : idx}>
+  <td style={tdStyle}>
+    {`${t("FLOOR")} ${floor.number != null ? floor.number : idx + 1}`}
+  </td>
                   <td style={tdStyle}>
                     <input
-                      value={floor.existing ?? ""}
+                      value={floor.existing != null ? floor.existing : ""}
                       onChange={(e) => updateFloorField(idx, "existing", e.target.value)}
                       placeholder={t("Text Input")}
                       style={inputStyle}
@@ -137,7 +156,7 @@ const Form23B = ({ config, onSelect, userType, formData }) => {
                   </td>
                   <td style={tdStyle}>
                     <input
-                      value={floor.proposed ?? ""}
+                      value={floor.proposed != null ? floor.proposed : ""}
                       onChange={(e) => updateFloorField(idx, "proposed", e.target.value)}
                       placeholder={t("Text Input")}
                       style={inputStyle}
@@ -146,7 +165,7 @@ const Form23B = ({ config, onSelect, userType, formData }) => {
                   </td>
                   <td style={tdStyle}>
                     <input
-                      value={floor.total ?? ""}
+                      value={floor.total != null ? floor.total : ""}
                       onChange={(e) => updateFloorField(idx, "total", e.target.value)}
                       placeholder={t("Text Input")}
                       style={inputStyle}
@@ -164,7 +183,7 @@ const Form23B = ({ config, onSelect, userType, formData }) => {
         <br />
 
         <CardLabel>(3) (a) {t("NO_OF_INHABITANTS")}</CardLabel>
-        <TextInput value={noOfInhabitants ?? ""} onChange={(e) => setNoOfInhabitants(e.target.value)} placeholder={t("Text Input")} />
+        <TextInput value={noOfInhabitants != null ? noOfInhabitants : ""} onChange={(e) => setNoOfInhabitants(e.target.value)} placeholder={t("Text Input")} />
 
         <CardLabel>(3) (b) {t("DETAILS_OF_SANITARY_AND_KITCHEN_FACILITIES")}</CardLabel>
         <table style={tableStyle}>

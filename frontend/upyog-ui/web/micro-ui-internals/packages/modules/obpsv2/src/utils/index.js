@@ -261,17 +261,29 @@ export const bpaEditPayload = async (formData) => {
   if (formData?.land) {
     updated.landInfo = {
       ...updated.landInfo,
-      oldDagNumber: formData.land.oldDagNumber ?? updated.landInfo.oldDagNumber,
-      newDagNumber: formData.land.newDagNumber ?? updated.landInfo.newDagNumber,
-      oldPattaNumber: formData.land.oldPattaNumber ?? updated.landInfo.oldPattaNumber,
-      newPattaNumber: formData.land.newPattaNumber ?? updated.landInfo.newPattaNumber,
-      totalPlotArea: formData.land.totalPlotArea ?? updated.landInfo.totalPlotArea,
-      documents: formData.land.documents?.map((doc) => ({
-        documentType: doc?.documentType || "",
-        documentUid: doc?.documentUid || "",
-        fileStoreId: doc?.fileStoreId || "",
-        id: doc?.id || "",
-      })) ?? updated.landInfo.documents,
+      oldDagNumber: (formData.land && formData.land.oldDagNumber != null) 
+  ? formData.land.oldDagNumber 
+  : updated.landInfo.oldDagNumber,
+      newDagNumber: (formData.land && formData.land.newDagNumber != null) 
+  ? formData.land.newDagNumber 
+  : updated.landInfo.newDagNumber,
+      oldPattaNumber: (formData.land && formData.land.oldPattaNumber != null) 
+  ? formData.land.oldPattaNumber 
+  : updated.landInfo.oldPattaNumber,
+      newPattaNumber: (formData.land && formData.land.newPattaNumber != null) 
+  ? formData.land.newPattaNumber 
+  : updated.landInfo.newPattaNumber,
+      totalPlotArea: (formData.land && formData.land.totalPlotArea != null) 
+  ? formData.land.totalPlotArea 
+  : updated.landInfo.totalPlotArea,
+documents: (formData.land && formData.land.documents != null)
+  ? formData.land.documents.map(doc => ({
+      documentType: (doc && doc.documentType != null) ? doc.documentType : "",
+      documentUid: (doc && doc.documentUid != null) ? doc.documentUid : "",
+      fileStoreId: (doc && doc.fileStoreId != null) ? doc.fileStoreId : "",
+      id: (doc && doc.id != null) ? doc.id : "",
+    }))
+  : updated.landInfo.documents,
       ownerAddresses: [],
       // Update units with occupancyType
       units: formData.land.occupancyType?.code ? [
@@ -335,43 +347,87 @@ export const bpaEditPayload = async (formData) => {
     
     updated.landInfo.owners[0] = {
       ...updated.landInfo.owners[0],
-      name: formData.applicant.applicantName ?? updated.landInfo.owners[0].name,
-      mobileNumber: formData.applicant.mobileNumber ?? updated.landInfo.owners[0].mobileNumber,
-      altContactNumber: formData.applicant.alternateNumber ?? updated.landInfo.owners[0].altContactNumber,
-      gender: formData.applicant.gender?.code ?? updated.landInfo.owners[0].gender,
-      relationship: formData.applicant.relationship?.code ?? updated.landInfo.owners[0].relationship,
+      name: (formData.applicant && formData.applicant.applicantName != null) 
+  ? formData.applicant.applicantName 
+  : (updated.landInfo.owners && updated.landInfo.owners[0] && updated.landInfo.owners[0].name != null 
+      ? updated.landInfo.owners[0].name 
+      : ""),
+      mobileNumber: (formData.applicant && formData.applicant.mobileNumber != null) 
+  ? formData.applicant.mobileNumber 
+  : updated.landInfo.owners[0].mobileNumber,
+      altContactNumber: (formData.applicant && formData.applicant.alternateNumber != null) 
+  ? formData.applicant.alternateNumber 
+  : updated.landInfo.owners[0].altContactNumber,
+      gender: (formData.applicant && formData.applicant.gender?.code != null) 
+  ? formData.applicant.gender?.code 
+  : updated.landInfo.owners[0].gender,
+      relationship: (formData.applicant && formData.applicant.relationship?.code != null) 
+  ? formData.applicant.relationship?.code 
+  : updated.landInfo.owners[0].relationship,
       // aadhaarNumber: formData.applicant.aadhaarNumber ?? updated.landInfo.owners[0].aadhaarNumber,
-      pan: formData.applicant.panCardNumber ?? updated.landInfo.owners[0].pan,
-      emailId: formData.applicant.emailId ?? updated.landInfo.owners[0].emailId,
-      fatherOrHusbandName: formData.applicant.fatherName ?? updated.landInfo.owners[0].fatherOrHusbandName,
-      motherName: formData.applicant.motherName ?? updated.landInfo.owners[0].motherName,
+      pan: (formData?.applicant?.panCardNumber !== undefined && formData?.applicant?.panCardNumber !== null)
+    ? formData.applicant.panCardNumber
+    : updated?.landInfo?.owners?.[0]?.pan,
+      emailId: (formData?.applicant?.emailId !== undefined && formData?.applicant?.emailId !== null)
+    ? formData.applicant.emailId
+    : updated?.landInfo?.owners?.[0]?.emailId,
+      fatherOrHusbandName: (formData?.applicant?.fatherName !== undefined && formData?.applicant?.fatherName !== null)
+    ? formData.applicant.fatherName
+    : updated?.landInfo?.owners?.[0]?.fatherOrHusbandName,
+      motherName: (formData?.applicant?.motherName !== undefined && formData?.applicant?.motherName !== null)
+    ? formData.applicant.motherName
+    : updated?.landInfo?.owners?.[0]?.motherName,
       correspondenceAddress,
     };
   }
   if (formData?.areaMapping) {
     updated.areaMapping = {
       ...updated.areaMapping,
-      district: formData.areaMapping.district?.code ?? updated.areaMapping.district,
-      planningArea: formData.areaMapping.planningArea?.code ?? updated.areaMapping.planningArea,
-      planningPermitAuthority: formData.areaMapping.ppAuthority?.code ?? updated.areaMapping.planningPermitAuthority,
-      concernedAuthority: formData.areaMapping.concernedAuthority?.code ?? updated.areaMapping.concernedAuthority,
-      buildingPermitAuthority: formData.areaMapping.bpAuthority?.code ?? updated.areaMapping.buildingPermitAuthority,
-      mouza: formData.areaMapping.mouza ?? updated.areaMapping.mouza,
+      district: (formData?.areaMapping?.district?.code !== undefined && formData?.areaMapping?.district?.code !== null)
+    ? formData.areaMapping.district.code
+    : updated?.areaMapping?.district,
+      planningArea: (formData?.areaMapping?.planningArea?.code !== undefined && formData?.areaMapping?.planningArea?.code !== null)
+    ? formData.areaMapping.planningArea.code
+    : updated?.areaMapping?.planningArea,
+      planningPermitAuthority: (formData?.areaMapping?.ppAuthority?.code !== undefined && formData?.areaMapping?.ppAuthority?.code !== null)
+    ? formData.areaMapping.ppAuthority.code
+    : updated?.areaMapping?.planningPermitAuthority,
+      concernedAuthority: (formData?.areaMapping?.concernedAuthority?.code !== undefined && formData?.areaMapping?.concernedAuthority?.code !== null)
+    ? formData.areaMapping.concernedAuthority.code
+    : updated?.areaMapping?.concernedAuthority,
+      buildingPermitAuthority: (formData?.areaMapping?.bpAuthority?.code !== undefined && formData?.areaMapping?.bpAuthority?.code !== null)
+    ? formData.areaMapping.bpAuthority.code
+    : updated?.areaMapping?.buildingPermitAuthority,
+      mouza: (formData?.areaMapping?.mouza !== undefined && formData?.areaMapping?.mouza !== null)
+    ? formData.areaMapping.mouza
+    : updated?.areaMapping?.mouza,
       ...(formData.areaMapping.bpAuthority?.code === "MUNICIPAL_BOARD" && {
-        ward: formData.areaMapping.ward?.code ?? updated.areaMapping.ward,
-        revenueVillage: formData.areaMapping.revenueVillage?.code ?? updated.areaMapping.revenueVillage,
+        ward: (formData?.areaMapping?.ward?.code !== undefined && formData?.areaMapping?.ward?.code !== null)
+    ? formData.areaMapping.ward.code
+    : updated?.areaMapping?.ward,
+        revenueVillage: (formData?.areaMapping?.revenueVillage?.code !== undefined && formData?.areaMapping?.revenueVillage?.code !== null)
+    ? formData.areaMapping.revenueVillage.code
+    : updated?.areaMapping?.revenueVillage,
       }),
       ...(formData.areaMapping.bpAuthority?.code === "GRAM_PANCHAYAT" && {
-        villageName: formData.areaMapping.villageName?.code ?? updated.areaMapping.villageName,
+        villageName: (formData?.areaMapping?.villageName?.code !== undefined && formData?.areaMapping?.villageName?.code !== null)
+    ? formData.areaMapping.villageName.code
+    : updated?.areaMapping?.villageName,
       }),
     };
   }
   if (formData?.land?.rtpCategory || formData?.land?.registeredTechnicalPerson) {
     updated.rtpDetails = {
       ...updated.rtpDetails,
-      rtpCategory: formData.land.rtpCategory?.code ?? updated.rtpDetails?.rtpCategory,
-      rtpName: formData.land.registeredTechnicalPerson?.code ?? updated.rtpDetails?.rtpName,
-      rtpUUID: formData.land.registeredTechnicalPerson?.uuid ?? updated.rtpDetails?.rtpUUID,
+      rtpCategory: (formData?.land?.rtpCategory?.code !== undefined && formData?.land?.rtpCategory?.code !== null)
+    ? formData.land.rtpCategory.code
+    : updated?.rtpDetails?.rtpCategory,
+      rtpName: (formData?.land?.registeredTechnicalPerson?.code !== undefined && formData?.land?.registeredTechnicalPerson?.code !== null)
+    ? formData.land.registeredTechnicalPerson.code
+    : updated?.rtpDetails?.rtpName,
+      rtpUUID: (formData?.land?.registeredTechnicalPerson?.uuid !== undefined && formData?.land?.registeredTechnicalPerson?.uuid !== null)
+    ? formData.land.registeredTechnicalPerson.uuid
+    : updated?.rtpDetails?.rtpUUID,
     };
   }
   if (formData?.additionalDetails) {
