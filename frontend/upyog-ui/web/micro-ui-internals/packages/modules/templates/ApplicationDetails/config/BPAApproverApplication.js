@@ -112,6 +112,9 @@ if (action?.action === "DSC") {
               isMandatory: isCommentRequired,
               populators: {
                 name: "comments",
+                style: {
+                height: "160px",
+              },
               },
             },
             {
@@ -167,6 +170,9 @@ if (action?.action === "DSC") {
             populators: {
               name: "comments",
             },
+            style: {
+            height: "160px",
+          },
           },
           {
             label: `${t("WF_APPROVAL_UPLOAD_HEAD")}`,
