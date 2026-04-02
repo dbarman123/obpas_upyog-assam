@@ -288,12 +288,16 @@ const CheckPage = ({ onSubmit, value = {} }) => {
               text={checkForNA(t(areaMapping?.villageName?.code))}
             />
           )}
-          {areaMapping?.bpAuthority?.code === "MUNICIPAL_CORPORATION" && (
-          <Row
-            label={t("MOUZA")}
-            text={checkForNA(areaMapping?.mouza?.code)}
-          />
-           )}
+          {(areaMapping?.bpAuthority?.code === "MUNICIPAL_CORPORATION" ||
+            areaMapping?.bpAuthority?.code === "MC"
+          ) && (
+            <>
+              <Row
+                label={t("REVENUE_VILLAGE")}
+                text={checkForNA(t(areaMapping?.revenueVillage?.code))}
+              />
+            </>
+          )}
           {areaMapping?.bpAuthority?.code !=="MUNICIPAL_CORPORATION" && (
           <Row
             label={t("MOUZA")}

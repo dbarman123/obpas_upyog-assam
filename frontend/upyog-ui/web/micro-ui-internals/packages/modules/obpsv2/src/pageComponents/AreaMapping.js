@@ -34,7 +34,9 @@ const AreaMapping = ({ t, config, onSelect, formData, searchResult }) => {
       return baseValidation || !ward || !revenueVillage;
     } else if (bpAuthority?.code === "GRAM_PANCHAYAT") {
       return baseValidation || !villageName;
-    }else if (bpAuthority?.code === "MUNICIPAL_CORPORATION") {
+    } else if (bpAuthority?.code === "MUNICIPAL_CORPORATION" ||
+      bpAuthority?.code === "MC"
+    ) {
       return baseValidation || !mouza || !revenueVillage;
     }
     
@@ -51,8 +53,9 @@ const AreaMapping = ({ t, config, onSelect, formData, searchResult }) => {
       bpAuthority,
       ...(bpAuthority?.code === "MUNICIPAL_BOARD" && { ward, revenueVillage }),
       ...(bpAuthority?.code === "GRAM_PANCHAYAT" && { villageName }),
-      ...(bpAuthority?.code === "MUNICIPAL_CORPORATION" && { mouza, revenueVillage }),
-      mouza
+      ...((bpAuthority?.code === "MUNICIPAL_CORPORATION" ||
+          bpAuthority?.code === "MC") && { mouza, revenueVillage }
+      ),mouza
     };
 
     onSelect(config.key, { ...formData[config.key], ...areaMappingStep });

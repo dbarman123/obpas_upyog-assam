@@ -1,7 +1,7 @@
 package org.egov.wf.validator;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -10,11 +10,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
+import org.egov.wf.config.WorkflowConfig;
+import org.egov.wf.service.MDMSService;
 import org.egov.wf.util.BusinessUtil;
 import org.egov.wf.util.WorkflowUtil;
 import org.egov.wf.web.models.Action;
@@ -24,7 +25,6 @@ import org.egov.wf.web.models.Document;
 import org.egov.wf.web.models.ProcessInstance;
 import org.egov.wf.web.models.ProcessStateAndAction;
 import org.egov.wf.web.models.State;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +44,11 @@ class WorkflowValidatorTest {
     @Autowired
     private WorkflowValidator workflowValidator;
 
+    @MockBean
+    private MDMSService mdmsService;
+    
+    @MockBean
+    private WorkflowConfig workflowConfig;
 
 
 
@@ -104,11 +109,13 @@ class WorkflowValidatorTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(
-                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name", state, "Comment", documents,
-                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null));
+                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
+                        state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
+                        new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null));
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
         doNothing().when(processStateAndAction).setProcessInstanceFromDb((ProcessInstance) any());
@@ -139,11 +146,13 @@ class WorkflowValidatorTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(
-                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name", state, "Comment", documents,
-                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null));
+                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
+                        state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
+                        new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null));
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
         doNothing().when(processStateAndAction).setProcessInstanceFromDb((ProcessInstance) any());
@@ -174,11 +183,13 @@ class WorkflowValidatorTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(
-                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name", state, "Comment", documents,
-                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null));
+                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
+                        state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
+                        new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null));
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
         doNothing().when(processStateAndAction).setProcessInstanceFromDb((ProcessInstance) any());
@@ -243,11 +254,13 @@ class WorkflowValidatorTest {
         State state = new State();
         ArrayList<Document> documents = new ArrayList<>();
         User assigner = new User();
+        User assignee = new User();
         ArrayList<User> assignes = new ArrayList<>();
         ArrayList<Action> nextActions = new ArrayList<>();
         when(processStateAndAction.getProcessInstanceFromRequest()).thenReturn(
-                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name", state, "Comment", documents,
-                        assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity", new AuditDetails(), 1, true, "notes", null, null, null, null, null, null, null));
+                new ProcessInstance("42", "42", "Business Service", "42", "Action", "Module Name",
+                        state, "Comment", documents, assigner, assignes, nextActions, 1L, 1L, "Previous Status", "Entity",
+                        new AuditDetails(), 1, assignee, true, "notes", null, null, null, null, null, null, null));
         doNothing().when(processStateAndAction).setAction((Action) any());
         doNothing().when(processStateAndAction).setCurrentState((State) any());
         doNothing().when(processStateAndAction).setProcessInstanceFromDb((ProcessInstance) any());

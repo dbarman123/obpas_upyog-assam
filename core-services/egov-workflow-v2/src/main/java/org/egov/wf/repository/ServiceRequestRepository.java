@@ -3,6 +3,9 @@ package org.egov.wf.repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
+
+import org.egov.mdms.model.MdmsCriteriaReq;
+import org.egov.mdms.model.MdmsResponse;
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -32,6 +35,22 @@ public class ServiceRequestRepository {
 		Object response = null;
 		try {
 			response = restTemplate.postForObject(uri.toString(), request, Map.class);
+		}catch(HttpClientErrorException e) {
+			log.error("External Service threw an Exception: ",e);
+			throw new ServiceCallException(e.getResponseBodyAsString());
+		}catch(Exception e) {
+			log.error("Exception while fetching from searcher: ",e);
+		}
+
+		return response;
+	}
+
+
+	public MdmsResponse fetchMdmsResult(StringBuilder uri, MdmsCriteriaReq mdmsCriteriaReq) {
+		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		MdmsResponse response = null;
+		try {
+			response = restTemplate.postForObject(uri.toString(), mdmsCriteriaReq, MdmsResponse.class);
 		}catch(HttpClientErrorException e) {
 			log.error("External Service threw an Exception: ",e);
 			throw new ServiceCallException(e.getResponseBodyAsString());
