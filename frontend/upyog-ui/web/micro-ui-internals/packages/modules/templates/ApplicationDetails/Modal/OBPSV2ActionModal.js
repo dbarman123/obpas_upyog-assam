@@ -207,7 +207,7 @@ const ActionModal = ({ t, action, tenantId, state, id, closeModal, submitAction,
     };
     } else if (action?.action === "DSC") {
       if (applicationData?.status === "PENDING_DSC") {
-      const signedPPFileStoreId = await handlePlanningPermitOrder();
+      const signedPPFileStoreId = await handlePlanningPermitOrder(data?.tokenPassword);
                 applicationData = {
         ...applicationData,
         signedPpFileStoreId: signedPPFileStoreId,
@@ -228,7 +228,7 @@ const ActionModal = ({ t, action, tenantId, state, id, closeModal, submitAction,
       };
       }
       if (applicationData?.status === "PENDING_FINAL_DSC") {
-      const signedBPFileStoreId = await handleBuildingPermitOrder();
+      const signedBPFileStoreId = await handleBuildingPermitOrder(data?.tokenPassword);
                 applicationData = {
         ...applicationData,
         signedBpFileStoreId: signedBPFileStoreId,
@@ -355,9 +355,9 @@ const fetchDscTokens = async () => {
     }
   }, [dscTokens, isDscLoading]);
 
-  useEffect(() => {
-    setTokenPassword("");
-  },[selectedCertificate,selectedDscToken]);
+  // useEffect(() => {
+  //   setTokenPassword("");
+  // },[selectedCertificate,selectedDscToken]);
 
     const fetchDscCertificates = async () => {
     try {
@@ -438,7 +438,7 @@ const fetchDscTokens = async () => {
 }, [selectedCertificate, certificateResponse]);
 
 
- const handlePlanningPermitOrder = async () => {
+ const handlePlanningPermitOrder = async (password) => {
       const application = applicationData;
       let fileStoreId = application?.ppFileStoreId;
       const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: applicationData?.edcrNumber });
@@ -458,8 +458,7 @@ const fetchDscTokens = async () => {
         );
   
         fileStoreId = response?.filestoreIds?.[0];
-        const signedFileStoreIds = await signPdfWithDSC(fileStoreId);
-
+        const signedFileStoreIds = await signPdfWithDSC(fileStoreId,password);
       return signedFileStoreIds;
         // const updatedApplication = {
         // ...application,
@@ -484,7 +483,7 @@ const fetchDscTokens = async () => {
       window.open(fileStore[fileStoreId], "_blank");
     };
 
-  const handleBuildingPermitOrder = async () => {
+  const handleBuildingPermitOrder = async (password) => {
           const application = applicationData;
           let fileStoreId = application?.bpFileStoreId;
           const edcrResponse = await Digit.OBPSService.scrutinyDetails("assam", { edcrNumber: applicationData?.edcrNumber });
@@ -506,7 +505,7 @@ const fetchDscTokens = async () => {
             );
       
             fileStoreId = response?.filestoreIds?.[0];
-            const signedFileStoreId = await signPdfWithDSC(fileStoreId);
+            const signedFileStoreId = await signPdfWithDSC(fileStoreId, password);
             return signedFileStoreId;
             // fileStoreId = signedFileStoreId;
 
@@ -533,8 +532,8 @@ const fetchDscTokens = async () => {
           window.open(fileStore[fileStoreId], "_blank");
   };
 
-    const signPdfWithDSC = async (fileStoreId) => {
-    if(!tokenPassword) {
+    const signPdfWithDSC = async (fileStoreId,password) => {
+    if(!password) {
     alert(t("WF_ENTER_TOKEN_PASSWORD_ERROR"));
     return;
   }
@@ -545,7 +544,7 @@ const fetchDscTokens = async () => {
 
     const inputRes = await Digit.OBPSV2Services.dscGetPdfSignInput({
       tokenDisplayName: selectedDscToken.code,
-      keyStorePassPhrase: tokenPassword,
+      keyStorePassPhrase: password,
       keyId: selectedCertificateKeyId,
       file: fileStoreId,
       fileName: metaRes.fileName,
@@ -556,7 +555,10 @@ const fetchDscTokens = async () => {
       encryptedRequest: inputRes.input.encryptedRequest,
       encryptionKeyId: inputRes.input.encryptionKeyId
     });
-
+    if (pkcsRes?.responseData == null) {
+      alert(pkcsRes?.errorMessage);
+      return;
+    }
   const signRes = await Digit.OBPSV2Services.dscGetPdfSign({
       responseData: pkcsRes?.responseData,
       tempFilePath: inputRes?.input.tempFilePath,
