@@ -1,7 +1,11 @@
 package org.egov.wf.web.models;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -10,6 +14,7 @@ import javax.validation.constraints.Size;
 import org.egov.common.contract.request.User;
 import org.springframework.validation.annotation.Validated;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
@@ -105,9 +110,34 @@ public class ProcessInstance   {
 
         @JsonProperty("rating")
         private Integer rating = null;
-
+        
         @JsonProperty("escalated")
         private Boolean escalated = false;
+        
+        @JsonProperty("notes")
+        private String notes = null;
+        
+        @JsonProperty("assignerName")
+        private String assignerName = null;
+        
+        @JsonProperty("assignerDesignation")
+        private String assignerDesignation = null;
+        
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMM dd, yyyy hh:mm:ss a", timezone = "IST")
+        @JsonProperty("assignedDate")
+        private Date assignedDate = null;
+        
+        @JsonProperty("additionalDetails")
+        private Object additionalDetails = null;
+        
+        @JsonProperty("applicationSubmissionDatetime")
+        private Long applicationSubmissionDatetime = null;
+        
+        @JsonProperty("latestApplicationSubmissionDatetime")
+        private Long latestApplicationSubmissionDatetime = null;
+        
+        @JsonProperty("allowedAssignees")
+        private List<User> allowedAssignees = null;
 
 
         public ProcessInstance addDocumentsItem(Document documentsItem) {
@@ -137,6 +167,10 @@ public class ProcessInstance   {
 
                 return this;
         }
+        public List<User> getAssignes() {
+			return Optional.ofNullable(assignes).orElseGet(ArrayList::new).stream().filter(Objects::nonNull)
+					.collect(Collectors.toList());
+		}
 
 }
 
