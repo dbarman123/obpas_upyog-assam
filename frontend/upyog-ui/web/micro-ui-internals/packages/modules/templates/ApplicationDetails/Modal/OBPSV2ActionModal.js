@@ -54,6 +54,7 @@ const ActionModal = ({ t, action, tenantId, state, id, closeModal, submitAction,
   const [selectedDscToken, setSelectedDscToken] = useState(null);
   const [dscCertificates, setDscCertificates] = useState([]);
   const [isCertLoading, setIsCertLoading] = useState(false);
+  const [tokenPassword, setTokenPassword] = useState("");
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [selectedCertificateKeyId, setSelectedCertificateKeyId] = useState(null);
   const [certificateResponse, setCertificateResponse] = useState([]);
@@ -164,21 +165,29 @@ const ActionModal = ({ t, action, tenantId, state, id, closeModal, submitAction,
          adjoiningOwners: {
             ...applicationData?.additionalDetails?.adjoiningOwners,
 
-            north:
-              applicationData?.additionalDetails?.submitReportinspection_pending?.north ??
-              applicationData?.additionalDetails?.adjoiningOwners?.north,
+           north: 
+           (applicationData?.additionalDetails?.submitReportinspection_pending?.north !== undefined &&
+               applicationData?.additionalDetails?.submitReportinspection_pending?.north !== null)
+              ? applicationData.additionalDetails.submitReportinspection_pending.north
+              : applicationData?.additionalDetails?.adjoiningOwners?.north,
 
             south:
-              applicationData?.additionalDetails?.submitReportinspection_pending?.south ??
-              applicationData?.additionalDetails?.adjoiningOwners?.south,
+            (applicationData?.additionalDetails?.submitReportinspection_pending?.south !== undefined &&
+               applicationData?.additionalDetails?.submitReportinspection_pending?.south !== null)
+              ? applicationData.additionalDetails.submitReportinspection_pending.south
+              : applicationData?.additionalDetails?.adjoiningOwners?.south,
 
-            east:
-              applicationData?.additionalDetails?.submitReportinspection_pending?.east ??
-              applicationData?.additionalDetails?.adjoiningOwners?.east,
+            east: 
+            (applicationData?.additionalDetails?.submitReportinspection_pending?.east !== undefined &&
+              applicationData?.additionalDetails?.submitReportinspection_pending?.east !== null)
+             ? applicationData.additionalDetails.submitReportinspection_pending.east
+             : applicationData?.additionalDetails?.adjoiningOwners?.east,
 
             west:
-              applicationData?.additionalDetails?.submitReportinspection_pending?.west ??
-              applicationData?.additionalDetails?.adjoiningOwners?.west,
+              (applicationData?.additionalDetails?.submitReportinspection_pending?.west !== undefined &&
+               applicationData?.additionalDetails?.submitReportinspection_pending?.west !== null)
+              ? applicationData.additionalDetails.submitReportinspection_pending.west
+              : applicationData?.additionalDetails?.adjoiningOwners?.west,
           }
       },
        workflow:{
@@ -345,6 +354,10 @@ const fetchDscTokens = async () => {
       setShowEsignModal(true);
     }
   }, [dscTokens, isDscLoading]);
+
+  useEffect(() => {
+    setTokenPassword("");
+  },[selectedCertificate,selectedDscToken]);
 
     const fetchDscCertificates = async () => {
     try {
@@ -521,6 +534,10 @@ const fetchDscTokens = async () => {
   };
 
     const signPdfWithDSC = async (fileStoreId) => {
+    if(!tokenPassword) {
+    alert(t("WF_ENTER_TOKEN_PASSWORD_ERROR"));
+    return;
+  }
     const metaRes = await Digit.OBPSV2Services.dscGetFileMetaData({
       tenantId: applicationData?.tenantId,
       fileStoreId,
@@ -528,7 +545,7 @@ const fetchDscTokens = async () => {
 
     const inputRes = await Digit.OBPSV2Services.dscGetPdfSignInput({
       tokenDisplayName: selectedDscToken.code,
-      keyStorePassPhrase: "12345678",
+      keyStorePassPhrase: tokenPassword,
       keyId: selectedCertificateKeyId,
       file: fileStoreId,
       fileName: metaRes.fileName,
@@ -580,6 +597,8 @@ const fetchDscTokens = async () => {
       dscCertificates,
       selectedCertificate,
       setSelectedCertificate,
+      tokenPassword,
+      setTokenPassword
         })
       );
     }

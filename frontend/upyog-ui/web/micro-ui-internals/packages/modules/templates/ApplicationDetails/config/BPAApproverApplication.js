@@ -1,4 +1,4 @@
-import { Dropdown, UploadFile } from "@upyog/digit-ui-react-components";
+import { Dropdown, TextInput, UploadFile } from "@upyog/digit-ui-react-components";
 import React from "react";
 
 export const configBPAApproverApplication = ({
@@ -17,6 +17,8 @@ export const configBPAApproverApplication = ({
   dscTokens = [],
   selectedDscToken,
   setSelectedDscToken,
+  tokenPassword,
+  setTokenPassword,
   dscCertificates = [],
   selectedCertificate,
   setSelectedCertificate,
@@ -69,7 +71,24 @@ if (action?.action === "DSC") {
                 placeholder={t("WF_SELECT_CERTIFICATE")}
               />
             ),
-          }
+          },
+          //Conditional Field to show password input only when token is selected and certificates are loading
+          ...(selectedDscToken
+            ?[
+          {
+            label: t("WF_TOKEN_PASSWORD"),
+            type: "text",
+            populators: (
+              <TextInput
+                type="password"
+                value={tokenPassword}
+                onChange={(e) => setTokenPassword(e.target.value)}
+                placeholder={t("WF_ENTER_TOKEN_PASSWORD")}
+              />
+            ),
+          },
+            ]
+            :[]),
         ],
       },
     ],
@@ -93,6 +112,9 @@ if (action?.action === "DSC") {
               isMandatory: isCommentRequired,
               populators: {
                 name: "comments",
+                style: {
+                height: "160px",
+              },
               },
             },
             {
@@ -148,6 +170,9 @@ if (action?.action === "DSC") {
             populators: {
               name: "comments",
             },
+            style: {
+            height: "160px",
+          },
           },
           {
             label: `${t("WF_APPROVAL_UPLOAD_HEAD")}`,

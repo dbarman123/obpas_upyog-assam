@@ -276,6 +276,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
             optionKey="i18nKey"
             select={(value) => setPermanentState(value)}
             placeholder={t("BPA_SELECT_STATE")}
+            disable={true}
           />
 
           {/* District */}
@@ -288,6 +289,7 @@ const AddressDetails = ({ t, config, onSelect, formData, searchResult}) => {
             optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
             select={(value) => setPermanentDistrict(value)}
             placeholder={t("BPA_SELECT_DISTRICT")}
+            disable={!!(formData?.address?.permanent?.district || formData?.areaMapping?.district || searchResultDistrict)}
           />
 
           {/* City/Village */}
