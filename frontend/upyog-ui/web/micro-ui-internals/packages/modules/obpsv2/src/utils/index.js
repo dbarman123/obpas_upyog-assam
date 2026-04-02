@@ -148,10 +148,11 @@ export const bpaPayload = async(data) => {
         ...(data?.areaMapping?.bpAuthority?.code === "GRAM_PANCHAYAT" && {
           villageName: data?.areaMapping?.villageName?.code,
         }),
-        ...(data?.areaMapping?.bpAuthority?.code === "MUNICIPAL_CORPORATION" && {
-          revenueVillage: data?.areaMapping?.revenueVillage?.code,
-          mouza: data?.areaMapping?.mouza?.code,
-        }),
+        ...((data?.areaMapping?.bpAuthority?.code === "MUNICIPAL_CORPORATION" ||
+          data?.areaMapping?.bpAuthority?.code === "MC") && {
+            revenueVillage: data?.areaMapping?.revenueVillage?.code,
+        mouza: data?.areaMapping?.mouza?.code,
+          }),
       },      
 
       rtpDetails: {

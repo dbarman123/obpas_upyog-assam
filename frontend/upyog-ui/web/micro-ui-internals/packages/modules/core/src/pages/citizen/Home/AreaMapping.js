@@ -39,7 +39,9 @@ const AreaMapping = () => {
       return baseValidation || !ward || !revenueVillage;
     } else if (bpAuthority?.code === "GRAM_PANCHAYAT") {
       return baseValidation || !villageName;
-    } else if (bpAuthority?.code === "MUNICIPAL_CORPORATION") {
+    } else if (bpAuthority?.code === "MUNICIPAL_CORPORATION" ||
+      bpAuthority?.code === "MC"
+    ) {
       return baseValidation || !mouza || !revenueVillage;
     }
     
@@ -60,8 +62,9 @@ const AreaMapping = () => {
       bpAuthority,
       ...(bpAuthority?.code === "MUNICIPAL_BOARD" && { ward, revenueVillage }),
       ...(bpAuthority?.code === "GRAM_PANCHAYAT" && { villageName }),
-      ...(bpAuthority?.code === "MUNICIPAL_CORPORATION" && { mouza, revenueVillage }),
-      mouza
+      ...((bpAuthority?.code === "MUNICIPAL_CORPORATION" ||
+          bpAuthority?.code === "MC") && { mouza, revenueVillage }
+      ),mouza
     };
     
     Digit.SessionStorage.set("CITIZEN.AREA.MAPPING", areaMappingStep);
