@@ -78,15 +78,12 @@ if (action?.action === "DSC") {
           {
             label: t("WF_TOKEN_PASSWORD"),
             type: "text",
-            populators: (
-              <TextInput
-                type="password"
-                value={tokenPassword}
-                onChange={(e) => setTokenPassword(e.target.value)}
-                placeholder={t("WF_ENTER_TOKEN_PASSWORD")}
-              />
-            ),
-          },
+  populators: {
+    name: "tokenPassword",
+    type: "password",
+    placeholder: t("WF_ENTER_TOKEN_PASSWORD"),
+  }
+}
             ]
             :[]),
         ],
