@@ -188,7 +188,7 @@ const AreaMapping = ({
         setRevenueVillages(formattedRevenueVillages);
         setVillages([]);
 
-      } else if (bpAuthority?.code === "MUNICIPAL_CORPORATION") {
+      } else if (bpAuthority?.code === "MUNICIPAL_CORPORATION" || bpAuthority?.code === "MC") {
         const formattedMouzaOptions = fetchedLocalities.map((mouza) => ({
           code: mouza.code,
           name: mouza.name,
@@ -471,6 +471,32 @@ const AreaMapping = ({
               pattern="^[A-Za-z0-9 ]+$"
               title={t("BPA_NAME_ERROR_MESSAGE")}
             />
+          )}
+          {bpAuthority?.code === "MC" && (
+            <>
+              <CardLabel>
+                {`${t("REVENUE_VILLAGE")}`}{" "}
+                <span className="check-page-link-button">*</span>
+              </CardLabel>
+              <Dropdown
+                t={t}
+                option={
+                  revenueVillages?.filter(
+                    rv => rv.parentMouzaCode === mouza?.code
+                  ) || []
+                }
+                optionKey="i18nKey"
+                selected={revenueVillage}
+                select={setRevenueVillage}
+                disable={isDisabled}
+                optionCardStyles={{ maxHeight: "300px", overflowY: "auto" }}
+                placeholder={
+                  !mouza
+                    ? t("SELECT_MOUZA_FIRST")
+                    : t("SELECT_REVENUE_VILLAGE")
+                }
+              />
+            </>
           )}
         </>
       )}
