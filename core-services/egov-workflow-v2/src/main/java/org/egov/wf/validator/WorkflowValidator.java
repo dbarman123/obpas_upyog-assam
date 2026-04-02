@@ -1,22 +1,47 @@
 package org.egov.wf.validator;
 
-import org.apache.commons.lang.StringUtils;
+import static org.egov.wf.util.WorkflowConstants.CITIZEN_TYPE;
+import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_TENANT;
+import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_PARENT_TENANT_ID;
+import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_TENANT_CODE;
+import static org.egov.wf.util.WorkflowConstants.MDMS_TENANTS;
+import static org.egov.wf.util.WorkflowConstants.RATE_ACTION;
+import static org.egov.wf.util.WorkflowConstants.SENDBACKTOCITIZEN;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
 import org.egov.common.contract.request.User;
+import org.egov.mdms.model.MasterDetail;
+import org.egov.mdms.model.MdmsCriteria;
+import org.egov.mdms.model.MdmsCriteriaReq;
+import org.egov.mdms.model.MdmsResponse;
+import org.egov.mdms.model.ModuleDetail;
 import org.egov.tracer.model.CustomException;
+import org.egov.wf.config.WorkflowConfig;
+import org.egov.wf.service.MDMSService;
 import org.egov.wf.util.BusinessUtil;
 import org.egov.wf.util.WorkflowUtil;
-import org.egov.wf.web.models.*;
+import org.egov.wf.web.models.Action;
+import org.egov.wf.web.models.BusinessService;
+import org.egov.wf.web.models.ProcessInstance;
+import org.egov.wf.web.models.ProcessStateAndAction;
+import org.egov.wf.web.models.State;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.egov.wf.util.WorkflowConstants.*;
+import net.minidev.json.JSONArray;
 
 
 @Component
@@ -26,6 +51,12 @@ public class WorkflowValidator {
     private WorkflowUtil util;
 
     private BusinessUtil businessUtil;
+    
+    @Autowired
+    private MDMSService mdmsService;
+    
+    @Autowired
+    private WorkflowConfig workflowConfig;
 
 
     @Autowired
@@ -98,16 +129,28 @@ public class WorkflowValidator {
      */
     private void validateAction(RequestInfo requestInfo,List<ProcessStateAndAction> processStateAndActions
             ,BusinessService businessService){
+    	String parentTenantId = null;
+    	
+    	//Fetching mdms details for tenantId
+    	Map<String, Map<String, JSONArray>> response = fetchMdmsResponseForTenantId(requestInfo);
 
         Map<String,List<String>> tenantIdToRoles = util.getTenantIdToUserRolesMap(requestInfo);
 
         for(ProcessStateAndAction processStateAndAction : processStateAndActions){
             String tenantId= processStateAndAction.getProcessInstanceFromRequest().getTenantId();
             List<String> roles = new LinkedList<>();
+            
+            //fetch Parent Tenant By Application TenantId
+            if(response != null) {
+            	 parentTenantId = fetchParentTenantByApplicationTenantId(response,tenantId);
+            }
 
             // Adding tenant level roles
-            if(!CollectionUtils.isEmpty(tenantIdToRoles.get(tenantId)))
+            if(!CollectionUtils.isEmpty(tenantIdToRoles.get(tenantId))) {
                 roles.addAll(tenantIdToRoles.get(tenantId));
+            }else if(!CollectionUtils.isEmpty(tenantIdToRoles.get(parentTenantId))) {
+            	roles.addAll(tenantIdToRoles.get(parentTenantId));
+            }
 
             // Adding the state level roles
             if(!CollectionUtils.isEmpty(tenantIdToRoles.get(tenantId.split("\\.")[0]))){
@@ -188,9 +231,88 @@ public class WorkflowValidator {
 
         }
     }
+    
+	@SuppressWarnings("unchecked")
+	private String fetchParentTenantByApplicationTenantId(Map<String, Map<String, JSONArray>> response,
+			String tenantId) {
 
+		if (response == null || tenantId == null) {
+			return null;
+		}
 
-    private List<String> getRolesFromState(State state){
+		Map<String, JSONArray> tenantModule = response.get(MDMS_MODULE_TENANT);
+		if (tenantModule == null) {
+			return null;
+		}
+
+		JSONArray tenants = tenantModule.get(MDMS_TENANTS);
+		if (tenants == null || tenants.isEmpty()) {
+			return null;
+		}
+
+		for (Object obj : tenants) {
+
+			if (obj == null || !(obj instanceof Map)) {
+				continue;
+			}
+
+			Map<String, Object> tenant = (Map<String, Object>) obj;
+
+			Object codeObj = tenant.get(MDMS_MODULE_TENANT_CODE);
+			if (codeObj == null) {
+				continue;
+			}
+
+			String code = String.valueOf(codeObj);
+
+			if (tenantId.equalsIgnoreCase(code)) {
+				Object parentTenant = tenant.get(MDMS_MODULE_PARENT_TENANT_ID);
+				return parentTenant != null ? String.valueOf(parentTenant) : null;
+			}
+		}
+
+		return null;
+	}
+
+	private Map<String, Map<String, JSONArray>> fetchMdmsResponseForTenantId(RequestInfo requestInfo) {
+
+		ModuleDetail tenantDetail = getTenants();
+		if (tenantDetail == null) {
+			return Collections.emptyMap();
+		}
+
+		List<ModuleDetail> moduleDetails = Collections.singletonList(tenantDetail);
+
+		String tenantId = workflowConfig != null ? workflowConfig.getStateLevelTenantId() : null;
+
+		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().moduleDetails(moduleDetails).tenantId(tenantId).build();
+
+		MdmsCriteriaReq mdmsCriteriaReq = MdmsCriteriaReq.builder().mdmsCriteria(mdmsCriteria).requestInfo(requestInfo)
+				.build();
+
+		MdmsResponse response = mdmsService != null ? mdmsService.searchMaster(mdmsCriteriaReq) : null;
+
+		return response != null && response.getMdmsRes() != null ? response.getMdmsRes() : Collections.emptyMap();
+	}
+
+    /**
+     * Creates MDMS ModuleDetail object for tenants
+     * @return ModuleDetail for tenants
+     */
+    private ModuleDetail getTenants() {
+
+        // master details for WF module
+        List<MasterDetail> masterDetails = new ArrayList<>();
+
+        masterDetails.add(MasterDetail.builder().name(MDMS_TENANTS).build());
+
+        ModuleDetail wfModuleDtls = ModuleDetail.builder().masterDetails(masterDetails)
+                .moduleName(MDMS_MODULE_TENANT).build();
+
+        return wfModuleDtls;
+    }
+
+	private List<String> getRolesFromState(State state){
         List<String> transitionRoles = new LinkedList<>();
         if(!CollectionUtils.isEmpty(state.getActions())){
             state.getActions().forEach(action -> {

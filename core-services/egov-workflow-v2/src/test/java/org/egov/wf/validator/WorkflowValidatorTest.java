@@ -15,6 +15,8 @@ import java.util.List;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
+import org.egov.wf.config.WorkflowConfig;
+import org.egov.wf.service.MDMSService;
 import org.egov.wf.util.BusinessUtil;
 import org.egov.wf.util.WorkflowUtil;
 import org.egov.wf.web.models.Action;
@@ -43,6 +45,12 @@ class WorkflowValidatorTest {
 
     @Autowired
     private WorkflowValidator workflowValidator;
+    
+    @MockBean
+    private MDMSService mdmsService;
+    
+    @MockBean
+    private WorkflowConfig workflowConfig;
 
 
 
