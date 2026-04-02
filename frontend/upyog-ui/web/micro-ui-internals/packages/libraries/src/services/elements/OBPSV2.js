@@ -621,6 +621,12 @@ export const OBPSV2Services = {
             value: bpa?.areaMapping?.revenueVillage || "NA",
           },
         ] : []),
+        ...(bpa?.areaMapping?.buildingPermitAuthority === "MUNICIPAL_CORPORATION" || bpa?.areaMapping?.buildingPermitAuthority === "MC" ? [
+          {
+            title: "REVENUE_VILLAGE",
+            value: bpa?.areaMapping?.revenueVillage || "NA",
+          },
+        ] : []),
         ...(bpa?.areaMapping?.buildingPermitAuthority === "GRAM_PANCHAYAT" ? [
           {
             title: "VILLAGE_NAME",

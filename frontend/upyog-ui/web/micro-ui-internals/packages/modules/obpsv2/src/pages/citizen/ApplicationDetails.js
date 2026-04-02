@@ -1135,6 +1135,15 @@ import {
                   text={t(areaMapping?.villageName) || t("CS_NA")}
                 />
               )}
+              {(areaMapping?.buildingPermitAuthority === "MC" || 
+              areaMapping?.buildingPermitAuthority === "MUNICIPAL_CORPORATION") && (
+              <>
+                <Row
+                  label={t("REVENUE_VILLAGE")}
+                  text={t(areaMapping?.revenueVillage) || t("CS_NA")}
+                />
+              </>
+            )}
               <Row
                 label={t("MOUZA")}
                 text={areaMapping?.mouza || t("CS_NA")}
