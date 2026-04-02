@@ -1,7 +1,7 @@
 package org.egov.wf.validator;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -10,11 +10,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
+import org.egov.wf.config.WorkflowConfig;
+import org.egov.wf.service.MDMSService;
 import org.egov.wf.util.BusinessUtil;
 import org.egov.wf.util.WorkflowUtil;
 import org.egov.wf.web.models.Action;
@@ -24,7 +25,6 @@ import org.egov.wf.web.models.Document;
 import org.egov.wf.web.models.ProcessInstance;
 import org.egov.wf.web.models.ProcessStateAndAction;
 import org.egov.wf.web.models.State;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +44,11 @@ class WorkflowValidatorTest {
     @Autowired
     private WorkflowValidator workflowValidator;
 
+    @MockBean
+    private MDMSService mdmsService;
+    
+    @MockBean
+    private WorkflowConfig workflowConfig;
 
 
 
