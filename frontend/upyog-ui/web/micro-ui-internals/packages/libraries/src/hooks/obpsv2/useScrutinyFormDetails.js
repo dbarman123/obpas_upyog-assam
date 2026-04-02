@@ -211,7 +211,7 @@ const useScrutinyFormDetails = (edcrNumber, tenantId) => {
           plan?.blocks?.[0]?.building?.floors?.map((f, i) => {
             const occ = f?.occupancies?.[0] || {};
             return {
-              label: f?.name || `Floor ${f?.number ?? i + 1}`,
+              label: f?.name || `Floor ${(f && f.number != null) ? f.number : (i + 1)}`,
               existing: occ?.builtUpArea || "",
               proposed: occ?.proposed || "",
               total: occ?.total || "",
@@ -219,10 +219,10 @@ const useScrutinyFormDetails = (edcrNumber, tenantId) => {
           }) || [];
 
         const sanitaryDetails = [
-          { description: "NUMBER OF URINALS", total: plan?.totalUrinals ?? 0 },
-          { description: "NUMBER OF BATHROOMS", total: plan?.totalBathrooms ?? 0 },
-          { description: "NUMBER OF LATRINES", total: plan?.totalLatrines ?? 0 },
-          { description: "NUMBER OF KITCHENS", total: plan?.totalKitchens ?? 0 },
+          { description: "NUMBER OF URINALS", total: (plan && plan.totalUrinals != null) ? plan.totalUrinals : 0 },
+          { description: "NUMBER OF BATHROOMS", total: (plan && plan.totalBathrooms != null) ? plan.totalBathrooms : 0 },
+          { description: "NUMBER OF LATRINES", total: (plan && plan.totalLatrines != null) ? plan.totalLatrines : 0 },
+          { description: "NUMBER OF KITCHENS", total: (plan && plan.totalKitchens != null) ? plan.totalKitchens : 0 },
         ];
 
         setForm23B({

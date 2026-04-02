@@ -52,7 +52,7 @@ export function startHdfcPayment(createOrderResponse) {
       const inp = document.createElement('input');
       inp.type = 'hidden';
       inp.name = name;
-      inp.value = value ?? '';
+      inp.value = (value != null) ? value : '';
       form.appendChild(inp);
     };
 

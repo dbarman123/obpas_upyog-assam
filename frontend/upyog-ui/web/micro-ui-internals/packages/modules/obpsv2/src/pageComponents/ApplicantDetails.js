@@ -82,6 +82,7 @@ const ApplicantDetails = ({ t, config, onSelect, formData, searchResult }) => {
             value={applicantName}
             onChange={(e) => setApplicantName(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
             ValidationRequired={true}
+            disabled={!!(formData?.applicant?.applicantName || searchResult?.landInfo?.owners?.[0]?.name || user?.name)}
             {...{ pattern: "^[a-zA-Z ]+$", title: t("BPA_NAME_ERROR_MESSAGE") }}
           />
 
@@ -92,7 +93,14 @@ const ApplicantDetails = ({ t, config, onSelect, formData, searchResult }) => {
             name="mobileNumber"
             placeholder="Enter Mobile Number"
             onChange={(value) => setMobileNumber(value)}
-            {...{ pattern: "[6-9]{1}[0-9]{9}", title: t("CORE_COMMON_APPLICANT_MOBILE_NUMBER_INVALID") }}
+            disable={
+                !!(
+                  formData?.applicant?.mobileNumber ||
+                  searchResult?.landInfo?.owners?.[0]?.mobileNumber ||
+                  user?.mobileNumber
+                )
+              }            
+              {...{ pattern: "[6-9]{1}[0-9]{9}", title: t("CORE_COMMON_APPLICANT_MOBILE_NUMBER_INVALID") }}
           />
 
           {/* Alternate Mobile Number */}
@@ -129,6 +137,7 @@ const ApplicantDetails = ({ t, config, onSelect, formData, searchResult }) => {
               }
               setEmail(e.target.value)}
             }
+            disabled={!!(formData?.applicant?.emailId ||  searchResult?.landInfo?.owners?.[0]?.emailId || user?.emailId)}
             //ValidationRequired={true}
             // {...{ pattern: "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", title: t("BPA76_EMAIL_ERROR_MESSAGE") }}
           />

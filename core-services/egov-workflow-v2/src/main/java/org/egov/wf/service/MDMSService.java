@@ -1,10 +1,14 @@
 package org.egov.wf.service;
 
 import com.jayway.jsonpath.JsonPath;
+
+import net.minidev.json.JSONArray;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MasterDetail;
 import org.egov.mdms.model.MdmsCriteria;
 import org.egov.mdms.model.MdmsCriteriaReq;
+import org.egov.mdms.model.MdmsResponse;
 import org.egov.mdms.model.ModuleDetail;
 import org.egov.wf.config.WorkflowConfig;
 import org.egov.wf.repository.ServiceRequestRepository;
@@ -210,9 +214,10 @@ public class MDMSService {
     }
 
 
+	public MdmsResponse searchMaster(MdmsCriteriaReq mdmsCriteriaReq) {
+		MdmsResponse mdmsResponse = serviceRequestRepository.fetchMdmsResult(getMdmsSearchUrl(), mdmsCriteriaReq);
 
-
-
-
+		return mdmsResponse;
+	}
 
 }
