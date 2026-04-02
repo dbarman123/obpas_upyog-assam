@@ -236,8 +236,8 @@ public class AdditionalFeature_Assam extends FeatureProcess {
             if (block.getBuilding() != null && !block.getBuilding().getFloors().isEmpty())
                 for(Floor floor: block.getBuilding().getFloors()){
                     for(Lobby lobby: floor.getLobby()){
-                        BigDecimal lobbyWidth = lobby.getLobbyWidths().stream().reduce(BigDecimal::max).get();
-
+                        BigDecimal lobbyWidth = lobby.getLobbyWidths().stream().reduce(BigDecimal::max).orElse(BigDecimal.ZERO);
+                        
                         ReportScrutinyDetail detail = new ReportScrutinyDetail();
                         detail.setFloorNo(floor.getNumber().toString());
                         detail.setDescription("Width of Lobby " + lobby.getNumber());
