@@ -68,6 +68,9 @@ class EnrichmentServiceTest {
     
     @MockBean
     private WorkflowConfig workflowConfig;
+    
+    @MockBean
+    private MDMSService mdmsService;
 
 
     @Test
