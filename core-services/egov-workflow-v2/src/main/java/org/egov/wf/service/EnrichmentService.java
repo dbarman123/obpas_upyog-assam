@@ -166,7 +166,8 @@ public class EnrichmentService {
 
 		String businessService = processInstanceFromRequest.getBusinessService();
 		
-		List<String> allTenantIds = Arrays.asList(tenantId);
+		List<String> allTenantIds = new ArrayList<>();
+		allTenantIds.add(tenantId);
 		
 		Map<String, User> idToUserMap = new HashMap<>();
 				
