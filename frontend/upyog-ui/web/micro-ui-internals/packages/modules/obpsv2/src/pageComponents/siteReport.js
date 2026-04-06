@@ -6,7 +6,10 @@ import {
   DatePicker,
   TextArea,
   CheckBox,
-  RadioButtons
+  RadioButtons,
+  CardSubHeader,
+  LabelFieldPair,
+  Dropdown
 } from "@upyog/digit-ui-react-components";
 import MultiUploadWrapper from "../../../../react-components/src/molecules/MultiUploadWrapper";
 import { useTranslation } from "react-i18next";
@@ -19,6 +22,8 @@ const siteReport = ({submitReport, onChange, data}) => {
   const { t } = useTranslation();
   const [buildingPermitAuthority, setBuildingPermitAuthority] = useState("");
   const [siteQuestions, setSiteQuestions] = useState([]);
+  const [error, setError] = useState(null);
+  const [documents, setDocuments] = useState([]);
   const userInfo = Digit.UserService.getUser();
   const { data: siteQuestionLists } = Digit.Hooks.useEnabledMDMS(
     stateId, 
@@ -481,6 +486,14 @@ console.log("formData==",form)
     wordBreak: "break-word",
     lineHeight: "1.4", 
   };
+
+  const handleDocumentUploadForField = (fieldKey, fileData) => {
+  const updatedForm = {
+    ...form,
+    [fieldKey]: fileData? fileData.fileStoreId : ""
+  };
+  setForm(updatedForm);
+};
   
   // Updated renderFieldWithRemarks to accept question object
   const renderFieldWithRemarks = (question) => {
@@ -560,6 +573,37 @@ console.log("formData==",form)
               placeholder={t("REMARKS")}
               rows={3}
             />
+          </div>
+        ) : dataType === "fileInput" ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {!isNotApplicable && (
+          <div
+            style={{
+              fontSize: "12px",
+              color: "#666",
+              fontStyle: "italic",
+              marginTop:"-5px"
+            }}
+          >
+          </div>
+        )}
+            <SelectDocument
+                            document={{code: fieldKey, required: mandatory}}
+                            t={t}
+                            error={error}
+                            fieldKey ={fieldKey}
+                            value={form[fieldKey] || ""}
+                            setError={setError}
+                            handleChange={handleChange}
+                            handleDocumentUpload = {handleDocumentUploadForField}
+                            setDocuments={(docs)=>{
+                              if(docs && docs.length > 0){
+                                const fileObj = docs[0];
+                                handleChange(fieldKey, fileObj?.fileStoreId);
+                                // handleChange(`${fieldKey}_DETAILS`,fileObj);
+                              }
+                            }}
+                        />
           </div>
         ) : null}
       </React.Fragment>
@@ -956,5 +1000,159 @@ console.log("formData==",form)
     </React.Fragment>
   );
 }
+function SelectDocument({
+    t,
+    document: doc,
+    setDocuments,
+    error,
+    setError,
+    handleDocumentUpload,
+    documents=[],
+    fieldKey,
+}) {
 
+    
+    const tenantId = Digit.ULBService.getStateId();
+
+    const [file, setFile] = useState(null);
+    const [uploadedFile, setUploadedFile] = useState(null);
+
+    const allowedFileTypes = /(.*?)(jpg|jpeg|png)$/i;
+
+  const checkGeoTag = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const view = new DataView(e.target.result);
+        let hasGPS = false;
+
+        for(let i=0;i< view.byteLength;i++){
+          if(view.getUint8(i) === 0x47 && view.getUint8(i+1) === 0x50 && view.getUint8(i+2) === 0x53){
+            hasGPS = true;
+            break;
+          }
+        }
+        resolve(hasGPS);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+    function selectfiles(e) {
+        e && setFile(e.file);
+    }
+
+    const getData = async (state) => {
+      let data = Object.fromEntries(state);
+      let files = Object.values(data);
+      if(!files.length){ 
+        setFile(null);
+        setUploadedFile(null);
+        setError(null);
+
+        handleDocumentUpload(fieldKey, null);
+        setDocuments([]);
+        return
+      };
+
+      let latestFile = files[files.length - 1];
+      const fileObj =latestFile?.file;
+
+      if(!allowedFileTypes.test(fileObj?.name)){
+        setError(t("BPA_INVALID_FILE_TYPE"));
+        return;
+      }
+//Optional Validation if requred
+      if(fileObj.size > 10*1024*1024){
+        setError(t("BPA_FILE_SIZE_EXCEEDED"));
+        return;
+      }
+      if(fileObj){
+        const isGeoTagged = await checkGeoTag(fileObj);
+        if(!isGeoTagged){
+          setError(t("BPA_GEO_TAGGING_REQUIRED"));
+          return;
+        }
+      }
+setError(null);
+setFile(fileObj);
+const fileStoreId = typeof latestFile?.fileStoreId === "string" ? latestFile.fileStoreId : latestFile?.fileStoreId?.fileStoreId;
+setUploadedFile(fileStoreId);
+if(!fileStoreId){
+  return;
+}
+const docData = [{
+  documentType: doc?.code,
+  fileStoreId,
+  fieldKey,
+documentUid: fileStoreId,
+fileName: fileObj?.name || "",
+}];
+handleDocumentUpload(fieldKey, {
+  documentType: doc?.code,
+  fileStoreId,
+  documentUid: fileStoreId,
+  fileName: fileObj?.name || "",
+});
+setDocuments(docData);
+    };
+
+    return (
+                    <div>
+                        <LabelFieldPair style={{width: "100%"}}>
+                            <div className="field"  style={{width: "200%"}}>
+                                <MultiUploadWrapper
+                                    module="BPA"
+                                    tenantId={tenantId}
+                                    getFormState={(state) => getData(state)}
+                                    t={t}
+                                    allowedFileTypesRegex={allowedFileTypes}
+                                    allowedMaxSizeInMB={10}
+                                    acceptFiles= "image/*, .png, .jpeg, .jpg"
+                                    maxFiles={1}
+                                />
+                                <div style={{ fontSize: "12px", marginTop: "5px" }}>
+                          {t("CS_FILE_SIZE_RESTRICTION")}
+                        </div>
+                                {uploadedFile && (
+                        <div style={{ marginTop: "10px" }}>
+                            <DocumentsPreview
+                                documents={[
+                                    {
+                                        values: [
+                                            {
+                                                title: "GeoTagged Image",
+                                                url: `/filestore/v1/files/id?tenantId=${tenantId}&fileStoreId=${uploadedFile}`,
+                                                documentType: doc?.code,
+                                            },
+                                        ],
+                                    },
+                                ]}
+                                svgStyles={{
+                                    width: "100px",
+                                    height: "100px",
+                                    viewBox: "0 0 25 25",
+                                    minWidth: "100px",
+                                }}
+                                isSendBackFlow={false}
+                                isHrLine={true}
+                                titleStyles={{
+                                    fontSize: "16px",
+                                    lineHeight: "20px",
+                                    fontWeight: 600,
+                                    marginBottom: "8px",
+                                }}
+                            />
+                        </div>
+                    )}
+                                {error && (
+                                  <div style={{ color: "red", marginTop: "5px" }}>
+                                    {error}
+                                    </div>
+                                )}
+                                </div>
+                        </LabelFieldPair>
+                    </div> 
+    );
+}
 export default siteReport;
