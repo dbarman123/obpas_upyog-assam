@@ -196,8 +196,12 @@ public class EnrichmentService {
 		}
 
 		for(String validTenantId : allTenantIds) {
-		 idToUserMap = getAllowedAssigneeUsers(requestInfo, assigneeRole, validTenantId, businessService,
-				businessId, processInstanceFromRequest.getAllowedAssignees());
+			idToUserMap = getAllowedAssigneeUsers(requestInfo, assigneeRole, validTenantId, businessService,
+					businessId, processInstanceFromRequest.getAllowedAssignees());
+
+			if (idToUserMap != null && !idToUserMap.isEmpty()) {
+				break; // exit loop if map has data
+			}
 		}
 
 		logRequests(businessId, businessService, assigneeRole, idToUserMap,
