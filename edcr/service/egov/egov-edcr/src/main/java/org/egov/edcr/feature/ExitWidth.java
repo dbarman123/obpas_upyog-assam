@@ -664,14 +664,13 @@ public class ExitWidth extends FeatureProcess {
 			occupantLoad = getOccupantLoadOfAFloor(occupancy, occupantLoadDivisonFactor);
 			maxOccupantsAllowedThrghExits = getMaximumNumberOfOccupantsAllwdThroughExits(flr,
 					config.exitWidth_A_SR_noOfDoors, config.exitWidth_A_SR_noOfOccupantsPerUnitExitWidthOfStairWay);
-		} else if (occupancyTypeHelper.equals(DxfFileConstants.B) || occupancyTypeHelper.equals(DxfFileConstants.B2)
-				|| occupancyTypeHelper.equals(DxfFileConstants.B_HEI)) {
+		} else if (occupancyTypeHelper.equals(DxfFileConstants.B)) {
 			occupantLoadDivisonFactor = config.exitWidth_B_occupantLoadDivisonFactor;
 			occupantLoad = getOccupantLoadOfAFloor(occupancy, occupantLoadDivisonFactor);
 			maxOccupantsAllowedThrghExits = getMaximumNumberOfOccupantsAllwdThroughExits(flr,
 					config.exitWidth_B_noOfDoors, config.exitWidth_B_noOfOccupantsPerUnitExitWidthOfStairWay);
-		} else if (occupancyTypeHelper.equals(DxfFileConstants.C) || occupancyTypeHelper.equals(DxfFileConstants.C_MIP)
-				|| occupancyTypeHelper.equals(DxfFileConstants.C_MOP) || occupancyTypeHelper.equals(DxfFileConstants.C_MA)) {
+		} else if (occupancyTypeHelper.equals(DxfFileConstants.HEATH_FACILITES) || occupancyTypeHelper.equals(DxfFileConstants.HOSPITALS)
+				|| occupancyTypeHelper.equals(DxfFileConstants.CLINICS)) {
 			occupantLoadDivisonFactor = config.exitWidth_C_occupantLoadDivisonFactor;
 			occupantLoad = getOccupantLoadOfAFloor(occupancy, occupantLoadDivisonFactor);
 			maxOccupantsAllowedThrghExits = getMaximumNumberOfOccupantsAllwdThroughExits(flr,
@@ -694,8 +693,9 @@ public class ExitWidth extends FeatureProcess {
 			occupantLoad = getOccupantLoadOfAFloor(occupancy, occupantLoadDivisonFactor);
 			maxOccupantsAllowedThrghExits = getMaximumNumberOfOccupantsAllwdThroughExits(flr,
 					config.exitWidth_F_noOfDoors, config.exitWidth_F_noOfOccupantsPerUnitExitWidthOfStairWay);
-		} else if (occupancyTypeHelper.equals(DxfFileConstants.G) || occupancyTypeHelper.equals(DxfFileConstants.G_SI)
-				|| occupancyTypeHelper.equals(DxfFileConstants.G_PHI) || occupancyTypeHelper.equals(DxfFileConstants.G_NPHI)) {
+		} else if (occupancyTypeHelper.equals(DxfFileConstants.G) || occupancyTypeHelper.equals(DxfFileConstants.G_L)
+				|| occupancyTypeHelper.equals(DxfFileConstants.G_F) || occupancyTypeHelper.equals(DxfFileConstants.G_M)
+				|| occupancyTypeHelper.equals(DxfFileConstants.G_SF)) {
 			occupantLoadDivisonFactor = config.exitWidth_G_occupantLoadDivisonFactor;
 			occupantLoad = getOccupantLoadOfAFloor(occupancy, occupantLoadDivisonFactor);
 			maxOccupantsAllowedThrghExits = getMaximumNumberOfOccupantsAllwdThroughExits(flr,
@@ -877,6 +877,14 @@ public class ExitWidth extends FeatureProcess {
  * @return The calculated occupant load for the floor.
  */
     private BigDecimal getOccupantLoadOfAFloor(Occupancy occupancy, BigDecimal occupantLoadDivisonFactor) {
+    	if (occupantLoadDivisonFactor == null || occupantLoadDivisonFactor.compareTo(BigDecimal.ZERO) == 0) {
+            // Decide on a fallback strategy:
+            // Option 1: Return ZERO
+            return BigDecimal.ZERO;
+
+            // Option 2: Throw a custom exception
+            // throw new IllegalArgumentException("Occupant load division factor cannot be zero or null");
+        }
         return BigDecimal
                 .valueOf(Math.ceil(occupancy.getBuiltUpArea().divide(occupantLoadDivisonFactor, DECIMALDIGITS_MEASUREMENTS,
                         ROUNDMODE_MEASUREMENTS).doubleValue()));
