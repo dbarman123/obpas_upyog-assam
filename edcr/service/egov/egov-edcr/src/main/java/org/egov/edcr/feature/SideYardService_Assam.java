@@ -78,9 +78,6 @@ import static org.egov.edcr.constants.DxfFileConstants.D_AW;
 import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
-import static org.egov.edcr.constants.DxfFileConstants.G_LI;
-import static org.egov.edcr.constants.DxfFileConstants.G_PHI;
-import static org.egov.edcr.constants.DxfFileConstants.G_SI;
 import static org.egov.edcr.constants.DxfFileConstants.H;
 import static org.egov.edcr.constants.DxfFileConstants.I;
 import static org.egov.edcr.constants.EdcrReportConstants.BSMT_SIDE_YARD_DESC;
@@ -739,41 +736,72 @@ public class SideYardService_Assam extends SideYardService {
 	    subRule = SUB_RULE_SIDE_YARD;
 	    Map<String, String> errors = new HashMap<>();
 
-	    // Fetch rules from MDMS cache for SIDE_YARD_SERVICE
-	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.SIDE_YARD_SERVICE.getValue(), false);
+//	    // Fetch rules from MDMS cache for SIDE_YARD_SERVICE
+//	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.SIDE_YARD_SERVICE.getValue(), false);
+//
+//	    // Identify applicable rule (active rule)
+//	    Optional<SideYardServiceRequirement> matchedRule = rules.stream()
+//	            .filter(SideYardServiceRequirement.class::isInstance)
+//	            .map(SideYardServiceRequirement.class::cast)
+//	            .filter(SideYardServiceRequirement::getActive)
+//	            .findFirst();
+//
+//	    if (matchedRule.isPresent()) {
+//	        SideYardServiceRequirement mdmsRule = matchedRule.get();
+//
+//	        // Determine subtype-specific permissible values
+//	        String subtypeCode = mostRestrictiveOccupancy.getSubtype() != null
+//	                ? mostRestrictiveOccupancy.getSubtype().getCode()
+//	                : null;
+//
+//	        if (G_SI.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleLight();
+//	        } else if (G_LI.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleMedium();
+//	        } else if (G_PHI.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleFlattered();
+//	        } else {
+//	            meanVal = mdmsRule.getPermissible();
+//	        }
+//
+//	        minVal = meanVal;
+//	        LOG.info("Matched MDMS rule for Industrial subtype '{}': Permissible Side Yard = {}", subtypeCode, meanVal);
+//
+//	    } else {
+//	        LOG.warn("No matching MDMS rule found for building height: {}", buildingHeight);
+//	        errors.put("MDMS_RULE_MISSING", "No setback rule found for given building height in MDMS.");
+//	    }
+	    
+	    String subtypeCode = mostRestrictiveOccupancy != null && mostRestrictiveOccupancy.getSubtype() != null
+                ? mostRestrictiveOccupancy.getSubtype().getCode()
+                : null;
+        
+        String typeCode = mostRestrictiveOccupancy != null && mostRestrictiveOccupancy.getType() != null
+                ? mostRestrictiveOccupancy.getType().getCode()
+                : null;
+		if (DxfFileConstants.INDUSTRIAL.equals(typeCode)) {
+			if (DxfFileConstants.INDUSTRIAL_LIGHT.equals(subtypeCode)) {
+				meanVal = new BigDecimal("5");
+			} else if (DxfFileConstants.INDUSTRIAL_MEDUIM.equals(subtypeCode)) {
+				meanVal = new BigDecimal("6");
+			} else if (DxfFileConstants.INDUSTRIAL_FLATTED.equals(subtypeCode)) {
+				meanVal = new BigDecimal("6");
+			} else if (DxfFileConstants.INDUSTRIAL_STANDALONE_FACTORY.equals(subtypeCode)) {
+				if (plotArea.compareTo(new BigDecimal("744")) <= 0) {
+					meanVal = new BigDecimal("1.8");
+				} else if (plotArea.compareTo(new BigDecimal("744")) > 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0) {
+					meanVal = new BigDecimal("3");
+				} else if (plotArea.compareTo(new BigDecimal("1338")) > 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0) {
+					meanVal = new BigDecimal("6");
+				} else {
+					meanVal = new BigDecimal("6");
+				}
 
-	    // Identify applicable rule (active rule)
-	    Optional<SideYardServiceRequirement> matchedRule = rules.stream()
-	            .filter(SideYardServiceRequirement.class::isInstance)
-	            .map(SideYardServiceRequirement.class::cast)
-	            .filter(SideYardServiceRequirement::getActive)
-	            .findFirst();
-
-	    if (matchedRule.isPresent()) {
-	        SideYardServiceRequirement mdmsRule = matchedRule.get();
-
-	        // Determine subtype-specific permissible values
-	        String subtypeCode = mostRestrictiveOccupancy.getSubtype() != null
-	                ? mostRestrictiveOccupancy.getSubtype().getCode()
-	                : null;
-
-	        if (G_SI.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleLight();
-	        } else if (G_LI.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleMedium();
-	        } else if (G_PHI.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleFlattered();
-	        } else {
-	            meanVal = mdmsRule.getPermissible();
-	        }
-
-	        minVal = meanVal;
-	        LOG.info("Matched MDMS rule for Industrial subtype '{}': Permissible Side Yard = {}", subtypeCode, meanVal);
-
-	    } else {
-	        LOG.warn("No matching MDMS rule found for building height: {}", buildingHeight);
-	        errors.put("MDMS_RULE_MISSING", "No setback rule found for given building height in MDMS.");
-	    }
+			}
+			minVal = meanVal;
+		}
 
 	    // Validate actual min value against permissible value
 	    boolean valid = validateMinimumAndMeanValue(BigDecimal.valueOf(min), minVal, plotArea);
