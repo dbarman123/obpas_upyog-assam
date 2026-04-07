@@ -488,12 +488,47 @@ console.log("formData==",form)
   };
 
   const handleDocumentUploadForField = (fieldKey, fileData) => {
-  const updatedForm = {
-    ...form,
-    [fieldKey]: fileData? fileData.fileStoreId : ""
+  const fileStoreId = fileData ? fileData.fileStoreId : "";
+
+  setForm(prev => ({
+    ...prev,
+    [fieldKey]: fileStoreId
+  }));
+
+  setInspectionCheckList(prev => ({
+    ...prev,
+    [fieldKey]: fileStoreId
+  }));
+
+  const existingData = JSON.parse(sessionStorage.getItem("SUBMIT_REPORT_DATA")) || {
+    submitReport: {},
+    siteInspectionQuestions: {},
+    nocList: [],
+    nocDetails: {}
   };
-  setForm(updatedForm);
+
+  const updatedSessionData = {
+    ...existingData,
+    submitReport: {
+      ...existingData.submitReport,
+      [fieldKey]: fileStoreId
+    },
+    siteInspectionQuestions: {
+      ...existingData.siteInspectionQuestions,
+      [fieldKey]: fileStoreId
+    }
+  };
+
+  sessionStorage.setItem("SUBMIT_REPORT_DATA", JSON.stringify(updatedSessionData));
 };
+
+//   const handleDocumentUploadForField = (fieldKey, fileData) => {
+//   const updatedForm = {
+//     ...form,
+//     [fieldKey]: fileData? fileData.fileStoreId : ""
+//   };
+//   setForm(updatedForm);
+// };
   
   // Updated renderFieldWithRemarks to accept question object
   const renderFieldWithRemarks = (question) => {
@@ -595,14 +630,14 @@ console.log("formData==",form)
                             value={form[fieldKey] || ""}
                             setError={setError}
                             handleChange={handleChange}
+                            setDocuments={setDocuments}
                             handleDocumentUpload = {handleDocumentUploadForField}
-                            setDocuments={(docs)=>{
-                              if(docs && docs.length > 0){
-                                const fileObj = docs[0];
-                                handleChange(fieldKey, fileObj?.fileStoreId);
-                                // handleChange(`${fieldKey}_DETAILS`,fileObj);
-                              }
-                            }}
+                            onDocumentUpload={(docs)=>{
+                            if(docs && docs.length > 0){
+                              const fileObj = docs[0];
+                              handleDocumentUploadForField(fieldKey, fileObj);
+                            }
+                          }}
                         />
           </div>
         ) : null}
@@ -1003,6 +1038,7 @@ console.log("formData==",form)
 function SelectDocument({
     t,
     document: doc,
+    onDocumentUpload,
     setDocuments,
     error,
     setError,
@@ -1094,7 +1130,7 @@ handleDocumentUpload(fieldKey, {
   documentUid: fileStoreId,
   fileName: fileObj?.name || "",
 });
-setDocuments(docData);
+onDocumentUpload && onDocumentUpload(docData);
     };
 
     return (
