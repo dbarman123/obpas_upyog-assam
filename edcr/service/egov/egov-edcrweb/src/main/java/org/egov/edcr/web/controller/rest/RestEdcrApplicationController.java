@@ -289,7 +289,8 @@ public class RestEdcrApplicationController {
                 edcrDetail = edcrRestService.createEdcr(edcr, planFile, masterData);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
+        	e.printStackTrace();
             ErrorResponse error = new ErrorResponse(INCORRECT_REQUEST, e.getLocalizedMessage(),
                     HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
