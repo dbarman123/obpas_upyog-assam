@@ -150,12 +150,14 @@ public class UserService {
         StringBuilder url = new StringBuilder(config.getUserHost());
         url.append(config.getUserSearchEndpoint());
         UserDetailResponse userDetailResponse = userCall(userSearchRequest,url);
-        if(CollectionUtils.isEmpty(userDetailResponse.getUser()))
-            throw new CustomException("INVALID USER","No user found for the userSearchRequest: " + userSearchRequest);
+//        if(CollectionUtils.isEmpty(userDetailResponse.getUser()))
+//            throw new CustomException("INVALID USER","No user found for the userSearchRequest: " + userSearchRequest);
         Map<String,User> idToUserMap = new HashMap<>();
-        userDetailResponse.getUser().forEach(user -> {
-            idToUserMap.put(user.getUuid(),user);
-        });
+        if(!CollectionUtils.isEmpty(userDetailResponse.getUser())) {
+        	userDetailResponse.getUser().forEach(user -> {
+        		idToUserMap.put(user.getUuid(),user);
+        	});
+        }
         return idToUserMap;
     }
 	public Map<String, User> searchUserByRegistrtaionNumber(RequestInfo requestInfo, String registrationNumber) {

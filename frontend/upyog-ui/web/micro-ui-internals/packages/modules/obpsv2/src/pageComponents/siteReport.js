@@ -490,7 +490,7 @@ console.log("formData==",form)
   const handleDocumentUploadForField = (fieldKey, fileData) => {
   const updatedForm = {
     ...form,
-    [fieldKey]: fileData
+    [fieldKey]: fileData? fileData.fileStoreId : ""
   };
   setForm(updatedForm);
 };
@@ -1045,8 +1045,15 @@ function SelectDocument({
     const getData = async (state) => {
       let data = Object.fromEntries(state);
       let files = Object.values(data);
+      if(!files.length){ 
+        setFile(null);
+        setUploadedFile(null);
+        setError(null);
 
-      if(!files.length) return;
+        handleDocumentUpload(fieldKey, null);
+        setDocuments([]);
+        return
+      };
 
       let latestFile = files[files.length - 1];
       const fileObj =latestFile?.file;

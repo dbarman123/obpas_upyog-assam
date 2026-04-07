@@ -1,7 +1,5 @@
 package org.egov.wf.service;
 
-import static org.egov.wf.util.WorkflowConstants.AUTO_ESC_EMPLOYEE_ROLE_CODE;
-import static org.egov.wf.util.WorkflowConstants.UUID_REGEX;
 import static org.egov.wf.util.WorkflowConstants.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +24,7 @@ import org.egov.common.contract.request.User;
 import org.egov.mdms.model.MasterDetail;
 import org.egov.mdms.model.MdmsCriteria;
 import org.egov.mdms.model.MdmsCriteriaReq;
+import org.egov.mdms.model.MdmsResponse;
 import org.egov.mdms.model.ModuleDetail;
 import org.egov.tracer.model.CustomException;
 import org.egov.wf.config.WorkflowConfig;
@@ -50,6 +49,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONArray;
 
 
 @Service
@@ -80,6 +80,9 @@ public class EnrichmentService {
 
     @Value("${egov.mdms.search.endpoint}")
     private String mdmsUrl;
+    
+    @Autowired
+    private MDMSService mdmsService;
 
     @Autowired
     public EnrichmentService(WorkflowUtil util, UserService userService,TransitionService transitionService) {
@@ -163,6 +166,11 @@ public class EnrichmentService {
 
 		String businessService = processInstanceFromRequest.getBusinessService();
 		
+		List<String> allTenantIds = new ArrayList<>();
+		allTenantIds.add(tenantId);
+		
+		Map<String, User> idToUserMap = new HashMap<>();
+				
 		String businessId = processInstanceFromRequest.getBusinessId();
 		
 		String currentAssigner = processInstanceFromRequest.getAssigner().getUuid();
@@ -177,9 +185,24 @@ public class EnrichmentService {
 
 		List<String> rolesInState = util.getAllRolesFromState(resultantState);
 		String assigneeRole = rolesInState.get(0);
+		
+		//Fetching mdms details for tenantId
+    	Map<String, Map<String, JSONArray>> response = fetchMdmsResponseForTenantId(requestInfo);
+    	
+		// fetch Parent Tenant By Application TenantId
+		if (response != null) {
+			String parentTenantId = fetchParentTenantByApplicationTenantId(response, tenantId);
+			allTenantIds.add(parentTenantId);
+		}
 
-		Map<String, User> idToUserMap = getAllowedAssigneeUsers(requestInfo, assigneeRole, tenantId, businessService,
-				businessId, processInstanceFromRequest.getAllowedAssignees());
+		for(String validTenantId : allTenantIds) {
+			idToUserMap = getAllowedAssigneeUsers(requestInfo, assigneeRole, validTenantId, businessService,
+					businessId, processInstanceFromRequest.getAllowedAssignees());
+
+			if (idToUserMap != null && !idToUserMap.isEmpty()) {
+				break; // exit loop if map has data
+			}
+		}
 
 		logRequests(businessId, businessService, assigneeRole, idToUserMap,
 				processInstanceFromRequest.getAllowedAssignees());
@@ -227,6 +250,86 @@ public class EnrichmentService {
 
 		return finalAssigneeUsers;
 	}
+	
+	@SuppressWarnings("unchecked")
+	private String fetchParentTenantByApplicationTenantId(Map<String, Map<String, JSONArray>> response,
+			String tenantId) {
+
+		if (response == null || tenantId == null) {
+			return null;
+		}
+
+		Map<String, JSONArray> tenantModule = response.get(MDMS_MODULE_TENANT);
+		if (tenantModule == null) {
+			return null;
+		}
+
+		JSONArray tenants = tenantModule.get(MDMS_TENANTS);
+		if (tenants == null || tenants.isEmpty()) {
+			return null;
+		}
+
+		for (Object obj : tenants) {
+
+			if (obj == null || !(obj instanceof Map)) {
+				continue;
+			}
+
+			Map<String, Object> tenant = (Map<String, Object>) obj;
+
+			Object codeObj = tenant.get(MDMS_MODULE_TENANT_CODE);
+			if (codeObj == null) {
+				continue;
+			}
+
+			String code = String.valueOf(codeObj);
+
+			if (tenantId.equalsIgnoreCase(code)) {
+				Object parentTenant = tenant.get(MDMS_MODULE_PARENT_TENANT_ID);
+				return parentTenant != null ? String.valueOf(parentTenant) : null;
+			}
+		}
+
+		return null;
+	}
+
+	private Map<String, Map<String, JSONArray>> fetchMdmsResponseForTenantId(RequestInfo requestInfo) {
+
+		ModuleDetail tenantDetail = getTenants();
+		if (tenantDetail == null) {
+			return Collections.emptyMap();
+		}
+
+		List<ModuleDetail> moduleDetails = Collections.singletonList(tenantDetail);
+
+		String tenantId = workflowConfig != null ? workflowConfig.getStateLevelTenantId() : null;
+
+		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().moduleDetails(moduleDetails).tenantId(tenantId).build();
+
+		MdmsCriteriaReq mdmsCriteriaReq = MdmsCriteriaReq.builder().mdmsCriteria(mdmsCriteria).requestInfo(requestInfo)
+				.build();
+
+		MdmsResponse response = mdmsService != null ? mdmsService.searchMaster(mdmsCriteriaReq) : null;
+
+		return response != null && response.getMdmsRes() != null ? response.getMdmsRes() : Collections.emptyMap();
+	}
+
+    /**
+     * Creates MDMS ModuleDetail object for tenants
+     * @return ModuleDetail for tenants
+     */
+    private ModuleDetail getTenants() {
+
+        // master details for WF module
+        List<MasterDetail> masterDetails = new ArrayList<>();
+
+        masterDetails.add(MasterDetail.builder().name(MDMS_TENANTS).build());
+
+        ModuleDetail wfModuleDtls = ModuleDetail.builder().masterDetails(masterDetails)
+                .moduleName(MDMS_MODULE_TENANT).build();
+
+        return wfModuleDtls;
+    }
 	
 	/**
 	 * 
@@ -500,9 +603,11 @@ public class EnrichmentService {
 
 			Map<String, User> uuidToUserMap = userService.searchUserDetails(requestInfo, request);
 
-			uuidToUserMap.forEach((key, value) -> {
-				finalUuidToUserMap.put(key, value);
-			});
+			if (uuidToUserMap != null && !uuidToUserMap.isEmpty()) {
+				uuidToUserMap.forEach((key, value) -> {
+					finalUuidToUserMap.put(key, value);
+				});
+			}
 		}
 
 		if (CollectionUtils.isEmpty(finalUuidToUserMap)) {
@@ -524,12 +629,14 @@ public class EnrichmentService {
 
 				Map<String, User> uuidToUserMap = userService.searchUserDetails(requestInfo, request);
 
-				uuidToUserMap.forEach((key, value) -> {
+				if (uuidToUserMap != null && !uuidToUserMap.isEmpty()) {
+					uuidToUserMap.forEach((key, value) -> {
 //					if (StringUtils.equals(assigneeRole, GOA_IDC_MD_ROLE_CODE) || value.getRoles().stream()
 //							.noneMatch(role -> StringUtils.equals(GOA_IDC_MD_ROLE_CODE, role.getCode()))) {
 						finalUuidToUserMap.put(key, value);
 //					}
-				});
+					});
+				}
 //			}
 		}
 
