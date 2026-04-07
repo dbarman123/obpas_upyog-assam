@@ -8,8 +8,8 @@ public class DxfFileConstants {
 
     // occupancies code
     public static final String A = "A"; // Residential
-    public static final String B = "B"; // Educational
-    public static final String C = "C"; // Medical/Hospital
+    public static final String B = "B"; // Institutional
+    public static final String C = "C"; // Health Facilities
     public static final String D = "D"; // Assembly
     public static final String E = "E"; // Office/Business
     public static final String F = "F"; // Mercantile / Commercial
@@ -17,8 +17,14 @@ public class DxfFileConstants {
     public static final String H = "H"; // Storage
     public static final String I = "I"; // Hazardous
     public static final String J = "J"; // Govt/public office
-    public static final String K = "K"; // Factories 
-
+    public static final String K = "K"; // Factories
+    
+    public static final String RESIDENTIAL = "A"; // Residential
+    public static final String INSTITUTIONAL = "B"; // Institutional
+    public static final String HEATH_FACILITES  = "C"; // Heath Facilities 
+    public static final String COMMERCIAL = "F"; // Commercial
+    public static final String INDUSTRIAL = "G"; // Industrial
+    
     // sub occupancies code
     public static final String A2 = "A2";// Old Age Home
     public static final String A_R = "A-R"; // Single family Residential
@@ -29,16 +35,45 @@ public class DxfFileConstants {
     public static final String A_SA = "A-SA";// Service Apartment
     public static final String A_PO = "A-PO";// Professional Office
     public static final String A_AF_GH = "A-AF-GH";
+    
+    public static final String F_H = "F-H";// Hotels
+    public static final String F_HB = "F-HB";// Hotels with banquet halls
+    public static final String F_HWB = "F-H";// Hotels without banquet halls
+    public static final String F_K = "F-K";// Kiosk
+    public static final String F_PA = "F-PA";// Parking Appurtenant
+    public static final String F_PP = "F-PP";// Parking Plaza
+    public static final String F_RT = "F-RT";// Restaurants
+    public static final String F_LD = "F-LD";// Lodges
+    public static final String F_CB = "F-CB";// Commercial Building
+    public static final String F_IT = "F-IT";// IT / ITES Buildings
+    public static final String F_PB = "F-PB";// Private business / business office
 
-    public static final String B2 = "B2";// Educational HighSchool
-    public static final String B_HEI = "B-HEI";// Higher Educational Institute
+    public static final String B_NS = "B-NS";// PreNursery/ Nursery Schools
     public static final String B_PS = "B-PS";// Primary school
-    public static final String B_NS = "B-NS";// Pre Primary/Nursery school
+    public static final String B_HEI = "B-HEI";// Higher Educational Institute
+    public static final String B_C = "B-C";// College 
+    
+    public static final String PRENURSERY_NURSERY_SCHOOLS = "B-NS";// PreNursery/Nursery Schools
+    public static final String PRIMARY_SCHOOL = "B-PS";// Primary school
+    public static final String HIGHER_EDUCATIONAL_INSTITUTE = "B-HEI";// Higher Educational Institute
+    public static final String COLLEGE = "B-C";// College 
+    
+    public static final String C_MA = "C-H"; //Hospitals
+    public static final String C_MIP = "C-C"; //Clinics
+    
+    public static final String HOSPITALS = "C-H"; //Hospitals 
+    public static final String CLINICS = "C-C"; //Clinics 
+    
+    public static final String G_L = "G-L";// LIGHT
+    public static final String G_M = "G-M";// MEDUIM
+    public static final String G_F = "G-F";// FLATTED
+    public static final String G_SF = "G-SF";// STANDALONE FACTORY
 
-    public static final String C_MA = "C-MA";// Medical Admin
-    public static final String C_MIP = "C-MIP";// Medical IP
-    public static final String C_MOP = "C-MOP";// Medical OP
-
+    public static final String INDUSTRIAL_LIGHT = "G-L";// LIGHT
+    public static final String INDUSTRIAL_MEDUIM = "G-M";// MEDUIM
+    public static final String INDUSTRIAL_FLATTED = "G-F";// FLATTED
+    public static final String INDUSTRIAL_STANDALONE_FACTORY = "G-SF";// STANDALONE FACTORY
+    
     public static final String D_B = "D-B"; // At sub city level in urban extension
     public static final String D_C = "D-C"; // Anganwari
     public static final String D_A = "D-A"; // Religious
@@ -53,26 +88,7 @@ public class DxfFileConstants {
     public static final String E_NS = "E-NS";// Nursury Schools
     public static final String E_CLG = "E-CLG";// College
     public static final String E_SACA = "E-SACA";// Sports and Cultural Activities
-
-    public static final String F_H = "F-H";// Hotels
-    public static final String F_HB = "F-HB";// Hotels with banquet halls
-    public static final String F_HWB = "F-H";// Hotels without banquet halls
-    public static final String F_K = "F-K";// Kiosk
-    public static final String F_PA = "F-PA";// Parking Appurtenant
-    public static final String F_PP = "F-PP";// Parking Plaza
-    public static final String F_RT = "F-RT";// Restaurants
-    public static final String F_LD = "F-LD";// Lodges
-    public static final String F_CB = "F-CB";// Commercial Building
-    public static final String F_IT = "F-IT";// IT / ITES Buildings
-    public static final String F_PB = "F-PB";// Private business / business office
-
-
-    public static final String G_LI = "G-LI";// Large Industrial
-    public static final String G_SI = "G-SI";// Small Industrial
-    public static final String G_PHI = "G-PHI";// Polluting and hazardous industries
-    public static final String G_NPHI = "G-NPHI";// Non-polluting and household industries
-    
-    
+   
     public static final String H_PP = "H-PP"; // Petrol Pump
 
     public static final String I1 = "I-1";// Hazardous (I1)
@@ -340,7 +356,7 @@ public class DxfFileConstants {
 
     public static final String AREA_TYPE = "Area Type";
     public static final String ROAD_WIDTH = "Road Width";
-    public static final String COMMERCIAL = "COMMERCIAL";
+    public static final String COMMERCIAL_STR = "COMMERCIAL";
     public static final String RULE_28 = "28";
     public static final String SETBACK = "SetBack";
     public static final String YARD_NAME = "Yard Name";

@@ -92,7 +92,6 @@ import static org.egov.edcr.constants.DxfFileConstants.A_FH;
 import static org.egov.edcr.constants.DxfFileConstants.A_R;
 import static org.egov.edcr.constants.DxfFileConstants.A_SA;
 import static org.egov.edcr.constants.DxfFileConstants.B;
-import static org.egov.edcr.constants.DxfFileConstants.B2;
 import static org.egov.edcr.constants.DxfFileConstants.C;
 import static org.egov.edcr.constants.DxfFileConstants.D;
 import static org.egov.edcr.constants.DxfFileConstants.D_A;
@@ -109,9 +108,6 @@ import static org.egov.edcr.constants.DxfFileConstants.E_SFMC;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.F_H;
 import static org.egov.edcr.constants.DxfFileConstants.G;
-import static org.egov.edcr.constants.DxfFileConstants.G_LI;
-import static org.egov.edcr.constants.DxfFileConstants.G_PHI;
-import static org.egov.edcr.constants.DxfFileConstants.G_SI;
 import static org.egov.edcr.constants.DxfFileConstants.H;
 import static org.egov.edcr.constants.DxfFileConstants.H_PP;
 import static org.egov.edcr.constants.DxfFileConstants.J;
@@ -199,6 +195,7 @@ import org.egov.common.entity.edcr.Result;
 import org.egov.common.entity.edcr.Room;
 import org.egov.common.entity.edcr.ScrutinyDetail;
 import org.egov.edcr.service.MDMSCacheManager;
+import org.egov.edcr.constants.DxfFileConstants;
 import org.egov.edcr.service.FeatureUtil;
 import org.egov.edcr.service.ProcessPrintHelper;
 import org.egov.edcr.utility.DcrConstants;
@@ -915,17 +912,20 @@ public class Far_Assam extends Far {
 
 	    // Process based on occupancy type
 	    try {
-	        if (mostRestrictiveOccupancyType != null && roadWidth != null
+	    	 String typeCode = mostRestrictiveOccupancyType != null && mostRestrictiveOccupancyType.getType() != null
+	                 ? mostRestrictiveOccupancyType.getType().getCode()
+	                 : null;
+	        if(typeCode.equals(DxfFileConstants.INDUSTRIAL)) {
+	        	 processFarIndustrial(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs,
+		                    feature, mostRestrictiveOccupancyType.getType().getName(),plotArea);
+		            LOG.info("Processed FAR for industrial occupancy");
+	        }else if (mostRestrictiveOccupancyType != null && roadWidth != null
 	                && !processFarForSpecialOccupancy(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs)) {
 
 	            processFar(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs,
 	                    feature, mostRestrictiveOccupancyType.getType().getName());
 	            LOG.info("Processed FAR for normal occupancy");
 
-	        } else {
-	            processFarIndustrial(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs,
-	                    feature, mostRestrictiveOccupancyType.getType().getName());
-	            LOG.info("Processed FAR for industrial occupancy");
 	        }
 	    } catch (Exception e) {
 	        LOG.error("Error occurred during FAR computation: {}", e.getMessage(), e);
@@ -1907,8 +1907,7 @@ public class Far_Assam extends Far {
                 return true;
             }
 
-            if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B2)
-                    || mostRestrictiveOccupancyType.getSubtype().getCode().equals(E_CLG)
+            if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(E_CLG)
                     || mostRestrictiveOccupancyType.getSubtype().getCode().equals(M_OHF)
                     || mostRestrictiveOccupancyType.getSubtype().getCode().equals(M_VH)
                     || mostRestrictiveOccupancyType.getSubtype().getCode().equals(M_NAPI)) {
@@ -2188,7 +2187,7 @@ public class Far_Assam extends Far {
     }
 
     private void processFarIndustrial(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far, String typeOfArea,
-                                      BigDecimal roadWidth, HashMap<String, String> errors, String feature, String occupancyName) {
+                                      BigDecimal roadWidth, HashMap<String, String> errors, String feature, String occupancyName, BigDecimal plotArea) {
 
         BigDecimal permissibleFar = BigDecimal.ZERO;
         BigDecimal baseFar = BigDecimal.ZERO;
@@ -2201,61 +2200,96 @@ public class Far_Assam extends Far {
         String subtypeCode = mostRestrictiveOccupancyType != null && mostRestrictiveOccupancyType.getSubtype() != null
                 ? mostRestrictiveOccupancyType.getSubtype().getCode()
                 : null;
+        
+        String typeCode = mostRestrictiveOccupancyType != null && mostRestrictiveOccupancyType.getType() != null
+                ? mostRestrictiveOccupancyType.getType().getCode()
+                : null;
 
         LOG.info("Processing FAR for industrial occupancy, subtype: {}", subtypeCode);
+        
+		if (DxfFileConstants.INDUSTRIAL.equals(typeCode)) {
+			if (DxfFileConstants.INDUSTRIAL_LIGHT.equals(subtypeCode)) {
+				baseFar = new BigDecimal("1.25");
+				permissibleFar = new BigDecimal("1.5");
+			} else if (DxfFileConstants.INDUSTRIAL_MEDUIM.equals(subtypeCode)) {
+				baseFar = new BigDecimal("1.5");
+				permissibleFar = new BigDecimal("1.75");
+			} else if (DxfFileConstants.INDUSTRIAL_FLATTED.equals(subtypeCode)) {
+				baseFar = new BigDecimal("1.75");
+				permissibleFar = new BigDecimal("3.5");
+			} else if (DxfFileConstants.INDUSTRIAL_STANDALONE_FACTORY.equals(subtypeCode)) {
+				if (plotArea.compareTo(new BigDecimal("744")) <= 0) {
+					baseFar = new BigDecimal("1");
+					permissibleFar = new BigDecimal("1.25");
+				} else if (plotArea.compareTo(new BigDecimal("744")) > 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0) {
+					baseFar = new BigDecimal("1.2");
+					permissibleFar = new BigDecimal("1.75");
+				} else if (plotArea.compareTo(new BigDecimal("1338")) > 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0) {
+					baseFar = new BigDecimal("1.3");
+					permissibleFar = new BigDecimal("2");
+				} else {
+					baseFar = new BigDecimal("1.4");
+					permissibleFar = new BigDecimal("2.25");
+				}
 
-        List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.FAR.getValue(), false);
-        Optional<FarRequirement> matchedRule = rules.stream().filter(FarRequirement.class::isInstance)
-                .map(FarRequirement.class::cast).filter(ruleObj -> Boolean.TRUE.equals(ruleObj.getActive())).findFirst();
-
-        if (matchedRule.isPresent()) {
-            FarRequirement mdmsRule = matchedRule.get();
-         
-            if (G_SI.equalsIgnoreCase(subtypeCode)) {
-                permissibleFar = mdmsRule.getPermissibleLight();
-                baseFar = mdmsRule.getBaseFar();
-                tdr =  baseFar = mdmsRule.getMaxTDRLoading();
-                computeBaseAndPremiumFarAreas(
-                        pl,
-                        pl.getPlot().getArea(),
-                        baseFar,  
-                        permissibleFar,
-                        far);
-            } else if (G_LI.equalsIgnoreCase(subtypeCode)) {
-                permissibleFar = mdmsRule.getPermissibleMedium();
-                baseFar = mdmsRule.getBaseFar();
-                tdr =  baseFar = mdmsRule.getMaxTDRLoading();
-                computeBaseAndPremiumFarAreas(
-                        pl,
-                        pl.getPlot().getArea(),
-                        baseFar,  
-                        permissibleFar,
-                        far);
-            } else if (G_PHI.equalsIgnoreCase(subtypeCode)) {
-                permissibleFar = mdmsRule.getPermissibleFlattered();
-                baseFar = mdmsRule.getBaseFar();
-                tdr =  baseFar = mdmsRule.getMaxTDRLoading();
-                computeBaseAndPremiumFarAreas(
-                        pl,
-                        pl.getPlot().getArea(),
-                        baseFar,  
-                        permissibleFar,
-                        far);
-            } else {
-                permissibleFar = mdmsRule.getPermissible();
-                baseFar = mdmsRule.getBaseFar();
-                tdr =  baseFar = mdmsRule.getMaxTDRLoading();
-                computeBaseAndPremiumFarAreas(
-                        pl,
-                        pl.getPlot().getArea(),
-                        baseFar,  
-                        permissibleFar,
-                        far);
-            }
-            LOG.info("Permissible FAR for industrial subtype '{}': {}", subtypeCode, permissibleFar);
-        } else {
-            LOG.warn("No active FAR rule found for industrial processing.");
-        }
+			}
+			computeBaseAndPremiumFarAreas(pl, pl.getPlot().getArea(), baseFar, permissibleFar, far);
+		}
+        
+//		List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.FAR.getValue(), false);
+//        Optional<FarRequirement> matchedRule = rules.stream().filter(FarRequirement.class::isInstance)
+//                .map(FarRequirement.class::cast).filter(ruleObj -> Boolean.TRUE.equals(ruleObj.getActive())).findFirst();
+//        
+//        if (matchedRule.isPresent()) {
+//            FarRequirement mdmsRule = matchedRule.get();
+//         
+//            if (G_SI.equalsIgnoreCase(subtypeCode)) {
+//                permissibleFar = mdmsRule.getPermissibleLight();
+//                baseFar = mdmsRule.getBaseFar();
+//                tdr =  baseFar = mdmsRule.getMaxTDRLoading();
+//                computeBaseAndPremiumFarAreas(
+//                        pl,
+//                        pl.getPlot().getArea(),
+//                        baseFar,  
+//                        permissibleFar,
+//                        far);
+//            } else if (G_LI.equalsIgnoreCase(subtypeCode)) {
+//                permissibleFar = mdmsRule.getPermissibleMedium();
+//                baseFar = mdmsRule.getBaseFar();
+//                tdr =  baseFar = mdmsRule.getMaxTDRLoading();
+//                computeBaseAndPremiumFarAreas(
+//                        pl,
+//                        pl.getPlot().getArea(),
+//                        baseFar,  
+//                        permissibleFar,
+//                        far);
+//            } else if (G_PHI.equalsIgnoreCase(subtypeCode)) {
+//                permissibleFar = mdmsRule.getPermissibleFlattered();
+//                baseFar = mdmsRule.getBaseFar();
+//                tdr =  baseFar = mdmsRule.getMaxTDRLoading();
+//                computeBaseAndPremiumFarAreas(
+//                        pl,
+//                        pl.getPlot().getArea(),
+//                        baseFar,  
+//                        permissibleFar,
+//                        far);
+//            } else {
+//                permissibleFar = mdmsRule.getPermissible();
+//                baseFar = mdmsRule.getBaseFar();
+//                tdr =  baseFar = mdmsRule.getMaxTDRLoading();
+//                computeBaseAndPremiumFarAreas(
+//                        pl,
+//                        pl.getPlot().getArea(),
+//                        baseFar,  
+//                        permissibleFar,
+//                        far);
+//            }
+//            LOG.info("Permissible FAR for industrial subtype '{}': {}", subtypeCode, permissibleFar);
+//        } else {
+//            LOG.warn("No active FAR rule found for industrial processing.");
+//        }
 
         boolean isAccepted = far.compareTo(permissibleFar) <= 0;
         pl.getFarDetails().setPermissableFar(permissibleFar.doubleValue());
