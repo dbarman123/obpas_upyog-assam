@@ -91,13 +91,6 @@ public class AssamFloorUnit extends Measurement {
 		return doors;
 	}
 
-	public List<Occupancy> getOccupancies() {
-		return occupancies;
-	}
-
-	public void setOccupancies(List<Occupancy> occupancies) {
-		this.occupancies = occupancies;
-	}
 
 	public MeasurementWithHeight getVerandah() {
 		return verandah;
@@ -138,10 +131,7 @@ public class AssamFloorUnit extends Measurement {
     private Room waterClosets;
 
 
-    public Occupancy getOccupancy() {
-        return occupancy;
-    }
-
+  
     public List<Room> getAcRooms() {
 		return acRooms;
 	}
@@ -158,9 +148,6 @@ public class AssamFloorUnit extends Measurement {
 		this.unitNumber = unitNumber;
 	}
 
-	public void setOccupancy(Occupancy occupancy) {
-        this.occupancy = occupancy;
-    }
 
     public BigDecimal getTotalUnitDeduction() {
         return totalUnitDeduction;
@@ -225,52 +212,8 @@ public class AssamFloorUnit extends Measurement {
     }
     
     
-    public void addCarpetArea(Occupancy occupancy) {
-        if (occupancies == null) {
-            occupancies = new ArrayList<>();
-            occupancies.add(occupancy);
-        } else if (occupancies.contains(occupancy)) {
-            occupancies.get(occupancies.indexOf(occupancy))
-                    .setCarpetArea((occupancies.get(occupancies.indexOf(occupancy)).getCarpetArea() == null
-                            ? BigDecimal.ZERO
-                            : occupancies.get(occupancies.indexOf(occupancy)).getCarpetArea())
-                                    .add(occupancy.getCarpetArea()));
-
-            occupancies.get(occupancies.indexOf(occupancy)).setExistingCarpetArea(
-                    (occupancies.get(occupancies.indexOf(occupancy)).getExistingCarpetArea() == null ? BigDecimal.ZERO
-                            : occupancies.get(occupancies.indexOf(occupancy)).getExistingCarpetArea())
-                                    .add(occupancy.getExistingCarpetArea()));
-        } else
-            occupancies.add(occupancy);
-
-    }
     
     
-    public void addCarpetDeductionArea(Occupancy occupancy) {
-        if (occupancies == null) {
-            occupancies = new ArrayList<>();
-            occupancies.add(occupancy);
-        } else {
-            List<Occupancy> collect = occupancies.stream().filter(o -> o.getTypeHelper() != null
-                    && (o.getTypeHelper().getType().getCode()
-                            .equalsIgnoreCase(occupancy.getTypeHelper().getType().getCode())))
-                    .collect(Collectors.toList());
-            if (!collect.isEmpty()) {
-                collect.get(0)
-                        .setCarpetAreaDeduction(collect.get(0).getCarpetAreaDeduction() == null
-                                ? BigDecimal.ZERO
-                                : collect.get(0).getCarpetAreaDeduction()
-                                        .add(occupancy.getCarpetAreaDeduction()));
-                collect.get(0).setExistingCarpetAreaDeduction(
-                        (collect.get(0).getExistingCarpetAreaDeduction() == null ? BigDecimal.ZERO
-                                : collect.get(0).getExistingCarpetAreaDeduction())
-                                        .add(occupancy.getExistingCarpetAreaDeduction()));
-            } else
-                occupancies.add(occupancy);
-        }
-
-    }
-
 
 
     public List<Balcony> getBalconies() {

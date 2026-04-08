@@ -72,7 +72,6 @@ import static org.egov.edcr.constants.DxfFileConstants.B_NS;
 import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.E_CLG;
 import static org.egov.edcr.constants.DxfFileConstants.E_NS;
-import static org.egov.edcr.constants.DxfFileConstants.B2;
 import static org.egov.edcr.constants.DxfFileConstants.B_PS;
 import static org.egov.edcr.constants.DxfFileConstants.B_HEI;
 import static org.egov.edcr.constants.DxfFileConstants.F;
@@ -770,7 +769,7 @@ public class Parking_Assam extends Parking {
 			double requiredECS = Math.ceil(ecsPerUnit) * noOfParking;
 			requiredCarParkingArea = requiredECS * ecsArea;
 
-		} else if (B_PS.equals(subtypeCode) || B_HEI.equals(subtypeCode) || B2.equals(subtypeCode)) { // Educational College
+		} else if (B_PS.equals(subtypeCode) || B_HEI.equals(subtypeCode)) { // Educational College
 			double noOfParking = ruleResult.getNoOfRequiredParking();
 			if (open.doubleValue() > 0 && basement.doubleValue() > 0 ) {
 				

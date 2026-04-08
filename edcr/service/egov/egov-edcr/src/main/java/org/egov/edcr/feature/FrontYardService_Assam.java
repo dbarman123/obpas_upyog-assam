@@ -75,9 +75,6 @@ import static org.egov.edcr.constants.DxfFileConstants.D_AW;
 import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
-import static org.egov.edcr.constants.DxfFileConstants.G_LI;
-import static org.egov.edcr.constants.DxfFileConstants.G_PHI;
-import static org.egov.edcr.constants.DxfFileConstants.G_SI;
 import static org.egov.edcr.constants.DxfFileConstants.I;
 import static org.egov.edcr.constants.EdcrReportConstants.BSMT_FRONT_YARD_DESC;
 import static org.egov.edcr.constants.EdcrReportConstants.ERR_NARROW_ROAD_RULE;
@@ -657,38 +654,68 @@ public class FrontYardService_Assam extends FrontYardService {
 	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.FRONT_SET_BACK.getValue(), false);
 	    LOG.info("Fetched {} Front Setback rules for Industrial Occupancy", rules.size());
 
-	    Optional<FrontSetBackRequirement> matchedRule = rules.stream()
-	            .filter(FrontSetBackRequirement.class::isInstance)
-	            .map(FrontSetBackRequirement.class::cast)
-	            .filter(ruleObj -> Boolean.TRUE.equals(ruleObj.getActive()))
-	            .findFirst();
+//	    Optional<FrontSetBackRequirement> matchedRule = rules.stream()
+//	            .filter(FrontSetBackRequirement.class::isInstance)
+//	            .map(FrontSetBackRequirement.class::cast)
+//	            .filter(ruleObj -> Boolean.TRUE.equals(ruleObj.getActive()))
+//	            .findFirst();
+//
+//	    if (matchedRule.isPresent()) {
+//	        FrontSetBackRequirement mdmsRule = matchedRule.get();
+//
+//	        String subtypeCode = mostRestrictiveOccupancy.getSubtype() != null
+//	                ? mostRestrictiveOccupancy.getSubtype().getCode()
+//	                : null;
+//
+//	        if (G_SI.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleLight();
+//	        } else if (G_LI.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleMedium();
+//	        } else if (G_PHI.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleFlattered();
+//	        } else {
+//	            meanVal = mdmsRule.getPermissible();
+//	        }
+//
+//	        minVal = meanVal;
+//	        LOG.info("Applied Front Setback for Industrial - Subtype: {}, MinVal: {}, MeanVal: {}", subtypeCode, minVal, meanVal);
+//	    } else {
+//	        errors.put(FRONT_YARD_DESC, "No applicable front setback rule found for occupancy: " + occupancyName);
+//	        meanVal = BigDecimal.ZERO;
+//	        minVal = BigDecimal.ZERO;
+//	        LOG.warn("No applicable Industrial Front Setback Rule found for Occupancy: {}", occupancyName);
+//	    }
+	    
+	    String subtypeCode = mostRestrictiveOccupancy != null && mostRestrictiveOccupancy.getSubtype() != null
+                ? mostRestrictiveOccupancy.getSubtype().getCode()
+                : null;
+        
+        String typeCode = mostRestrictiveOccupancy != null && mostRestrictiveOccupancy.getType() != null
+                ? mostRestrictiveOccupancy.getType().getCode()
+                : null;
+		if (DxfFileConstants.INDUSTRIAL.equals(typeCode)) {
+			if (DxfFileConstants.INDUSTRIAL_LIGHT.equals(subtypeCode)) {
+				meanVal = new BigDecimal("6");
+			} else if (DxfFileConstants.INDUSTRIAL_MEDUIM.equals(subtypeCode)) {
+				meanVal = new BigDecimal("9");
+			} else if (DxfFileConstants.INDUSTRIAL_FLATTED.equals(subtypeCode)) {
+				meanVal = new BigDecimal("4.5");
+			} else if (DxfFileConstants.INDUSTRIAL_STANDALONE_FACTORY.equals(subtypeCode)) {
+				if (plotArea.compareTo(new BigDecimal("744")) <= 0) {
+					meanVal = new BigDecimal("1.5");
+				} else if (plotArea.compareTo(new BigDecimal("744")) > 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0) {
+					meanVal = new BigDecimal("1.8");
+				} else if (plotArea.compareTo(new BigDecimal("1338")) > 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0) {
+					meanVal = new BigDecimal("1.8");
+				} else {
+					meanVal = new BigDecimal("6");
+				}
 
-	    if (matchedRule.isPresent()) {
-	        FrontSetBackRequirement mdmsRule = matchedRule.get();
-
-	        String subtypeCode = mostRestrictiveOccupancy.getSubtype() != null
-	                ? mostRestrictiveOccupancy.getSubtype().getCode()
-	                : null;
-
-	        if (G_SI.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleLight();
-	        } else if (G_LI.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleMedium();
-	        } else if (G_PHI.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleFlattered();
-	        } else {
-	            meanVal = mdmsRule.getPermissible();
-	        }
-
-	        minVal = meanVal;
-	        LOG.info("Applied Front Setback for Industrial - Subtype: {}, MinVal: {}, MeanVal: {}", subtypeCode, minVal, meanVal);
-	    } else {
-	        errors.put(FRONT_YARD_DESC, "No applicable front setback rule found for occupancy: " + occupancyName);
-	        meanVal = BigDecimal.ZERO;
-	        minVal = BigDecimal.ZERO;
-	        LOG.warn("No applicable Industrial Front Setback Rule found for Occupancy: {}", occupancyName);
-	    }
-
+			}
+			minVal = meanVal;
+		}
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
 	    LOG.info("Validation result for Industrial Block {} - Min: {}, Mean: {}, Required MinVal: {}, MeanVal: {}, Valid: {}",
 	            blockName, min, mean, minVal, meanVal, valid);
