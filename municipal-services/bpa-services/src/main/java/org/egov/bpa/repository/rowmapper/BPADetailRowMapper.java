@@ -138,6 +138,8 @@ public class BPADetailRowMapper implements ResultSetExtractor<List<BPA>> {
 		        .signedPpFileStoreId(rs.getString("signed_pp_filestore_id"))
 		        .signedOcFileStoreId(rs.getString("signed_oc_filestore_id"))
 		        .signedDxfFileStoreId(rs.getString("signed_dxf_filestore_id"))
+		        .estimatedCostOfConstruction(rs.getBigDecimal("estimated_cost_of_construction"))
+		        .estimateFileStoreId(rs.getString("estimate_file_store_id"))
 				.build();
 	}
 

@@ -1,9 +1,11 @@
 package org.egov.bpa.web.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -12,8 +14,6 @@ import org.egov.bpa.web.model.landInfo.LandInfo;
 import org.egov.bpa.web.model.property.PropertyValidationResponse;
 import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.validation.annotation.Validated;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -152,4 +152,8 @@ public class BPA {
   
   private String geoTaggedPhotoFilestoreId;
   private String signedDxfFileStoreId;
+  
+  @Digits(integer = 12, fraction = 2)
+  private BigDecimal estimatedCostOfConstruction;
+  private String estimateFileStoreId;
 }

@@ -280,6 +280,8 @@ public class EnrichmentService {
 		updateFileStoreId(existingBPA::setGeoTaggedPhotoFilestoreId, existingBPA.getGeoTaggedPhotoFilestoreId(),bpa.getGeoTaggedPhotoFilestoreId());
 
 		updateFileStoreId(existingBPA::setSignedDxfFileStoreId, existingBPA.getSignedDxfFileStoreId(),bpa.getSignedDxfFileStoreId());
+		
+		updateFileStoreId(existingBPA::setEstimateFileStoreId, existingBPA.getEstimateFileStoreId(),bpa.getEstimateFileStoreId());
         
 		return true;
 	}
