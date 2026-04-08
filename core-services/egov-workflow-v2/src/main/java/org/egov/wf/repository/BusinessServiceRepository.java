@@ -90,11 +90,13 @@ public class BusinessServiceRepository {
 
     /**
      * Creates map of roles vs tenantId vs List of status uuids from all the avialable businessServices
+     * @param roleValidTenantId 
      * @return
      */
     @Cacheable(value = "roleTenantAndStatusesMapping")
-    public Map<String,Map<String,List<String>>> getRoleTenantAndStatusMapping(){
+    public Map<String,Map<String,List<String>>> getRoleTenantAndStatusMapping(String roleValidTenantId){
 
+    	List<String> tenantIdList = new ArrayList<>();
 
         Map<String, Map<String,List<String>>> roleTenantAndStatusMapping = new HashMap();
 
@@ -102,7 +104,7 @@ public class BusinessServiceRepository {
 
         for(BusinessService businessService : businessServices){
 
-            String tenantId = businessService.getTenantId();
+            String tenantId = roleValidTenantId;
 
             for(State state : businessService.getStates()){
 
@@ -139,9 +141,8 @@ public class BusinessServiceRepository {
 
                 }
 
-            }
-
         }
+    }
 
         return roleTenantAndStatusMapping;
 
