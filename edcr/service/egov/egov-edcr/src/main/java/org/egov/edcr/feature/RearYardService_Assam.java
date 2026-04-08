@@ -72,9 +72,6 @@ import static org.egov.edcr.constants.DxfFileConstants.D_AW;
 import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
-import static org.egov.edcr.constants.DxfFileConstants.G_LI;
-import static org.egov.edcr.constants.DxfFileConstants.G_PHI;
-import static org.egov.edcr.constants.DxfFileConstants.G_SI;
 import static org.egov.edcr.constants.DxfFileConstants.H;
 import static org.egov.edcr.constants.DxfFileConstants.I;
 import static org.egov.edcr.constants.EdcrReportConstants.BSMT_REAR_YARD_DESC;
@@ -537,42 +534,74 @@ public class RearYardService_Assam extends RearYardService {
 	        BigDecimal meanVal,
 	        BigDecimal buildingHeight,
 	        Boolean valid,
-	        String occupancyName) {
+	        String occupancyName,
+	        BigDecimal plotArea) {
 
 	    subRule = SUB_RULE_SIDE_YARD;
 
-	    // Fetch REAR_SET_BACK rules from MDMS
-	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.REAR_SET_BACK.getValue(), false);
+//	    // Fetch REAR_SET_BACK rules from MDMS
+//	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.REAR_SET_BACK.getValue(), false);
+//
+//	    Optional<RearSetBackRequirement> matchedRule = rules.stream()
+//	            .filter(RearSetBackRequirement.class::isInstance)
+//	            .map(RearSetBackRequirement.class::cast)
+//	            .filter(ruleFeature -> Boolean.TRUE.equals(ruleFeature.getActive()))
+//	            .findFirst();
+//
+//	    if (matchedRule.isPresent()) {
+//	        RearSetBackRequirement mdmsRule = matchedRule.get();
+//
+//	        String subtypeCode = mostRestrictiveOccupancy.getSubtype() != null
+//	                ? mostRestrictiveOccupancy.getSubtype().getCode()
+//	                : null;
+//
+//	        if (G_SI.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleLight();
+//	        } else if (G_LI.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleMedium();
+//	        } else if (G_PHI.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleFlattered();
+//	        } else {
+//	            meanVal = mdmsRule.getPermissible();
+//	        }
+//
+//	        minVal = meanVal;
+//	    } else {
+//	        meanVal = BigDecimal.ZERO;
+//	        minVal = BigDecimal.ZERO;
+//	    }
 
-	    Optional<RearSetBackRequirement> matchedRule = rules.stream()
-	            .filter(RearSetBackRequirement.class::isInstance)
-	            .map(RearSetBackRequirement.class::cast)
-	            .filter(ruleFeature -> Boolean.TRUE.equals(ruleFeature.getActive()))
-	            .findFirst();
+	    String subtypeCode = mostRestrictiveOccupancy != null && mostRestrictiveOccupancy.getSubtype() != null
+                ? mostRestrictiveOccupancy.getSubtype().getCode()
+                : null;
+        
+        String typeCode = mostRestrictiveOccupancy != null && mostRestrictiveOccupancy.getType() != null
+                ? mostRestrictiveOccupancy.getType().getCode()
+                : null;
+		if (DxfFileConstants.INDUSTRIAL.equals(typeCode)) {
+			if (DxfFileConstants.INDUSTRIAL_LIGHT.equals(subtypeCode)) {
+				meanVal = new BigDecimal("6");
+			} else if (DxfFileConstants.INDUSTRIAL_MEDUIM.equals(subtypeCode)) {
+				meanVal = new BigDecimal("6");
+			} else if (DxfFileConstants.INDUSTRIAL_FLATTED.equals(subtypeCode)) {
+				meanVal = new BigDecimal("6");
+			} else if (DxfFileConstants.INDUSTRIAL_STANDALONE_FACTORY.equals(subtypeCode)) {
+				if (plotArea.compareTo(new BigDecimal("744")) <= 0) {
+					meanVal = new BigDecimal("1.5");
+				} else if (plotArea.compareTo(new BigDecimal("744")) > 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0) {
+					meanVal = new BigDecimal("1.8");
+				} else if (plotArea.compareTo(new BigDecimal("1338")) > 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0) {
+					meanVal = new BigDecimal("3");
+				} else {
+					meanVal = new BigDecimal("6");
+				}
 
-	    if (matchedRule.isPresent()) {
-	        RearSetBackRequirement mdmsRule = matchedRule.get();
-
-	        String subtypeCode = mostRestrictiveOccupancy.getSubtype() != null
-	                ? mostRestrictiveOccupancy.getSubtype().getCode()
-	                : null;
-
-	        if (G_SI.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleLight();
-	        } else if (G_LI.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleMedium();
-	        } else if (G_PHI.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleFlattered();
-	        } else {
-	            meanVal = mdmsRule.getPermissible();
-	        }
-
-	        minVal = meanVal;
-	    } else {
-	        meanVal = BigDecimal.ZERO;
-	        minVal = BigDecimal.ZERO;
-	    }
-
+			}
+			minVal = meanVal;
+		}
+	    
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
 
 	    compareRearYardResult(
@@ -1354,7 +1383,7 @@ public class RearYardService_Assam extends RearYardService {
 	        
 	        valid = processRearYardIndustrial(
 	                pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
-	                subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName);
+	                subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName,plotArea);
 	    } else if (D.equalsIgnoreCase(occupancyCode) &&  D_AW.equalsIgnoreCase(subOccupancyCode)) {
 	       
 	        

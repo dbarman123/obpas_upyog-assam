@@ -254,6 +254,8 @@ public class Plan implements Serializable {
     private FarExemption farExemptions;
     private Garbage garbagePit;
     
+    private RecreationalSpaceDetails recreationalSpaceDetails = new RecreationalSpaceDetails();
+    
     public BigDecimal getRiver() {
 		return river;
 	}
@@ -838,4 +840,14 @@ public class Plan implements Serializable {
     public void setGarbagePit(Garbage garbagePit) {
         this.garbagePit = garbagePit;
     }
+
+	public RecreationalSpaceDetails getRecreationalSpaceDetails() {
+		return recreationalSpaceDetails;
+	}
+
+	public void setRecreationalSpaceDetails(RecreationalSpaceDetails recreationalSpaceDetails) {
+		this.recreationalSpaceDetails = recreationalSpaceDetails;
+	}
+    
+    
 }
