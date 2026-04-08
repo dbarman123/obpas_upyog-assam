@@ -1554,8 +1554,7 @@ public class Far extends FeatureProcess {
 				return true;
 			}
 
-			if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B2)
-					|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(E_CLG)
+			if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(E_CLG)
 					|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(M_OHF)
 					|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(M_VH)
 					|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(M_NAPI)) {
@@ -1822,15 +1821,15 @@ private void processFarIndustrial(Plan pl, OccupancyTypeHelper occupancyType, Bi
 	if (matchedRule.isPresent()) {
 		FarRequirement mdmsRule = matchedRule.get();
 
-		if (G_SI.equalsIgnoreCase(subtypeCode)) {
-			permissibleFar = mdmsRule.getPermissibleLight();
-		} else if (G_LI.equalsIgnoreCase(subtypeCode)) {
-			permissibleFar = mdmsRule.getPermissibleMedium();
-		} else if (G_PHI.equalsIgnoreCase(subtypeCode)) {
-			permissibleFar = mdmsRule.getPermissibleFlattered();
-		} else {
-			permissibleFar = mdmsRule.getPermissible(); // fallback
-		}
+//		if (G_SI.equalsIgnoreCase(subtypeCode)) {
+//			permissibleFar = mdmsRule.getPermissibleLight();
+//		} else if (G_LI.equalsIgnoreCase(subtypeCode)) {
+//			permissibleFar = mdmsRule.getPermissibleMedium();
+//		} else if (G_PHI.equalsIgnoreCase(subtypeCode)) {
+//			permissibleFar = mdmsRule.getPermissibleFlattered();
+//		} else {
+//			permissibleFar = mdmsRule.getPermissible(); // fallback
+//		}
 		LOG.info("Permissible FAR for industrial subtype '{}': {}", subtypeCode, permissibleFar);
 	} else {
 		LOG.warn("No active FAR rule found for industrial processing.");
