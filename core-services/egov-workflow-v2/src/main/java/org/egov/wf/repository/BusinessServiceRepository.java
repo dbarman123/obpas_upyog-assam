@@ -1,20 +1,27 @@
 package org.egov.wf.repository;
 
-import lombok.extern.slf4j.Slf4j;
-import org.egov.common.contract.request.Role;
-import org.egov.tracer.model.CustomException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.egov.wf.config.WorkflowConfig;
 import org.egov.wf.repository.querybuilder.BusinessServiceQueryBuilder;
 import org.egov.wf.repository.rowmapper.BusinessServiceRowMapper;
 import org.egov.wf.service.MDMSService;
-import org.egov.wf.web.models.*;
+import org.egov.wf.web.models.Action;
+import org.egov.wf.web.models.BusinessService;
+import org.egov.wf.web.models.BusinessServiceSearchCriteria;
+import org.egov.wf.web.models.State;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Repository
@@ -104,7 +111,12 @@ public class BusinessServiceRepository {
 
         for(BusinessService businessService : businessServices){
 
-            String tenantId = roleValidTenantId;
+			String tenantId = null;
+			if (StringUtils.isEmpty(roleValidTenantId)) {
+				tenantId = businessService.getTenantId();
+			} else {
+				tenantId = roleValidTenantId;
+			}
 
             for(State state : businessService.getStates()){
 
