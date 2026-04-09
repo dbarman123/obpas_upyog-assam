@@ -1,8 +1,8 @@
 package org.egov.wf.validator;
 
 import static org.egov.wf.util.WorkflowConstants.CITIZEN_TYPE;
-import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_TENANT;
 import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_PARENT_TENANT_ID;
+import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_TENANT;
 import static org.egov.wf.util.WorkflowConstants.MDMS_MODULE_TENANT_CODE;
 import static org.egov.wf.util.WorkflowConstants.MDMS_TENANTS;
 import static org.egov.wf.util.WorkflowConstants.RATE_ACTION;
@@ -14,10 +14,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
 import org.egov.common.contract.request.User;
@@ -206,9 +205,13 @@ public class WorkflowValidator {
             List<String> nextStateRoles = getRolesFromState(processStateAndAction.getResultantState());
 
             if(isStateChanging && !CollectionUtils.isEmpty(processStateAndAction.getProcessInstanceFromRequest().getAssignes())){
+            	if(!StringUtils.isEmpty(parentTenantId)) {
+            		tenantId = parentTenantId;
+            	}
+            	final String finalResolvedTenantId = tenantId;
                 processStateAndAction.getProcessInstanceFromRequest().getAssignes().forEach(assignee -> {
                     List<Role> assigneeRoles = assignee.getRoles();
-                    Boolean isRoleAvailableInNextState = util.isRoleAvailable(tenantId,assigneeRoles,nextStateRoles);
+                    Boolean isRoleAvailableInNextState = util.isRoleAvailable(finalResolvedTenantId,assigneeRoles,nextStateRoles);
                     if(!isRoleAvailableInNextState)
                         throw new CustomException("INVALID_ASSIGNEE","Cannot assign to the user: "+ assignee.getUuid());
 
