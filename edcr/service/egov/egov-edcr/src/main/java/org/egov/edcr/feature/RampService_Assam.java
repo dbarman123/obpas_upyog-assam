@@ -507,7 +507,10 @@ public class RampService_Assam extends RampService {
 		Map<String, String> mapOfRampNumberAndSlopeValues = new HashMap<>();
 
 // expectedSlope = divideExpectedSlope / expectedSlopeOne
-		BigDecimal expectedSlope = divideExpectedSlope.divide(expectedSlopeOne, 2, RoundingMode.HALF_UP);
+		BigDecimal expectedSlope = BigDecimal.ZERO;
+		if(divideExpectedSlope.compareTo(BigDecimal.ZERO)!=0 && expectedSlopeOne.compareTo(BigDecimal.ZERO)!=0) {
+			expectedSlope=divideExpectedSlope.divide(expectedSlopeOne, 2, RoundingMode.HALF_UP);
+		}
 		BigDecimal tolerance = new BigDecimal("0.01"); 
 
 		BigDecimal lastSlope = BigDecimal.ZERO;
