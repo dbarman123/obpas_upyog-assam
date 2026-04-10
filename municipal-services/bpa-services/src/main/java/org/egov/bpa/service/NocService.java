@@ -20,6 +20,7 @@ import org.egov.bpa.web.model.NOC.NocResponse;
 import org.egov.bpa.web.model.NOC.NocType;
 import org.egov.bpa.web.model.NOC.Workflow;
 import org.egov.bpa.web.model.NOC.enums.ApplicationType;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,6 +125,9 @@ public class NocService {
 
 		String tenantId = bpaRequest.getBPA().getTenantId();
 		String applicationNo = bpaRequest.getBPA().getApplicationNo();
+		RequestInfo requestInfo = bpaRequest.getRequestInfo();
+		// Retrieve the existing roles from the userInfo
+		List<Role> existingRoles = new ArrayList<>(requestInfo.getUserInfo().getRoles());
 		
 		// Fetch existing NOCs to avoid duplicates
 		List<Noc> existingNocs = fetchNocRecords(bpaRequest);
@@ -261,6 +265,8 @@ public class NocService {
 		NocRequest nocRequest = NocRequest.builder().nocList(nocs).requestInfo(bpaRequest.getRequestInfo()).build();
 
 		createNoc(nocRequest);
+		requestInfo.getUserInfo().setRoles(existingRoles);
+		bpaRequest.setRequestInfo(requestInfo);
 	}
 	
 	/**

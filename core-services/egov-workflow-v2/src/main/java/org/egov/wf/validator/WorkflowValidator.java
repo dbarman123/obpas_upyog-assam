@@ -129,6 +129,7 @@ public class WorkflowValidator {
     private void validateAction(RequestInfo requestInfo,List<ProcessStateAndAction> processStateAndActions
             ,BusinessService businessService){
     	String parentTenantId = null;
+    	Boolean isTenantIdChangesRequired = false;
     	
     	//Fetching mdms details for tenantId
     	Map<String, Map<String, JSONArray>> response = fetchMdmsResponseForTenantId(requestInfo);
@@ -149,6 +150,7 @@ public class WorkflowValidator {
                 roles.addAll(tenantIdToRoles.get(tenantId));
             }else if(!CollectionUtils.isEmpty(tenantIdToRoles.get(parentTenantId))) {
             	roles.addAll(tenantIdToRoles.get(parentTenantId));
+            	isTenantIdChangesRequired = true;
             }
 
             // Adding the state level roles
@@ -205,7 +207,7 @@ public class WorkflowValidator {
             List<String> nextStateRoles = getRolesFromState(processStateAndAction.getResultantState());
 
             if(isStateChanging && !CollectionUtils.isEmpty(processStateAndAction.getProcessInstanceFromRequest().getAssignes())){
-            	if(!StringUtils.isEmpty(parentTenantId)) {
+            	if(!StringUtils.isEmpty(parentTenantId) && isTenantIdChangesRequired) {
             		tenantId = parentTenantId;
             	}
             	final String finalResolvedTenantId = tenantId;
