@@ -78,6 +78,7 @@ public class RecreationalSpaceExtract extends FeatureExtract {
 			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			pl.addError(layerRegEx + "treeCount",
 					"Mtex is either not defined or not numeric in layer RECREATIONAL_SPACE");
 		}

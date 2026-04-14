@@ -51,7 +51,6 @@ import static org.egov.edcr.constants.CommonFeatureConstants.*;
 import static org.egov.edcr.constants.CommonKeyConstants.BLOCK;
 import static org.egov.edcr.constants.DxfFileConstants.A;
 import static org.egov.edcr.constants.DxfFileConstants.A_AF;
-import static org.egov.edcr.constants.DxfFileConstants.A_PO;
 import static org.egov.edcr.constants.DxfFileConstants.A_R;
 import static org.egov.edcr.constants.DxfFileConstants.B;
 import static org.egov.edcr.constants.DxfFileConstants.C;
@@ -66,7 +65,6 @@ import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
 import static org.egov.edcr.constants.DxfFileConstants.H;
 import static org.egov.edcr.constants.DxfFileConstants.I;
-import static org.egov.edcr.constants.DxfFileConstants.A_PO;
 import static org.egov.edcr.constants.EdcrReportConstants.*;
 import static org.egov.edcr.service.FeatureUtil.addScrutinyDetailtoPlan;
 import static org.egov.edcr.service.FeatureUtil.mapReportDetails;
@@ -281,10 +279,9 @@ public class SideYardService extends GeneralRule {
      * @return true if applicable for residential rules
      */
     private boolean isApplicableSubtype(Occupancy occupancy) {
-        return occupancy.getTypeHelper().getSubtype() != null &&
-                (A_R.equalsIgnoreCase(occupancy.getTypeHelper().getSubtype().getCode())
-                        || A_AF.equalsIgnoreCase(occupancy.getTypeHelper().getSubtype().getCode())
-                        || A_PO.equalsIgnoreCase(occupancy.getTypeHelper().getSubtype().getCode()));
+        return occupancy.getTypeHelper().getType() != null &&
+                (A.equalsIgnoreCase(occupancy.getTypeHelper().getType().getCode())
+                       );
     }
 
     // Added by Bimal 18-March-2924 to check Side yard based on plot are not on height
@@ -300,9 +297,8 @@ public class SideYardService extends GeneralRule {
 //        BigDecimal side1val = BigDecimal.ZERO;
 //        BigDecimal widthOfPlot = pl.getPlanInformation().getWidthOfPlot();
 
-        if (mostRestrictiveOccupancy.getSubtype() != null && (A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-        		|| A_AF.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-        		|| A_PO.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode()))) {
+        if (mostRestrictiveOccupancy.getType() != null && (A.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())
+        		)) {
 
         	processSideYardResidential(pl, blockName, level, min,
         			mostRestrictiveOccupancy, rule, subRule, buildingHeight, plotArea, sideYard1Result,sideYard2Result);
@@ -592,9 +588,8 @@ public class SideYardService extends GeneralRule {
 
         BigDecimal widthOfPlot = pl.getPlanInformation().getWidthOfPlot();
 
-        if (mostRestrictiveOccupancy.getSubtype() != null && (A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-                || A_AF.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-                || A_PO.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode()))) {
+        if (mostRestrictiveOccupancy.getType() != null && (A.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())
+                )) {
             if (pl.getPlanInformation() != null && pl.getPlanInformation().getRoadWidth() != null
                     && StringUtils.isNotBlank(pl.getPlanInformation().getLandUseZone())
                     && DxfFileConstants.COMMERCIAL.equalsIgnoreCase(pl.getPlanInformation().getLandUseZone())
@@ -716,9 +711,9 @@ public class SideYardService extends GeneralRule {
         BigDecimal side2val = BigDecimal.ZERO;
         BigDecimal side1val = BigDecimal.ZERO;
 
-        if ((mostRestrictiveOccupancy.getSubtype() != null
-                && A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-                || A_PO.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode()))
+        if ((mostRestrictiveOccupancy.getType() != null
+                && A.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())
+               )
                 || F.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())) {
             if (plot.getArea().compareTo(BigDecimal.valueOf(PLOTAREA_300)) <= 0) {
                 side2val = SIDEVALUE_THREE;
@@ -938,9 +933,8 @@ public class SideYardService extends GeneralRule {
 
         BigDecimal widthOfPlot = pl.getPlanInformation().getWidthOfPlot();
 
-        if (mostRestrictiveOccupancy.getSubtype() != null && A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-                || A_AF.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-                || A_PO.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())) {
+        if (mostRestrictiveOccupancy.getType() != null && A.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())
+                ) {
             if (pl.getPlanInformation() != null && pl.getPlanInformation().getRoadWidth() != null
                     && StringUtils.isNotBlank(pl.getPlanInformation().getLandUseZone())
                     && DxfFileConstants.COMMERCIAL.equalsIgnoreCase(pl.getPlanInformation().getLandUseZone())
@@ -1063,9 +1057,8 @@ public class SideYardService extends GeneralRule {
 
         BigDecimal widthOfPlot = pl.getPlanInformation().getWidthOfPlot();
 
-        if (mostRestrictiveOccupancy.getSubtype() != null && A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-                || A_AF.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-                || A_PO.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())) {
+        if (mostRestrictiveOccupancy.getType() != null && A.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())
+                ) {
             if (pl.getPlanInformation() != null && pl.getPlanInformation().getRoadWidth() != null
                     && StringUtils.isNotBlank(pl.getPlanInformation().getLandUseZone())
                     && DxfFileConstants.COMMERCIAL.equalsIgnoreCase(pl.getPlanInformation().getLandUseZone())

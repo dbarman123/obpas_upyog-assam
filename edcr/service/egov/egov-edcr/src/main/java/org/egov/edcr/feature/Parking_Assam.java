@@ -76,10 +76,6 @@ import static org.egov.edcr.constants.DxfFileConstants.B_PS;
 import static org.egov.edcr.constants.DxfFileConstants.B_HEI;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.F_CB;
-import static org.egov.edcr.constants.DxfFileConstants.F_HB;
-import static org.egov.edcr.constants.DxfFileConstants.F_HWB;
-import static org.egov.edcr.constants.DxfFileConstants.F_LD;
-import static org.egov.edcr.constants.DxfFileConstants.F_PB;
 import static org.egov.edcr.constants.DxfFileConstants.G;
 import static org.egov.edcr.constants.DxfFileConstants.H;
 import static org.egov.edcr.constants.DxfFileConstants.J;
@@ -624,13 +620,13 @@ public class Parking_Assam extends Parking {
 				double requiredECS = Math.ceil(ecsPerUnit) * noOfParking;
 				requiredCarParkingArea = requiredECS * ecsArea;
 
-			} else if (F_PB.equals(subtypeCode)) {
+			} else if (DxfFileConstants.F_O.equals(subtypeCode)) {
 				double perArea = ruleResult.getPerAreaCommercialBusinessCar();
 				double ecsPerUnit = builtupArea / perArea;
 				double requiredECS = Math.ceil(ecsPerUnit) * noOfParking;
 				requiredCarParkingArea = requiredECS * ecsArea;
 
-			} else if (F_LD.equals(subtypeCode)) {
+			} else if (DxfFileConstants.A_L.equals(subtypeCode)) {
 				BigDecimal noOfRoom = pl.getPlanInformation().getNoOfRoom();
 				if (noOfRoom != null) {
 					double perRoom = ruleResult.getPerRoomHotelsCar();
@@ -639,7 +635,7 @@ public class Parking_Assam extends Parking {
 					requiredCarParkingArea = requiredECS * ecsArea;
 				}
 
-			} else if (F_HB.equals(subtypeCode)) {
+			} else if (DxfFileConstants.F_RT.equals(subtypeCode)) {
 				BigDecimal noOfRoom = pl.getPlanInformation().getNoOfRoom();
 				double noOfParkingPerRule = ruleResult.getNoOfRequiredParking();
 				double ecsAreaVal = ruleResult.getPermissibleCar();
@@ -661,7 +657,7 @@ public class Parking_Assam extends Parking {
 
 				requiredCarParkingArea = requiredCarParkingAreaPerRoom + requiredCarParkingAreaPerArea;
 
-			} else if (F_HWB.equals(subtypeCode)) {
+			} else if (DxfFileConstants.F_RT.equals(subtypeCode)) {
 				BigDecimal noOfRoom = pl.getPlanInformation().getNoOfRoom();
 				double noOfParkingPerRule = ruleResult.getNoOfRequiredParking();
 				double ecsAreaVal = ruleResult.getPermissibleCar();

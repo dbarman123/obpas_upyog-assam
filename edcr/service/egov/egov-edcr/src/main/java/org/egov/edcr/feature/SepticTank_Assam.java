@@ -69,8 +69,6 @@ import static org.egov.edcr.constants.DxfFileConstants.C;
 import static org.egov.edcr.constants.DxfFileConstants.A_AF;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
-import static org.egov.edcr.constants.DxfFileConstants.F_H;
-import static org.egov.edcr.constants.DxfFileConstants.F_LD;
 import static org.egov.edcr.constants.EdcrReportConstants.*;
 import static org.egov.edcr.service.FeatureUtil.addScrutinyDetailtoPlan;
 import static org.egov.edcr.service.FeatureUtil.mapReportDetails;
@@ -236,7 +234,7 @@ public class SepticTank_Assam extends FeatureProcess {
 	        }
 	    }
 
-	    if (F.equals(typeCode) || G.equals(typeCode) || F_H.equals(subtypeCode) || F_LD.equals(subtypeCode)) {
+	    if (F.equals(typeCode) || G.equals(typeCode)) {
 	        if (builtUpArea != null && builtUpArea.compareTo(BigDecimal.valueOf(2000)) > 0 && !hasSepticTank) {
 	            LOG.info("Error: {}", MSG_COMMERCIAL);
 	            pl.addError(VALIDATION_MANDATORY_STP_MISSING, MSG_COMMERCIAL);
