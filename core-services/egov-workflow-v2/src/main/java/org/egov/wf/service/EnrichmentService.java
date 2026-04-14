@@ -166,6 +166,8 @@ public class EnrichmentService {
 
 		String businessService = processInstanceFromRequest.getBusinessService();
 		
+		String roleValidTenantId = null;
+		
 		List<String> allTenantIds = new ArrayList<>();
 		allTenantIds.add(tenantId);
 		
@@ -200,6 +202,7 @@ public class EnrichmentService {
 					businessId, processInstanceFromRequest.getAllowedAssignees());
 
 			if (idToUserMap != null && !idToUserMap.isEmpty()) {
+				roleValidTenantId = validTenantId;
 				break; // exit loop if map has data
 			}
 		}
@@ -447,7 +450,7 @@ public class EnrichmentService {
 	private void populateRoleStatusBasedCriteria(ProcessInstanceSearchCriteria criteria, String tenantId,
 			String assigneeRole) {
 		Map<String, Map<String, List<String>>> roleTenantAndStatusMapping = businessServiceRepository
-				.getRoleTenantAndStatusMapping();
+				.getRoleTenantAndStatusMapping(tenantId);
 
 		if (!CollectionUtils.isEmpty(roleTenantAndStatusMapping)) {
 			Map<String, List<String>> tenantToStatuses = roleTenantAndStatusMapping.get(assigneeRole);
