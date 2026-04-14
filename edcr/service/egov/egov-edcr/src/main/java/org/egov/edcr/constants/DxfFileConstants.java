@@ -26,37 +26,66 @@ public class DxfFileConstants {
     public static final String INDUSTRIAL = "G"; // Industrial
     
     // sub occupancies code
-    public static final String A2 = "A2";// Old Age Home
-    public static final String A_R = "A-R"; // Single family Residential
-    public static final String A_AF = "A-AF"; // Apartment/Flat
-    public static final String A_FH = "A-FH"; // Farm House
-    public static final String A_SR = "A-SR";// Special Residential
-    public static final String A_HE = "A-HE";// Hostel Educational
-    public static final String A_SA = "A-SA";// Service Apartment
-    public static final String A_PO = "A-PO";// Professional Office
+//    public static final String A2 = "A2";// Old Age Home
+//    public static final String A_R = "A-R"; // Single family Residential //
+//    public static final String A_AF = "A-AF"; // Apartment/Flat
+//    public static final String A_FH = "A-FH"; // Farm House
+//    public static final String A_SR = "A-SR";// Special Residential
+//    public static final String A_HE = "A-HE";// Hostel Educational
+//    public static final String A_SA = "A-SA";// Service Apartment
+//    public static final String A_PO = "A-PO";// Professional Office
     public static final String A_AF_GH = "A-AF-GH";
     
-    public static final String F_H = "F-H";// Hotels
-    public static final String F_HB = "F-HB";// Hotels with banquet halls
-    public static final String F_HWB = "F-H";// Hotels without banquet halls
-    public static final String F_K = "F-K";// Kiosk
-    public static final String F_PA = "F-PA";// Parking Appurtenant
-    public static final String F_PP = "F-PP";// Parking Plaza
-    public static final String F_RT = "F-RT";// Restaurants
-    public static final String F_LD = "F-LD";// Lodges
+    public static final String A_R = "A-R"; // RESIDENTIAL - Single Unit
+    public static final String A_SR = "A-SR"; // RESIDENTIAL - Multi Unit
+    public static final String A_AF = "A-AF"; // Apartment/ Flat
+    public static final String A_L = "A-L"; // Lodge
+    public static final String A_SA = "A-SA"; // Shared Accommodation
+    
+    public static final String RESIDENTIAL_SINGLE_UNIT  = "A-R"; // RESIDENTIAL - Single Unit
+    public static final String RESIDENTIAL_MULTI_UNIT  = "A-SR"; // RESIDENTIAL - Multi Unit
+    public static final String APARTMENT_FLAT  = "A-AF"; // Apartment/ Flat
+    public static final String LODGE  = "A-L"; // Lodge
+    public static final String SHARED_ACCOMMODATION  = "A-SA"; // Shared Accommodation
+    
+   
+//    public static final String F_H = "F-H";// Hotels
+//    public static final String F_HB = "F-HB";// Hotels with banquet halls
+//    public static final String F_HWB = "F-H";// Hotels without banquet halls
+//    public static final String F_K = "F-K";// Kiosk
+//    public static final String F_PA = "F-PA";// Parking Appurtenant
+//    public static final String F_PP = "F-PP";// Parking Plaza
+//    public static final String F_RT = "F-RT";// Restaurants
+//    public static final String F_LD = "F-LD";// Lodges
+//    public static final String F_CB = "F-CB";// Commercial Building
+//    public static final String F_IT = "F-IT";// IT / ITES Buildings
+//    public static final String F_PB = "F-PB";// Private business / business office
+    
+    
     public static final String F_CB = "F-CB";// Commercial Building
-    public static final String F_IT = "F-IT";// IT / ITES Buildings
-    public static final String F_PB = "F-PB";// Private business / business office
-
+    public static final String F_O = "F-O";// Office
+    public static final String F_RT = "F-RT";// Restaurants
+    
+    public static final String COMMERCIAL_BUILDING = "F-CB";// Commercial Building
+    public static final String OFFICE = "F-O";// Office
+    public static final String RESTAURANTS = "F-RT";// Restaurants
+    
+    
     public static final String B_NS = "B-NS";// PreNursery/ Nursery Schools
     public static final String B_PS = "B-PS";// Primary school
     public static final String B_HEI = "B-HEI";// Higher Educational Institute
     public static final String B_C = "B-C";// College 
+    public static final String B_PN = "B-PN";// Prenursery 
+    public static final String B_TA = "B-TA";// Training Academy 
+    
     
     public static final String PRENURSERY_NURSERY_SCHOOLS = "B-NS";// PreNursery/Nursery Schools
     public static final String PRIMARY_SCHOOL = "B-PS";// Primary school
     public static final String HIGHER_EDUCATIONAL_INSTITUTE = "B-HEI";// Higher Educational Institute
     public static final String COLLEGE = "B-C";// College 
+    public static final String PRENURSERY = "B-PN";// Prenursery 
+    public static final String TRAINING_ACADEMY  = "B-TA";// Training Academy 
+    
     
     public static final String C_MA = "C-H"; //Hospitals
     public static final String C_MIP = "C-C"; //Clinics

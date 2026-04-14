@@ -579,9 +579,7 @@ public class ExitWidth extends FeatureProcess {
 				}
 
 				BigDecimal value;
-				if (occupancyTypeHelper.equals(DxfFileConstants.A) || occupancyTypeHelper.equals(DxfFileConstants.A_R)
-						|| occupancyTypeHelper.equals(DxfFileConstants.A_SR) || occupancyTypeHelper.equals(DxfFileConstants.A_HE)
-						|| occupancyTypeHelper.equals(DxfFileConstants.A_AF) || occupancyTypeHelper.equals(DxfFileConstants.A_PO)) {
+				if (occupancyTypeHelper.equals(DxfFileConstants.A)) {
 					value = config.exitWidthOccupancyTypeHandlerVal;
 				} else {
 					value = config.exitWidthNotOccupancyTypeHandlerVal;
@@ -654,12 +652,12 @@ public class ExitWidth extends FeatureProcess {
 		}
 
 		if (occupancyTypeHelper.equals(DxfFileConstants.A) || occupancyTypeHelper.equals(DxfFileConstants.A_R)
-				|| occupancyTypeHelper.equals(DxfFileConstants.A_AF) || occupancyTypeHelper.equals(DxfFileConstants.A_PO)) {
+				|| occupancyTypeHelper.equals(DxfFileConstants.A_AF)) {
 			occupantLoadDivisonFactor = config.exitWidth_A_occupantLoadDivisonFactor;
 			occupantLoad = getOccupantLoadOfAFloor(occupancy, occupantLoadDivisonFactor);
 			maxOccupantsAllowedThrghExits = getMaximumNumberOfOccupantsAllwdThroughExits(flr,
 					config.exitWidth_A_noOfDoors, config.exitWidth_A_noOfOccupantsPerUnitExitWidthOfStairWay);
-		} else if (occupancyTypeHelper.equals(DxfFileConstants.A_SR) || occupancyTypeHelper.equals(DxfFileConstants.A_HE)) {
+		} else if (occupancyTypeHelper.equals(DxfFileConstants.A_SR)) {
 			occupantLoadDivisonFactor = config.exitWidth_A_SR_occupantLoadDivisonFactor;
 			occupantLoad = getOccupantLoadOfAFloor(occupancy, occupantLoadDivisonFactor);
 			maxOccupantsAllowedThrghExits = getMaximumNumberOfOccupantsAllwdThroughExits(flr,
@@ -686,9 +684,7 @@ public class ExitWidth extends FeatureProcess {
 			occupantLoad = getOccupantLoadOfAFloor(occupancy, occupantLoadDivisonFactor);
 			maxOccupantsAllowedThrghExits = getMaximumNumberOfOccupantsAllwdThroughExits(flr,
 					config.exitWidth_E_noOfDoors, config.exitWidth_E_noOfOccupantsPerUnitExitWidthOfStairWay);
-		} else if (occupancyTypeHelper.equals(DxfFileConstants.F) || occupancyTypeHelper.equals(DxfFileConstants.F_PP)
-				|| occupancyTypeHelper.equals(DxfFileConstants.F_PA) || occupancyTypeHelper.equals(DxfFileConstants.F_H)
-				|| occupancyTypeHelper.equals(DxfFileConstants.F_K)) {
+		} else if (occupancyTypeHelper.equals(DxfFileConstants.F)) {
 			occupantLoadDivisonFactor = config.exitWidth_F_occupantLoadDivisonFactor;
 			occupantLoad = getOccupantLoadOfAFloor(occupancy, occupantLoadDivisonFactor);
 			maxOccupantsAllowedThrghExits = getMaximumNumberOfOccupantsAllwdThroughExits(flr,

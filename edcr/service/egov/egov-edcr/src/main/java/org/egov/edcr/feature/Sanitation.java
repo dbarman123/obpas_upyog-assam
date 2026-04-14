@@ -165,7 +165,7 @@ public class Sanitation extends FeatureProcess {
 							 * BLDG_PART_SPECIAL_WATER_CLOSET, b.getNumber()));
 							 */
                         break;
-                    case DxfFileConstants.A_HE:
+                    case DxfFileConstants.A_L:
                         commonSanitationValidations(pl, b, sanityDetails, o);
                         validateBathRoom(pl, b, sanityDetails);
                         break;
@@ -189,10 +189,10 @@ public class Sanitation extends FeatureProcess {
                         break;
                     case DxfFileConstants.E:
                     case DxfFileConstants.F:
-                    case DxfFileConstants.F_K:
+                  
                         commonSanitationValidations(pl, b, sanityDetails, o);
                         break;
-                    case DxfFileConstants.F_H:
+                    case DxfFileConstants.F_RT:
                         commonSanitationValidations(pl, b, sanityDetails, o);
                         validateBathRoom(pl, b, sanityDetails);
                         break;
@@ -259,7 +259,7 @@ public class Sanitation extends FeatureProcess {
                     getLocaleMessage(MSG_ERROR_MANDATORY, FEATURE_NAME, BLDG_PART_URINAL, b.getNumber()));
         }
 
-        if (!DxfFileConstants.F.equals(type.getCode()) && !DxfFileConstants.F_K.equals(type.getCode())
+        if (!DxfFileConstants.F.equals(type.getCode())
                 && !DxfFileConstants.E.equals(type.getCode())
                 && sanityDetails.getTotalwashBasins() == 0) {
             pl.addError(BLDG_PART_WASHBASIN,
@@ -449,7 +449,7 @@ public class Sanitation extends FeatureProcess {
                                 processSpecialWaterCloset(b, requiredSpWcMap, providedSpWcMap,
                                         failedAreaSpWcMap, failedDimensionSpWcMap, pl);
                                 break;
-                    case DxfFileConstants.A_HE:
+                    case DxfFileConstants.A_L:
                         helper.maleWc += carpetArea * 2 / (4.75 * 3 * 10);
                         helper.femaleWc += carpetArea / (4.75 * 3 * 8);
                         helper.urinal += carpetArea * 2 / (4.75 * 3 * 25);
@@ -572,14 +572,13 @@ public class Sanitation extends FeatureProcess {
                         break;
                     case DxfFileConstants.E:
                     case DxfFileConstants.F:
-                    case DxfFileConstants.F_K:
                         helper.maleWc += carpetArea * 2 / (4.75 * 3 * 25);
                         helper.femaleWc += carpetArea / (4.75 * 3 * 15);
                         helper.urinal += carpetArea * 2 / (4.75 * 3 * 25);
 
                         helper.ruleNo.add(FIFTY_SIX_3C);
                         helper.ruleDescription = SANITY_RULE_DESC + o.getCode();
-                        if ((o.equals(DxfFileConstants.F) || o.equals(DxfFileConstants.F_K)))
+                        if ((o.equals(DxfFileConstants.F)))
                             processSpecialWaterCloset(b, requiredSpWcMap, providedSpWcMap, failedAreaSpWcMap,
                                     failedDimensionSpWcMap, pl);
 
@@ -590,7 +589,7 @@ public class Sanitation extends FeatureProcess {
                         helper.urinal += carpetArea * 2 / (3 * 30 * 100);
                         helper.ruleNo.add(FIFTY_EIGHT_SIX);
                         break;
-                    case DxfFileConstants.F_H:
+                    case DxfFileConstants.F_RT:
                         helper.maleWc += carpetArea * 2 / (4.75 * 3 * 25);
                         helper.femaleWc += carpetArea / (4.75 * 3 * 15);
                         helper.urinal += carpetArea * 2 / (4.75 * 3 * 25);

@@ -171,7 +171,7 @@ public class PassageService_Assam extends FeatureProcess {
         if (subOccupancy != null) {
             LOG.info("Setting Passage Width according to SubOccupancy: " + subOccupancy);
             switch (subOccupancy) {
-                case DxfFileConstants.F_H:
+                case DxfFileConstants.F_RT:
                     return passageServiceValueFH;
                 default:
                     return passageServiceValueDefault;

@@ -63,7 +63,6 @@ import static org.egov.edcr.constants.CommonFeatureConstants.UNDERSCORE;
 import static org.egov.edcr.constants.CommonKeyConstants.BLOCK;
 import static org.egov.edcr.constants.DxfFileConstants.A;
 import static org.egov.edcr.constants.DxfFileConstants.A_AF;
-import static org.egov.edcr.constants.DxfFileConstants.A_PO;
 import static org.egov.edcr.constants.DxfFileConstants.A_R;
 import static org.egov.edcr.constants.DxfFileConstants.B;
 import static org.egov.edcr.constants.DxfFileConstants.B_HEI;
@@ -1020,10 +1019,8 @@ public class FrontYardService_Assam extends FrontYardService {
 		BigDecimal plotArea = pl.getPlanInformation().getPlotArea();
 
 		// Process only for A_R, A_AF, and A_ occupancy types
-		if (mostRestrictiveOccupancy.getSubtype() != null
-				&& (A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| A_AF.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| A_PO.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode()))) {
+		if (mostRestrictiveOccupancy.getType() != null
+				&& (A.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode()))) {
 
 			valid = processFrontYardResidential(blockName, level, min, mean, mostRestrictiveOccupancy, frontYardResult,
 					valid, subRule, rule, meanVal, depthOfPlot, errors, pl, plotArea);
@@ -1119,10 +1116,8 @@ public class FrontYardService_Assam extends FrontYardService {
 		BigDecimal minVal = BigDecimal.ZERO;
 		BigDecimal meanVal = BigDecimal.ZERO;
 		BigDecimal depthOfPlot = pl.getPlanInformation().getDepthOfPlot();
-		if (mostRestrictiveOccupancy.getSubtype() != null
-				&& A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-				|| A_AF.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-				|| A_PO.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
+		if (mostRestrictiveOccupancy.getType() != null
+				&& A.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())
 						&& block.getBuilding().getFloorsAboveGround().compareTo(BigDecimal.valueOf(5)) <= 0) {
 			if (pl.getPlanInformation() != null && pl.getPlanInformation().getRoadWidth() != null
 					&& StringUtils.isNotBlank(pl.getPlanInformation().getLandUseZone())
@@ -1291,10 +1286,9 @@ public class FrontYardService_Assam extends FrontYardService {
 		BigDecimal minVal = BigDecimal.ZERO;
 		BigDecimal meanVal = BigDecimal.ZERO;
 		BigDecimal depthOfPlot = pl.getPlanInformation().getDepthOfPlot();
-		if (mostRestrictiveOccupancy.getSubtype() != null
-				&& (A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| A_AF.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| A_PO.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode()))) {
+		if (mostRestrictiveOccupancy.getType() != null
+				&& (A.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())
+						)) {
 			if (pl.getPlanInformation() != null && pl.getPlanInformation().getRoadWidth() != null
 					&& StringUtils.isNotBlank(pl.getPlanInformation().getLandUseZone())
 					&& DxfFileConstants.COMMERCIAL.equalsIgnoreCase(pl.getPlanInformation().getLandUseZone())
@@ -1320,11 +1314,9 @@ public class FrontYardService_Assam extends FrontYardService {
 		String rule = FRONT_YARD_DESC;
 		BigDecimal minVal = BigDecimal.ZERO;
 		BigDecimal meanVal = BigDecimal.ZERO;
-		if ((mostRestrictiveOccupancy.getSubtype() != null
-				&& A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-				|| A_AF.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-				|| A_PO.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode()))
-				|| F.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())) {
+		if ((mostRestrictiveOccupancy.getType() != null
+				&& A.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())
+				|| F.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode()))) {
 			if (plot.getArea().compareTo(BigDecimal.valueOf(PLOTAREA_300)) <= 0) {
 				minVal = FRONTYARDMINIMUM_DISTANCE_3;
 				valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
@@ -1447,10 +1439,9 @@ public class FrontYardService_Assam extends FrontYardService {
 		BigDecimal meanVal = BigDecimal.ZERO;
 		BigDecimal depthOfPlot = pl.getPlanInformation().getDepthOfPlot();
 
-		if (mostRestrictiveOccupancy.getSubtype() != null
-				&& A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-				|| A_AF.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())
-				|| A_PO.equalsIgnoreCase(mostRestrictiveOccupancy.getSubtype().getCode())) {
+		if (mostRestrictiveOccupancy.getType() != null
+				&& A_R.equalsIgnoreCase(mostRestrictiveOccupancy.getType().getCode())
+				) {
 			if (pl.getPlanInformation() != null && pl.getPlanInformation().getRoadWidth() != null
 					&& StringUtils.isNotBlank(pl.getPlanInformation().getLandUseZone())
 					&& DxfFileConstants.COMMERCIAL.equalsIgnoreCase(pl.getPlanInformation().getLandUseZone())

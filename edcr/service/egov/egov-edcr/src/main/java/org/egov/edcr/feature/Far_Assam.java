@@ -85,10 +85,8 @@ import static org.egov.edcr.constants.CommonKeyConstants.FLOOR_SPACED;
 import static org.egov.edcr.constants.CommonKeyConstants.TOTAL_BUILDUP_AREA;
 import static org.egov.edcr.constants.CommonKeyConstants.TOTAL_FLOOR_AREA;
 import static org.egov.edcr.constants.DxfFileConstants.A;
-import static org.egov.edcr.constants.DxfFileConstants.A2;
 import static org.egov.edcr.constants.DxfFileConstants.A_AF;
 import static org.egov.edcr.constants.DxfFileConstants.A_AF_GH;
-import static org.egov.edcr.constants.DxfFileConstants.A_FH;
 import static org.egov.edcr.constants.DxfFileConstants.A_R;
 import static org.egov.edcr.constants.DxfFileConstants.A_SA;
 import static org.egov.edcr.constants.DxfFileConstants.B;
@@ -106,7 +104,6 @@ import static org.egov.edcr.constants.DxfFileConstants.E_SACA;
 import static org.egov.edcr.constants.DxfFileConstants.E_SFDAP;
 import static org.egov.edcr.constants.DxfFileConstants.E_SFMC;
 import static org.egov.edcr.constants.DxfFileConstants.F;
-import static org.egov.edcr.constants.DxfFileConstants.F_H;
 import static org.egov.edcr.constants.DxfFileConstants.G;
 import static org.egov.edcr.constants.DxfFileConstants.H;
 import static org.egov.edcr.constants.DxfFileConstants.H_PP;
@@ -642,7 +639,7 @@ public class Far_Assam extends Far {
 
             // Educational, Medical, Government/Public, Hotels
             if (B.equalsIgnoreCase(occCode) || C.equalsIgnoreCase(occCode) || J.equalsIgnoreCase(occCode)
-                    || (F_H.equals(subOccCode) && pl.getPlanInformation().getFourFiveStaredHotel())) {
+                    || (DxfFileConstants.F_RT.equals(subOccCode) && pl.getPlanInformation().getFourFiveStaredHotel())) {
                 qualifiesForCorridorExemption = true;
             }
         }
@@ -1772,8 +1769,8 @@ public class Far_Assam extends Far {
         codes = codesMap.keySet();
         if (codes.contains(S_ECFG))
             return codesMap.get(S_ECFG);
-        else if (codes.contains(A_FH))
-            return codesMap.get(A_FH);
+        else if (codes.contains(A_R))
+            return codesMap.get(A_R);
         else if (codes.contains(S_SAS))
             return codesMap.get(S_SAS);
         else if (codes.contains(D_B))
@@ -1810,8 +1807,6 @@ public class Far_Assam extends Far {
             return codesMap.get(S_SC);
         else if (codes.contains(S_ICC))
             return codesMap.get(S_ICC);
-        else if (codes.contains(A2))
-            return codesMap.get(A2);
         else if (codes.contains(E_CLG))
             return codesMap.get(E_CLG);
         else if (codes.contains(M_OHF))
@@ -1853,7 +1848,7 @@ public class Far_Assam extends Far {
         boolean isAccepted = false;
         if (mostRestrictiveOccupancyType != null && mostRestrictiveOccupancyType.getSubtype() != null) {
             if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(S_ECFG)
-                    || mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_FH)) {
+                    ) {
                 isAccepted = far.compareTo(POINTTWO) <= 0;
                 expectedResult = LESS_THAN_EQUAL_TO_ZERO_POINT_TWO;
                 return true;
@@ -1901,7 +1896,7 @@ public class Far_Assam extends Far {
                     || mostRestrictiveOccupancyType.getSubtype().getCode().equals(S_CA)
                     || mostRestrictiveOccupancyType.getSubtype().getCode().equals(S_SC)
                     || mostRestrictiveOccupancyType.getSubtype().getCode().equals(S_ICC)
-                    || mostRestrictiveOccupancyType.getSubtype().getCode().equals(A2)) {
+                    ) {
                 isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
                 expectedResult = LESS_THAN_EQUAL_TO_ONE_POINT_TWO;
                 return true;
