@@ -24,6 +24,9 @@ public class DxfFileConstants {
     public static final String HEATH_FACILITES  = "C"; // Heath Facilities 
     public static final String COMMERCIAL = "F"; // Commercial
     public static final String INDUSTRIAL = "G"; // Industrial
+    public static final String ASSEMBLY = "D"; // Assembly
+    public static final String STORAGE = "H"; // Storage
+    public static final String HAZARDOUS = "I"; // Hazardous
     
     // sub occupancies code
 //    public static final String A2 = "A2";// Old Age Home
@@ -87,8 +90,8 @@ public class DxfFileConstants {
     public static final String TRAINING_ACADEMY  = "B-TA";// Training Academy 
     
     
-    public static final String C_MA = "C-H"; //Hospitals
-    public static final String C_MIP = "C-C"; //Clinics
+    public static final String C_H = "C-H"; //Hospitals
+    public static final String C_C = "C-C"; //Clinics
     
     public static final String HOSPITALS = "C-H"; //Hospitals 
     public static final String CLINICS = "C-C"; //Clinics 
@@ -103,12 +106,19 @@ public class DxfFileConstants {
     public static final String INDUSTRIAL_FLATTED = "G-F";// FLATTED
     public static final String INDUSTRIAL_STANDALONE_FACTORY = "G-SF";// STANDALONE FACTORY
     
-    public static final String D_B = "D-B"; // At sub city level in urban extension
-    public static final String D_C = "D-C"; // Anganwari
-    public static final String D_A = "D-A"; // Religious
-    public static final String D_AW = "D-AW";// Assembly Worship
-    public static final String D_BT = "D-BT";// Bus Terminal
-    public static final String D_M = "D-M";// Multiplex
+//    public static final String D_B = "D-B"; // At sub city level in urban extension
+//    public static final String D_C = "D-C"; // Anganwari
+//    public static final String D_A = "D-A"; // Religious
+//    public static final String D_AW = "D-AW";// Assembly Worship
+//    public static final String D_BT = "D-BT";// Bus Terminal
+//    public static final String D_M = "D-M";// Multiplex
+    
+    public static final String D_A = "D-A"; // Assembly Buildings
+    public static final String D_C = "D-C"; // Commercial Amenities
+    
+    public static final String ASSEMBLY_BUILDINGS = "D-A"; // Assembly Buildings
+    public static final String COMMERCIAL_AMENITIES = "D-C";// Commercial Amenities
+
 
     public static final String E_PS = "E-PS";// Primary School
     public static final String E_SFMC = "E-SFMC";// School for Mentally Challenged
@@ -118,11 +128,18 @@ public class DxfFileConstants {
     public static final String E_CLG = "E-CLG";// College
     public static final String E_SACA = "E-SACA";// Sports and Cultural Activities
    
-    public static final String H_PP = "H-PP"; // Petrol Pump
-
-    public static final String I1 = "I-1";// Hazardous (I1)
-    public static final String I2 = "I-2";// Hazardous (I2)
-
+//    public static final String H_PP = "H-PP"; // Petrol Pump
+    public static final String H_S = "H-S"; // Storage
+    
+    public static final String STORAGE_SUB_OCC = "H-S"; // Storage
+    
+//    public static final String I1 = "I-1";// Hazardous (I1)
+//    public static final String I2 = "I-2";// Hazardous (I2)
+    
+    public static final String I_H = "I-H";// Hazardous
+    
+    public static final String HAZARDOUS_SUB_OCC = "I-H";// Hazardous
+    
     public static final String M_DFPAB = "M-DFPAB";// Dispensary for pet animals and birds
     public static final String M_OHF = "M-OHF";// Other Health Facilities
     public static final String M_VH = "M-VH";// Veterinary Hospital for pet animals and birds

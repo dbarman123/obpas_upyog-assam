@@ -69,7 +69,6 @@ import static org.egov.edcr.constants.DxfFileConstants.A;
 import static org.egov.edcr.constants.DxfFileConstants.C;
 import static org.egov.edcr.constants.DxfFileConstants.B;
 import static org.egov.edcr.constants.DxfFileConstants.B_NS;
-import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.E_CLG;
 import static org.egov.edcr.constants.DxfFileConstants.E_NS;
 import static org.egov.edcr.constants.DxfFileConstants.B_PS;
@@ -775,7 +774,7 @@ public class Parking_Assam extends Parking {
 //			requiredCarParkingArea = requiredECS * ecsArea;
 //
 //		} 
-		else if (D_M.equals(subtypeCode)) { // Assembly - Cinema/Multiplex
+		else if (DxfFileConstants.D.equals(typeCode)) { // Assembly - Cinema/Multiplex
 			Integer seatCount = pl.getPlanInformation().getNoOfSeats();
 			BigDecimal noOfSeats = seatCount != null ? BigDecimal.valueOf(seatCount) : BigDecimal.ZERO;
 			if (noOfSeats != null) {
@@ -968,7 +967,7 @@ public class Parking_Assam extends Parking {
 			double requiredECS = Math.ceil(ecsPerUnit) * noOfParking;
 			requiredTwoWheelerParkingArea = requiredECS * ecsArea;
 
-		} else if (D_M.equals(subtypeCode)) { // Assembly - Cinema/Multiplex
+		} else if (DxfFileConstants.D.equals(typeCode)) { // Assembly - Cinema/Multiplex
 			Integer seatCount = pl.getPlanInformation().getNoOfSeats();
 			BigDecimal noOfSeats = seatCount != null ? BigDecimal.valueOf(seatCount) : BigDecimal.ZERO;
 			if (noOfSeats != null) {

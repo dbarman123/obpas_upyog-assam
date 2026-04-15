@@ -67,8 +67,6 @@ import static org.egov.edcr.constants.DxfFileConstants.A_R;
 import static org.egov.edcr.constants.DxfFileConstants.B;
 import static org.egov.edcr.constants.DxfFileConstants.C;
 import static org.egov.edcr.constants.DxfFileConstants.D;
-import static org.egov.edcr.constants.DxfFileConstants.D_AW;
-import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
 import static org.egov.edcr.constants.DxfFileConstants.H;
@@ -1377,7 +1375,7 @@ public class RearYardService_Assam extends RearYardService {
 	        valid = processRearYardIndustrial(
 	                pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
 	                subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName,plotArea);
-	    } else if (D.equalsIgnoreCase(occupancyCode) &&  D_AW.equalsIgnoreCase(subOccupancyCode)) {
+	    } else if (D.equalsIgnoreCase(occupancyCode)) {
 	       
 	        
 	        valid = processRearYardPlaceOfworship(
@@ -1395,7 +1393,7 @@ public class RearYardService_Assam extends RearYardService {
 	        valid = processRearYardAssembly(
 	                pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
 	                subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName);
-	    }else if (D.equalsIgnoreCase(occupancyCode) &&  D_M.equalsIgnoreCase(subOccupancyCode)) {
+	    }else if (D.equalsIgnoreCase(occupancyCode)) {
 	       
 	        
 	        valid = processRearYardMultiplex(

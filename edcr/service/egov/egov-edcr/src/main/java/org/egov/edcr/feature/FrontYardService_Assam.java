@@ -70,8 +70,6 @@ import static org.egov.edcr.constants.DxfFileConstants.B_NS;
 import static org.egov.edcr.constants.DxfFileConstants.B_PS;
 import static org.egov.edcr.constants.DxfFileConstants.C;
 import static org.egov.edcr.constants.DxfFileConstants.D;
-import static org.egov.edcr.constants.DxfFileConstants.D_AW;
-import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
 import static org.egov.edcr.constants.DxfFileConstants.I;
@@ -260,12 +258,12 @@ public class FrontYardService_Assam extends FrontYardService {
 			}
 		 else if (D.equalsIgnoreCase(occupancyCode)) {
 			 processFrontYardServiceAssembly(blockName, level, min, mean, mostRestrictiveOccupancy, frontYardResult, valid, subRule, rule, minVal, meanVal, depthOfPlot, errors, pl, occupancyCode);
-		 }else if(D.equalsIgnoreCase(occupancyCode) &&  D_M.equalsIgnoreCase(occupancyCode)){
+		 }else if(D.equalsIgnoreCase(occupancyCode)){
 			 processFrontYardServiceMultiplex(blockName, level, min, mean, mostRestrictiveOccupancy, frontYardResult, valid, subRule, rule, minVal, meanVal, depthOfPlot, errors, pl, occupancyCode);
 		 }
 		 else if (B.equalsIgnoreCase(occupancyCode)) {
 			 processFrontYardServiceSchools(blockName, level, min, mean, mostRestrictiveOccupancy, frontYardResult, valid, subRule, rule, minVal, meanVal, depthOfPlot, errors, pl, occupancyCode);
-		 }else if(D.equalsIgnoreCase(occupancyCode) &&  D_AW.equalsIgnoreCase(occupancyCode)){
+		 }else if(D.equalsIgnoreCase(occupancyCode)){
 			 processFrontYardServicePlaceOfWorship(blockName, level, min, mean, mostRestrictiveOccupancy, frontYardResult, valid, subRule, rule, minVal, meanVal, depthOfPlot, errors, pl, occupancyCode);
 		 } else if (C.equalsIgnoreCase(occupancyCode)) {
 			 processFrontYardServiceHospitalAndNursingHomes(blockName, level, min, mean, mostRestrictiveOccupancy, frontYardResult, valid, subRule, rule, minVal, meanVal, depthOfPlot, errors, pl, occupancyCode);

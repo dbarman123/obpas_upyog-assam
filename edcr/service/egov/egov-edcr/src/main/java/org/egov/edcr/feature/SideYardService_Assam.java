@@ -73,8 +73,6 @@ import static org.egov.edcr.constants.DxfFileConstants.A_R;
 import static org.egov.edcr.constants.DxfFileConstants.B;
 import static org.egov.edcr.constants.DxfFileConstants.C;
 import static org.egov.edcr.constants.DxfFileConstants.D;
-import static org.egov.edcr.constants.DxfFileConstants.D_AW;
-import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
 import static org.egov.edcr.constants.DxfFileConstants.H;
@@ -501,7 +499,7 @@ public class SideYardService_Assam extends SideYardService {
 					plotArea, sideYard1Result, sideYard2Result, max);
 		
 		}
-		else if ((D.equalsIgnoreCase(occupancyCode) &&  D_AW.equalsIgnoreCase(subOccupancyCode))) {
+		else if ((D.equalsIgnoreCase(occupancyCode))) {
 			processSideYardPlaceOfworship(pl, blockName, level, min, mostRestrictiveOccupancy, rule, subRule, buildingHeight,
 					plotArea, sideYard1Result, sideYard2Result, max);
 		
@@ -515,7 +513,7 @@ public class SideYardService_Assam extends SideYardService {
 			 processSideYardResidential(pl, blockName, level, min, mostRestrictiveOccupancy, rule, subRule,
 						buildingHeight, plotArea, sideYard1Result, sideYard2Result, max);
 		 }
-		else if (D.equalsIgnoreCase(occupancyCode) &&  D_M.equalsIgnoreCase(subOccupancyCode)) {
+		else if (D.equalsIgnoreCase(occupancyCode)) {
 			processSideYardMultiplex(pl, blockName, level, min, mostRestrictiveOccupancy, rule, subRule, buildingHeight,
 					plotArea, sideYard1Result, sideYard2Result, max);
 		
