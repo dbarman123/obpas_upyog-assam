@@ -917,8 +917,9 @@ public class Far_Assam extends Far {
 	        }else if (mostRestrictiveOccupancyType != null && roadWidth != null
 	                && !processFarForSpecialOccupancy(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs)) {
 
-	            processFar(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs,
-	                    feature, mostRestrictiveOccupancyType.getType().getName());
+//	            processFar(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs,
+//	                    feature, mostRestrictiveOccupancyType.getType().getName());
+	        	processFarV2(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs, feature, feature);
 	            LOG.info("Processed FAR for normal occupancy");
 
 	        }
@@ -2069,7 +2070,75 @@ public class Far_Assam extends Far {
             buildResult(pl, occupancyName, far, typeOfArea, roadWidth, expectedResult, isAccepted, additionalMixedUseFar, additionalEWSLIGFar, baseFar, tdr);
         }
     }
+    
+	private void processFarV2(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far, String typeOfArea,
+			BigDecimal roadWidth, HashMap<String, String> errors, String feature, String occupancyName) {
 
+		final BigDecimal ONE_BIGHA_IN_SQM = ONEBIGHA;
+		BigDecimal plotArea = pl.getPlot().getArea();
+		BigDecimal permissibleFar = BigDecimal.ZERO;
+		String TDR = pl.getPlanInformation().getTDR();
+		String todZone = pl.getPlanInformation().getTodZone();
+		BigDecimal additionalMixedUseFar = BigDecimal.ZERO;
+		BigDecimal additionalEWSLIGFar = BigDecimal.ZERO;
+		BigDecimal baseFar = BigDecimal.ZERO;
+		BigDecimal tdr = BigDecimal.ZERO;
+
+		LOG.info("Starting processFar with plotArea: {}, far: {}, roadWidth: {}", plotArea, far, roadWidth);
+
+		OccupancyTypeHelper mostRestrictiveOccupancyType = pl.getVirtualBuilding() != null
+				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
+				: null;
+
+		LOG.info("Most restrictive occupancy type: {}", mostRestrictiveOccupancyType);
+
+		if (roadWidth != null && roadWidth.compareTo(new BigDecimal("2.4")) < 0) {
+			permissibleFar = new BigDecimal("0.75");
+			LOG.info("Road width < 2.4m, permissible FAR restricted to 0.75 (G+1 buildings only)");
+		} else {
+			tdr = BigDecimal.ZERO;
+			if (mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.RESIDENTIAL)
+					|| mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.COMMERCIAL)) {
+				if (roadWidth.compareTo(new BigDecimal("3.6")) >= 0 && roadWidth.compareTo(new BigDecimal("4.5")) < 0) {
+					baseFar = new BigDecimal("1");
+					permissibleFar = new BigDecimal("1.25");
+				} else if (roadWidth.compareTo(new BigDecimal("4.5")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("6.6")) < 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0) {
+					baseFar = new BigDecimal("1.25");
+					permissibleFar = new BigDecimal("1.25");
+				} else if (roadWidth.compareTo(new BigDecimal("4.5")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("6.6")) < 0
+						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
+					baseFar = new BigDecimal("1.25");
+					permissibleFar = new BigDecimal("1.50");
+				}
+			} else {
+				LOG.warn("No FAR rule matched for given parameters: plotArea={}, roadWidth={}", plotArea, roadWidth);
+			}
+			computeBaseAndPremiumFarAreas(pl, plotArea, baseFar, permissibleFar, far);
+			LOG.info("Permissible FAR from matched rule: {}", permissibleFar);
+
+		}
+		try {
+			LOG.info("Final permissible FAR to validate against: {}", permissibleFar);
+		} catch (NullPointerException e) {
+			LOG.error("Permissible FAR not found or null", e);
+		}
+
+		boolean isAccepted = far.compareTo(permissibleFar) <= 0;
+		pl.getFarDetails().setPermissableFar(permissibleFar.doubleValue());
+		String expectedResult = "<= " + permissibleFar;
+
+		LOG.info("FAR validation result for occupancy '{}': provided FAR = {}, accepted = {}", occupancyName, far,
+				isAccepted);
+
+		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
+			buildResult(pl, occupancyName, far, typeOfArea, roadWidth, expectedResult, isAccepted,
+					additionalMixedUseFar, additionalEWSLIGFar, baseFar, tdr);
+		}
+	}
+    
     private Optional<FarRequirement> findMatchedFarRule(Plan pl, OccupancyTypeHelper occupancy, BigDecimal plotArea,
                                                         BigDecimal roadWidth) {
         LOG.info("Finding matched FAR rule with plotArea: {}, roadWidth: {}", plotArea, roadWidth);
