@@ -638,13 +638,13 @@ public class FrontYardService_Assam extends FrontYardService {
 	    LOG.info("Front Setback Rule - Applied MinVal: {}, MeanVal: {}", minVal, meanVal);
 	    
 	   // Proposed Road Width Adjustment
-	    meanVal = applyProposedRoadWidthAdjustment(
-	            proposedRoadWidthRequired,
-	            proposedRoadWidth,
-	            existingRoadWidth,
-	            meanVal,
-	            blockName
-	    );
+//	    meanVal = applyProposedRoadWidthAdjustment(
+//	            proposedRoadWidthRequired,
+//	            proposedRoadWidth,
+//	            existingRoadWidth,
+//	            meanVal,
+//	            blockName
+//	    );
         minVal = meanVal;
 
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);

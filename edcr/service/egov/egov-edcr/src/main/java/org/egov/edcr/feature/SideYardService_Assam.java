@@ -635,7 +635,7 @@ public class SideYardService_Assam extends SideYardService {
 		} else {
 	    	meanVal = new BigDecimal("12");
 		} 
-	    meanVal = minVal;
+	    minVal = meanVal;
 	    
 	    // Validate minimum side yard
 	    boolean valid = validateMinimumAndMeanValue(

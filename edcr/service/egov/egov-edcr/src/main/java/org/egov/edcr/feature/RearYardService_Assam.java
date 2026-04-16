@@ -377,7 +377,7 @@ public class RearYardService_Assam extends RearYardService {
 		} else {
 	    	meanVal = new BigDecimal("12");
 		} 
-	    meanVal = minVal;
+	    minVal = meanVal;
 
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
 
@@ -548,8 +548,8 @@ public class RearYardService_Assam extends RearYardService {
 	    } else {
 	    	meanVal = new BigDecimal("3.0");
 		}
-	    meanVal = minVal;
-	    
+	   
+	    minVal = meanVal;
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
 
 	    compareRearYardResult(block.getName(), min, mean, mostRestrictiveOccupancy, rearYardResult, valid, subRule,
