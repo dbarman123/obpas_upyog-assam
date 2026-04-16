@@ -155,6 +155,7 @@ import org.egov.infra.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 @Service
 public class FrontYardService_Assam extends FrontYardService {
 	
@@ -262,7 +263,7 @@ public class FrontYardService_Assam extends FrontYardService {
 			 processFrontYardServiceMultiplex(blockName, level, min, mean, mostRestrictiveOccupancy, frontYardResult, valid, subRule, rule, minVal, meanVal, depthOfPlot, errors, pl, occupancyCode);
 		 }
 		 else if (B.equalsIgnoreCase(occupancyCode)) {
-			 processFrontYardServiceSchools(blockName, level, min, mean, mostRestrictiveOccupancy, frontYardResult, valid, subRule, rule, minVal, meanVal, depthOfPlot, errors, pl, occupancyCode);
+			 processFrontYardServiceSchools(blockName, level, min, mean, mostRestrictiveOccupancy, frontYardResult, valid, subRule, rule, minVal, meanVal, depthOfPlot, errors, pl, occupancyCode, buildingHeight);
 		 }else if(D.equalsIgnoreCase(occupancyCode)){
 			 processFrontYardServicePlaceOfWorship(blockName, level, min, mean, mostRestrictiveOccupancy, frontYardResult, valid, subRule, rule, minVal, meanVal, depthOfPlot, errors, pl, occupancyCode);
 		 } else if (C.equalsIgnoreCase(occupancyCode)) {
@@ -552,31 +553,90 @@ public class FrontYardService_Assam extends FrontYardService {
 	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.FRONT_SET_BACK.getValue(), false);
 	    LOG.info("Fetched {} Front Setback rules from MDMS for Block: {}", rules.size(), blockName);
 
-	    Optional<FrontSetBackRequirement> matchedRule = rules.stream()
-	            .filter(FrontSetBackRequirement.class::isInstance)
-	            .map(FrontSetBackRequirement.class::cast)
-	            .filter(ruleObj ->
-	                ruleObj.getFromRoadWidth() != null && ruleObj.getToRoadWidth() != null
-	                && ruleObj.getFromBuildingHeight() != null && ruleObj.getToBuildingHeight() != null
-	                && existingRoadWidth.compareTo(ruleObj.getFromRoadWidth()) >= 0
-	                && existingRoadWidth.compareTo(ruleObj.getToRoadWidth()) < 0
-	                && buildingHeight.compareTo(ruleObj.getFromBuildingHeight()) >= 0
-	                && buildingHeight.compareTo(ruleObj.getToBuildingHeight()) < 0
-	                && Boolean.TRUE.equals(ruleObj.getActive()))
-	            .findFirst();
+//	    Optional<FrontSetBackRequirement> matchedRule = rules.stream()
+//	            .filter(FrontSetBackRequirement.class::isInstance)
+//	            .map(FrontSetBackRequirement.class::cast)
+//	            .filter(ruleObj ->
+//	                ruleObj.getFromRoadWidth() != null && ruleObj.getToRoadWidth() != null
+//	                && ruleObj.getFromBuildingHeight() != null && ruleObj.getToBuildingHeight() != null
+//	                && existingRoadWidth.compareTo(ruleObj.getFromRoadWidth()) >= 0
+//	                && existingRoadWidth.compareTo(ruleObj.getToRoadWidth()) < 0
+//	                && buildingHeight.compareTo(ruleObj.getFromBuildingHeight()) >= 0
+//	                && buildingHeight.compareTo(ruleObj.getToBuildingHeight()) < 0
+//	                && Boolean.TRUE.equals(ruleObj.getActive()))
+//	            .findFirst();
+//
+//	    if (matchedRule.isPresent()) {
+//	        FrontSetBackRequirement mdmsRule = matchedRule.get();
+//	        meanVal = mdmsRule.getPermissible();
+//	        minVal = meanVal;
+//	        LOG.info("Matched Front Setback Rule - Permissible: {}, Applied MinVal: {}, MeanVal: {}", mdmsRule.getPermissible(), minVal, meanVal);
+//	    } else {
+//	        errors.put(FRONT_YARD_DESC, "No applicable front setback rule found for given road width and plot depth.");
+//	        meanVal = BigDecimal.ZERO;
+//	        minVal = BigDecimal.ZERO;
+//	        LOG.warn("No applicable Front Setback Rule found for Block: {} (RoadWidth: {}, Height: {})", blockName, existingRoadWidth, buildingHeight);
+//	    }
 
-	    if (matchedRule.isPresent()) {
-	        FrontSetBackRequirement mdmsRule = matchedRule.get();
-	        meanVal = mdmsRule.getPermissible();
-	        minVal = meanVal;
-	        LOG.info("Matched Front Setback Rule - Permissible: {}, Applied MinVal: {}, MeanVal: {}", mdmsRule.getPermissible(), minVal, meanVal);
-	    } else {
-	        errors.put(FRONT_YARD_DESC, "No applicable front setback rule found for given road width and plot depth.");
-	        meanVal = BigDecimal.ZERO;
-	        minVal = BigDecimal.ZERO;
-	        LOG.warn("No applicable Front Setback Rule found for Block: {} (RoadWidth: {}, Height: {})", blockName, existingRoadWidth, buildingHeight);
-	    }
-
+	    // For all plot sizes
+	    if (existingRoadWidth.compareTo(new BigDecimal("6.6")) < 0
+	    		&& buildingHeight.compareTo(new BigDecimal("9.6")) < 0) {
+			meanVal = new BigDecimal("3.6");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("6.6")) < 0
+				&& buildingHeight.compareTo(new BigDecimal("9.6")) >= 0
+	    		&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0) {
+			meanVal = new BigDecimal("4.5");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("6.6")) < 0
+	    		&& buildingHeight.compareTo(new BigDecimal("15.6")) >= 0) {
+			meanVal = new BigDecimal("6.0");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("6.6")) >= 0
+				&& existingRoadWidth.compareTo(new BigDecimal("15.0")) < 0
+				&& buildingHeight.compareTo(new BigDecimal("9.6")) < 0) {
+			meanVal = new BigDecimal("4.5");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("6.6")) >= 0
+				&& existingRoadWidth.compareTo(new BigDecimal("15.0")) < 0
+				&& buildingHeight.compareTo(new BigDecimal("9.6")) >= 0
+	    		&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0) {
+			meanVal = new BigDecimal("6.0");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("6.6")) >= 0
+				&& existingRoadWidth.compareTo(new BigDecimal("15.0")) < 0
+	    		&& buildingHeight.compareTo(new BigDecimal("15.6")) >= 0) {
+			meanVal = new BigDecimal("7.5");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("15.0")) >= 0
+				&& existingRoadWidth.compareTo(new BigDecimal("45.0")) < 0
+				&& buildingHeight.compareTo(new BigDecimal("9.6")) < 0) {
+			meanVal = new BigDecimal("6.0");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("15.0")) >= 0
+				&& existingRoadWidth.compareTo(new BigDecimal("24.0")) < 0
+				&& buildingHeight.compareTo(new BigDecimal("9.6")) >= 0
+	    		&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0) {
+			meanVal = new BigDecimal("7.5");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("15.0")) >= 0
+				&& existingRoadWidth.compareTo(new BigDecimal("24.0")) < 0
+	    		&& buildingHeight.compareTo(new BigDecimal("15.6")) >= 0) {
+			meanVal = new BigDecimal("9.0");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("24.0")) >= 0
+				&& existingRoadWidth.compareTo(new BigDecimal("45.0")) < 0
+				&& buildingHeight.compareTo(new BigDecimal("9.6")) >= 0
+	    		&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0) {
+			meanVal = new BigDecimal("9.0");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("24.0")) >= 0
+				&& existingRoadWidth.compareTo(new BigDecimal("45.0")) < 0
+	    		&& buildingHeight.compareTo(new BigDecimal("15.6")) >= 0) {
+			meanVal = new BigDecimal("12.0");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("45.0")) >= 0
+				&& buildingHeight.compareTo(new BigDecimal("9.6")) < 0) {
+			meanVal = new BigDecimal("7.5");
+		} else if (existingRoadWidth.compareTo(new BigDecimal("45.0")) >= 0
+				&& buildingHeight.compareTo(new BigDecimal("9.6")) >= 0
+	    		&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0) {
+			meanVal = new BigDecimal("12.0");
+		} else {
+			meanVal = new BigDecimal("15.0");
+		}
+	    minVal = meanVal;
+	    LOG.info("Front Setback Rule - Applied MinVal: {}, MeanVal: {}", minVal, meanVal);
+	    
 	   // Proposed Road Width Adjustment
 	    meanVal = applyProposedRoadWidthAdjustment(
 	            proposedRoadWidthRequired,
@@ -737,24 +797,27 @@ public class FrontYardService_Assam extends FrontYardService {
 	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.FRONT_SET_BACK.getValue(), false);
 	    LOG.info("Fetched {} Front Setback rules for Hospital/Nursing Homes", rules.size());
 
-	    Optional<FrontSetBackRequirement> matchedRule = rules.stream()
-	            .filter(FrontSetBackRequirement.class::isInstance)
-	            .map(FrontSetBackRequirement.class::cast)
-	            .filter(ruleObj -> Boolean.TRUE.equals(ruleObj.getActive()))
-	            .findFirst();
-
-	    if (matchedRule.isPresent()) {
-	        FrontSetBackRequirement mdmsRule = matchedRule.get();
-	        meanVal = mdmsRule.getPermissible();
-	        minVal = meanVal;
-	        LOG.info("Applied Hospital/Nursing Homes Front Setback Rule - MinVal: {}, MeanVal: {}", minVal, meanVal);
-	    } else {
-	        errors.put(FRONT_YARD_DESC, "No applicable front setback rule found for occupancy: " + occupancyName);
-	        meanVal = BigDecimal.ZERO;
-	        minVal = BigDecimal.ZERO;
-	        LOG.warn("No applicable Hospital/Nursing Homes Front Setback Rule found for Occupancy: {}", occupancyName);
-	    }
-
+//	    Optional<FrontSetBackRequirement> matchedRule = rules.stream()
+//	            .filter(FrontSetBackRequirement.class::isInstance)
+//	            .map(FrontSetBackRequirement.class::cast)
+//	            .filter(ruleObj -> Boolean.TRUE.equals(ruleObj.getActive()))
+//	            .findFirst();
+//
+//	    if (matchedRule.isPresent()) {
+//	        FrontSetBackRequirement mdmsRule = matchedRule.get();
+//	        meanVal = mdmsRule.getPermissible();
+//	        minVal = meanVal;
+//	        LOG.info("Applied Hospital/Nursing Homes Front Setback Rule - MinVal: {}, MeanVal: {}", minVal, meanVal);
+//	    } else {
+//	        errors.put(FRONT_YARD_DESC, "No applicable front setback rule found for occupancy: " + occupancyName);
+//	        meanVal = BigDecimal.ZERO;
+//	        minVal = BigDecimal.ZERO;
+//	        LOG.warn("No applicable Hospital/Nursing Homes Front Setback Rule found for Occupancy: {}", occupancyName);
+//	    }
+	    
+	    meanVal = new BigDecimal("9.0");
+	    minVal = meanVal;
+	    
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
 	    LOG.info("Validation result for Hospital/Nursing Homes Block {} - Min: {}, Mean: {}, Required MinVal: {}, MeanVal: {}, Valid: {}",
 	            blockName, min, mean, minVal, meanVal, valid);
@@ -945,7 +1008,7 @@ public class FrontYardService_Assam extends FrontYardService {
 	private Boolean processFrontYardServiceSchools(String blockName, Integer level, BigDecimal min, BigDecimal mean,
 	        OccupancyTypeHelper mostRestrictiveOccupancy, FrontYardResult frontYardResult, Boolean valid,
 	        String subRule, String rule, BigDecimal minVal, BigDecimal meanVal,
-	        BigDecimal depthOfPlot, HashMap<String, String> errors, Plan pl, String occupancyName) {
+	        BigDecimal depthOfPlot, HashMap<String, String> errors, Plan pl, String occupancyName, BigDecimal buildingHeight) {
 
 	    LOG.info("Processing FrontYard (Schools) for Block: {}, Level: {}, Occupancy: {}", blockName, level, occupancyName);
 
@@ -957,42 +1020,124 @@ public class FrontYardService_Assam extends FrontYardService {
 	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.FRONT_SET_BACK.getValue(), false);
 	    LOG.info("Fetched {} rules for FRONT_SET_BACK", rules.size());
 
-	    Optional<FrontSetBackRequirement> matchedRule = rules.stream()
-	            .filter(FrontSetBackRequirement.class::isInstance)
-	            .map(FrontSetBackRequirement.class::cast)
-	            .filter(ruleObj -> Boolean.TRUE.equals(ruleObj.getActive()))
-	            .findFirst();
+//	    Optional<FrontSetBackRequirement> matchedRule = rules.stream()
+//	            .filter(FrontSetBackRequirement.class::isInstance)
+//	            .map(FrontSetBackRequirement.class::cast)
+//	            .filter(ruleObj -> Boolean.TRUE.equals(ruleObj.getActive()))
+//	            .findFirst();
+//
+//	    String subtypeCode = mostRestrictiveOccupancy.getSubtype() != null
+//                ? mostRestrictiveOccupancy.getSubtype().getCode()
+//                : null;
+//
+//	    if (matchedRule.isPresent()) {
+//	        FrontSetBackRequirement mdmsRule = matchedRule.get();
+//	       
+//
+//	        if (B_NS.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleNursery();
+//	            LOG.info("Occupancy subtype: NURSERY | Permissible Side Yard: {}", meanVal);
+//	        } else if (B_PS.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissiblePrimary();
+//	            LOG.info("Occupancy subtype: PRIMARY SCHOOL | Permissible Side Yard: {}", meanVal);
+//	        } else if (B_HEI.equalsIgnoreCase(subtypeCode)) {
+//	            meanVal = mdmsRule.getPermissibleHighSchool();
+//	            LOG.info("Occupancy subtype: HIGH SCHOOL | Permissible Side Yard: {}", meanVal);
+//	        }  else {
+//	            LOG.warn("No matching occupancy subtype found for school category. Defaulting permissible values to 0.");
+//	            meanVal = BigDecimal.ZERO;
+//	        }
+//	        minVal = meanVal;
+//	        LOG.info("Matched rule found. Permissible: {}, MinVal set to: {}", meanVal, minVal);
+//	    } else {
+//	        errors.put(FRONT_YARD_DESC, "No applicable front setback rule found for occupancy: " + occupancyName);
+//	        meanVal = BigDecimal.ZERO;
+//	        minVal = BigDecimal.ZERO;
+//	        LOG.warn("No applicable rule found for Occupancy: {}", occupancyName);
+//	    }
 
+	    String subtype = mostRestrictiveOccupancy.getSubtype() != null
+	              ? mostRestrictiveOccupancy.getSubtype().getName()
+	              : null;
 	    String subtypeCode = mostRestrictiveOccupancy.getSubtype() != null
-                ? mostRestrictiveOccupancy.getSubtype().getCode()
-                : null;
-
-	    if (matchedRule.isPresent()) {
-	        FrontSetBackRequirement mdmsRule = matchedRule.get();
-	       
-
-	        if (B_NS.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleNursery();
-	            LOG.info("Occupancy subtype: NURSERY | Permissible Side Yard: {}", meanVal);
-	        } else if (B_PS.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissiblePrimary();
-	            LOG.info("Occupancy subtype: PRIMARY SCHOOL | Permissible Side Yard: {}", meanVal);
-	        } else if (B_HEI.equalsIgnoreCase(subtypeCode)) {
-	            meanVal = mdmsRule.getPermissibleHighSchool();
-	            LOG.info("Occupancy subtype: HIGH SCHOOL | Permissible Side Yard: {}", meanVal);
-	        }  else {
-	            LOG.warn("No matching occupancy subtype found for school category. Defaulting permissible values to 0.");
-	            meanVal = BigDecimal.ZERO;
-	        }
-	        minVal = meanVal;
-	        LOG.info("Matched rule found. Permissible: {}, MinVal set to: {}", meanVal, minVal);
-	    } else {
-	        errors.put(FRONT_YARD_DESC, "No applicable front setback rule found for occupancy: " + occupancyName);
-	        meanVal = BigDecimal.ZERO;
-	        minVal = BigDecimal.ZERO;
-	        LOG.warn("No applicable rule found for Occupancy: {}", occupancyName);
-	    }
-
+              ? mostRestrictiveOccupancy.getSubtype().getCode()
+              : null;
+	    BigDecimal existingRoadWidth = pl.getPlanInformation().getRoadWidth();
+	    
+	    if (buildingHeight.compareTo(new BigDecimal("15.6")) < 0 ) {
+			if(subtypeCode.equalsIgnoreCase(DxfFileConstants.B_PN) || subtypeCode.equalsIgnoreCase(DxfFileConstants.B_NS)) {
+				meanVal = new BigDecimal("6.0");
+			} else if (subtypeCode.equalsIgnoreCase(DxfFileConstants.B_PS)) {
+				meanVal =new BigDecimal("7.5");
+			} else if (subtypeCode.equalsIgnoreCase(DxfFileConstants.B_HEI) || subtypeCode.equalsIgnoreCase(DxfFileConstants.B_C)) {
+				meanVal =new BigDecimal("10.0");
+			} 
+			else {
+		        errors.put(FRONT_YARD_DESC, "No applicable front setback rule found for occupancy: " + occupancyName + ", sub occupancy: " + subtype);
+		        meanVal = BigDecimal.ZERO;
+		        minVal = BigDecimal.ZERO;
+		        LOG.warn("No applicable rule found for Occupancy: {}, Sub Occupancy:{}", occupancyName, subtype);
+		    }
+		} else {
+			if (existingRoadWidth.compareTo(new BigDecimal("6.6")) < 0
+		    		&& buildingHeight.compareTo(new BigDecimal("9.6")) < 0) {
+				meanVal = new BigDecimal("3.6");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("6.6")) < 0
+					&& buildingHeight.compareTo(new BigDecimal("9.6")) >= 0
+		    		&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0) {
+				meanVal = new BigDecimal("4.5");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("6.6")) < 0
+		    		&& buildingHeight.compareTo(new BigDecimal("15.6")) >= 0) {
+				meanVal = new BigDecimal("6.0");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("6.6")) >= 0
+					&& existingRoadWidth.compareTo(new BigDecimal("15.0")) < 0
+					&& buildingHeight.compareTo(new BigDecimal("9.6")) < 0) {
+				meanVal = new BigDecimal("4.5");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("6.6")) >= 0
+					&& existingRoadWidth.compareTo(new BigDecimal("15.0")) < 0
+					&& buildingHeight.compareTo(new BigDecimal("9.6")) >= 0
+		    		&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0) {
+				meanVal = new BigDecimal("6.0");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("6.6")) >= 0
+					&& existingRoadWidth.compareTo(new BigDecimal("15.0")) < 0
+		    		&& buildingHeight.compareTo(new BigDecimal("15.6")) >= 0) {
+				meanVal = new BigDecimal("7.5");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("15.0")) >= 0
+					&& existingRoadWidth.compareTo(new BigDecimal("45.0")) < 0
+					&& buildingHeight.compareTo(new BigDecimal("9.6")) < 0) {
+				meanVal = new BigDecimal("6.0");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("15.0")) >= 0
+					&& existingRoadWidth.compareTo(new BigDecimal("24.0")) < 0
+					&& buildingHeight.compareTo(new BigDecimal("9.6")) >= 0
+		    		&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0) {
+				meanVal = new BigDecimal("7.5");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("15.0")) >= 0
+					&& existingRoadWidth.compareTo(new BigDecimal("24.0")) < 0
+		    		&& buildingHeight.compareTo(new BigDecimal("15.6")) >= 0) {
+				meanVal = new BigDecimal("9.0");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("24.0")) >= 0
+					&& existingRoadWidth.compareTo(new BigDecimal("45.0")) < 0
+					&& buildingHeight.compareTo(new BigDecimal("9.6")) >= 0
+		    		&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0) {
+				meanVal = new BigDecimal("9.0");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("24.0")) >= 0
+					&& existingRoadWidth.compareTo(new BigDecimal("45.0")) < 0
+		    		&& buildingHeight.compareTo(new BigDecimal("15.6")) >= 0) {
+				meanVal = new BigDecimal("12.0");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("45.0")) >= 0
+					&& buildingHeight.compareTo(new BigDecimal("9.6")) < 0) {
+				meanVal = new BigDecimal("7.5");
+			} else if (existingRoadWidth.compareTo(new BigDecimal("45.0")) >= 0
+					&& buildingHeight.compareTo(new BigDecimal("9.6")) >= 0
+		    		&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0) {
+				meanVal = new BigDecimal("12.0");
+			} else {
+				meanVal = new BigDecimal("15.0");
+			}
+		} 
+	    
+	    minVal = meanVal;
+	    
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
 	    LOG.info("Validation result for Block: {}, Level: {} → {}", blockName, level, valid);
 
