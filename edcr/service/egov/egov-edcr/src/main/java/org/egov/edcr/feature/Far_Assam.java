@@ -2098,7 +2098,9 @@ public class Far_Assam extends Far {
 		} else {
 			tdr = BigDecimal.ZERO;
 			if (mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.RESIDENTIAL)
-					|| mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.COMMERCIAL)) {
+					|| mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.COMMERCIAL)
+					|| mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.INSTITUTIONAL)
+					|| mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.HEATH_FACILITES)) {
 				if (roadWidth.compareTo(new BigDecimal("3.6")) >= 0 && roadWidth.compareTo(new BigDecimal("4.5")) < 0) {
 					baseFar = new BigDecimal("1");
 					permissibleFar = new BigDecimal("1.25");
@@ -2112,7 +2114,148 @@ public class Far_Assam extends Far {
 						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
 					baseFar = new BigDecimal("1.25");
 					permissibleFar = new BigDecimal("1.50");
-				}
+				} else if (roadWidth.compareTo(new BigDecimal("6.6")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("15.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("1.50");
+				} else if (roadWidth.compareTo(new BigDecimal("6.6")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("8.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("1.60");
+				} else if (roadWidth.compareTo(new BigDecimal("6.6")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("8.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("1.75");
+				} else if (roadWidth.compareTo(new BigDecimal("8.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("15.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("1.75");
+				} else if (roadWidth.compareTo(new BigDecimal("8.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("15.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("2.25");
+				} else if (roadWidth.compareTo(new BigDecimal("8.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("15.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("2.75");
+				} else if (roadWidth.compareTo(new BigDecimal("15.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("40.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0) {
+					baseFar = new BigDecimal("1.60");
+					permissibleFar = new BigDecimal("1.75");
+				} else if (roadWidth.compareTo(new BigDecimal("15.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("40.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("1.60");
+					permissibleFar = new BigDecimal("2.00");
+				} else if (roadWidth.compareTo(new BigDecimal("15.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("40.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0
+						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
+					baseFar = new BigDecimal("1.60");
+					permissibleFar = new BigDecimal("2.50");
+				} else if (roadWidth.compareTo(new BigDecimal("15.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("40.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("1.60");
+					permissibleFar = new BigDecimal("2.75");
+				} else if (roadWidth.compareTo(new BigDecimal("15.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("40.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("1.60");
+					permissibleFar = new BigDecimal("3.00");
+				} else if (roadWidth.compareTo(new BigDecimal("40.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("50.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0) {
+					baseFar = new BigDecimal("2.00");
+					permissibleFar = new BigDecimal("2.00");
+				} else if (roadWidth.compareTo(new BigDecimal("40.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("50.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("2.00");
+					permissibleFar = new BigDecimal("2.25");
+				} else if (roadWidth.compareTo(new BigDecimal("40.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("50.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0
+						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
+					baseFar = new BigDecimal("2.00");
+					permissibleFar = new BigDecimal("2.75");
+				} else if (roadWidth.compareTo(new BigDecimal("40.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("50.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("2.00");
+					permissibleFar = new BigDecimal("3.00");
+				} else if (roadWidth.compareTo(new BigDecimal("40.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("50.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("2.00");
+					permissibleFar = new BigDecimal("3.25");
+				} else if (roadWidth.compareTo(new BigDecimal("50.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("65.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0) {
+					baseFar = new BigDecimal("2.25");
+					permissibleFar = new BigDecimal("2.25");
+				} else if (roadWidth.compareTo(new BigDecimal("50.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("65.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("2.25");
+					permissibleFar = new BigDecimal("2.50");
+				} else if (roadWidth.compareTo(new BigDecimal("50.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("65.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0
+						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
+					baseFar = new BigDecimal("2.25");
+					permissibleFar = new BigDecimal("3.00");
+				} else if (roadWidth.compareTo(new BigDecimal("50.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("65.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("2.25");
+					permissibleFar = new BigDecimal("3.25");
+				} else if (roadWidth.compareTo(new BigDecimal("50.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("65.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("2.25");
+					permissibleFar = new BigDecimal("3.50");
+				} else if (roadWidth.compareTo(new BigDecimal("65.0")) >= 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0) {
+					baseFar = new BigDecimal("3.00");
+					permissibleFar = new BigDecimal("5.10");
+				} else if (roadWidth.compareTo(new BigDecimal("65.0")) >= 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("3.00");
+					permissibleFar = new BigDecimal("5.20");
+				} else if (roadWidth.compareTo(new BigDecimal("65.0")) >= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0
+						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
+					baseFar = new BigDecimal("3.00");
+					permissibleFar = new BigDecimal("5.30");
+				} else if (roadWidth.compareTo(new BigDecimal("65.0")) >= 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("3.00");
+					permissibleFar = new BigDecimal("5.40");
+				} else if (roadWidth.compareTo(new BigDecimal("65.0")) >= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("3.00");
+					permissibleFar = new BigDecimal("5.50");
+				} 
+				
 			} else {
 				LOG.warn("No FAR rule matched for given parameters: plotArea={}, roadWidth={}", plotArea, roadWidth);
 			}

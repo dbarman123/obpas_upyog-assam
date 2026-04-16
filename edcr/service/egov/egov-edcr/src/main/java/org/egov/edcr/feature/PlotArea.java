@@ -71,6 +71,7 @@ import org.apache.logging.log4j.Logger;
 import org.egov.common.constants.MdmsFeatureConstants;
 import org.egov.common.entity.dcr.helper.OccupancyHelperDetail;
 import org.egov.common.entity.edcr.*;
+import org.egov.edcr.constants.DxfFileConstants;
 import org.egov.edcr.service.MDMSCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -122,7 +123,7 @@ public class PlotArea extends FeatureProcess {
         Map<String, String> details = buildScrutinyDetailRow(occupancyType, plotArea, permissibleArea);
 
         scrutinyDetail.getDetail().add(details);
-      //  pl.getReportOutput().getScrutinyDetails().add(scrutinyDetail);
+        pl.getReportOutput().getScrutinyDetails().add(scrutinyDetail);
 
         return pl;
     }
@@ -177,10 +178,30 @@ public class PlotArea extends FeatureProcess {
      * @return the permissible plot area for the given occupancy type, or null if not found
      */
     private BigDecimal getPermissiblePlotArea(Plan pl, String occupancyCode) {
-        Map<String, BigDecimal> occupancyValuesMap = getOccupancyValues(pl);
+//        Map<String, BigDecimal> occupancyValuesMap = getOccupancyValues(pl);
+        Map<String, BigDecimal> occupancyValuesMap = getOccupancyValuesV2(pl);
         return occupancyValuesMap.get(occupancyCode);
     }
-    
+    public Map<String, BigDecimal> getOccupancyValuesV2(Plan pl) {
+        
+        Map<String, BigDecimal> plotAreaValues = new HashMap<>();
+        plotAreaValues.put(DxfFileConstants.F_CB, new BigDecimal("134"));
+        plotAreaValues.put(DxfFileConstants.F_O, new BigDecimal("134"));
+        plotAreaValues.put(DxfFileConstants.F_RT, new BigDecimal("134"));
+        plotAreaValues.put(DxfFileConstants.G_L, new BigDecimal("744"));
+        plotAreaValues.put(DxfFileConstants.G_M, new BigDecimal("1800"));
+        plotAreaValues.put(DxfFileConstants.G_F, new BigDecimal("2000"));
+        plotAreaValues.put(DxfFileConstants.G_SF, new BigDecimal("400"));
+        plotAreaValues.put(DxfFileConstants.C_H, new BigDecimal("1338"));
+        plotAreaValues.put(DxfFileConstants.C_C, new BigDecimal("1338"));
+        plotAreaValues.put(DxfFileConstants.B_PN, new BigDecimal("535"));
+        plotAreaValues.put(DxfFileConstants.B_NS, new BigDecimal("535"));
+        plotAreaValues.put(DxfFileConstants.B_PS, new BigDecimal("804"));
+        plotAreaValues.put(DxfFileConstants.B_HEI, new BigDecimal("2677"));
+        plotAreaValues.put(DxfFileConstants.B_C, new BigDecimal("4015"));
+        
+        return plotAreaValues;
+    }
     /**
      * Constructs a mapping of occupancy codes to their corresponding permissible plot areas from the feature rule.
      *
