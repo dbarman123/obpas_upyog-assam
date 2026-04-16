@@ -73,8 +73,6 @@ import static org.egov.edcr.constants.DxfFileConstants.A_R;
 import static org.egov.edcr.constants.DxfFileConstants.B;
 import static org.egov.edcr.constants.DxfFileConstants.C;
 import static org.egov.edcr.constants.DxfFileConstants.D;
-import static org.egov.edcr.constants.DxfFileConstants.D_AW;
-import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
 import static org.egov.edcr.constants.DxfFileConstants.H;
@@ -501,7 +499,7 @@ public class SideYardService_Assam extends SideYardService {
 					plotArea, sideYard1Result, sideYard2Result, max);
 		
 		}
-		else if ((D.equalsIgnoreCase(occupancyCode) &&  D_AW.equalsIgnoreCase(subOccupancyCode))) {
+		else if ((D.equalsIgnoreCase(occupancyCode))) {
 			processSideYardPlaceOfworship(pl, blockName, level, min, mostRestrictiveOccupancy, rule, subRule, buildingHeight,
 					plotArea, sideYard1Result, sideYard2Result, max);
 		
@@ -515,14 +513,21 @@ public class SideYardService_Assam extends SideYardService {
 			 processSideYardResidential(pl, blockName, level, min, mostRestrictiveOccupancy, rule, subRule,
 						buildingHeight, plotArea, sideYard1Result, sideYard2Result, max);
 		 }
-		else if (D.equalsIgnoreCase(occupancyCode) &&  D_M.equalsIgnoreCase(subOccupancyCode)) {
+		else if (D.equalsIgnoreCase(occupancyCode)) {
 			processSideYardMultiplex(pl, blockName, level, min, mostRestrictiveOccupancy, rule, subRule, buildingHeight,
 					plotArea, sideYard1Result, sideYard2Result, max);
 		
 		}else if (C.equalsIgnoreCase(occupancyCode)) {
-			processSideYardHospitalAndNursingHomes(pl, blockName, level, min, mostRestrictiveOccupancy, rule, subRule, buildingHeight,
-					plotArea, sideYard1Result, sideYard2Result, max);
-		
+			if (buildingHeight.compareTo(new BigDecimal("21.6")) <= 0) {
+				// Health Facilities
+				processSideYardHospitalAndNursingHomes(pl, blockName, level, min, mostRestrictiveOccupancy, rule, subRule, buildingHeight,
+						plotArea, sideYard1Result, sideYard2Result, max);
+
+			}else {
+				processSideYardResidential(pl, blockName, level, min,  mostRestrictiveOccupancy, rule, subRule,
+						buildingHeight, plotArea, sideYard1Result, sideYard2Result, max);
+			}
+			
 		}else if (D.equalsIgnoreCase(occupancyCode)) {
 			processSideYardAssembly(pl, blockName, level, min, mostRestrictiveOccupancy, rule, subRule, buildingHeight,
 					plotArea, sideYard1Result, sideYard2Result, max);
@@ -573,31 +578,65 @@ public class SideYardService_Assam extends SideYardService {
 	    List<Object> rules = cache.getFeatureRules(
 	            pl, FeatureEnum.SIDE_YARD_SERVICE.getValue(), false);
 
-	    List<SideYardServiceRequirement> mdmsRules = rules.stream()
-	            .filter(SideYardServiceRequirement.class::isInstance)
-	            .map(SideYardServiceRequirement.class::cast)
-	            .filter(r -> Boolean.TRUE.equals(r.getActive()))
-	            .filter(r -> r.getFromBuildingHeight() != null
-                && r.getToBuildingHeight() != null)
-	            .collect(Collectors.toList());
-
-	    if (!mdmsRules.isEmpty() && buildingHeight != null) {
-
-	        SideYardServiceRequirement applicableRule =
-	                sideYardRule(buildingHeight, mdmsRules);
-
-	        meanVal = applicableRule.getPermissible();
-	        minVal = meanVal;
-
-	        LOG.info("Side Yard applied slab up to height {} → permissible = {}",
-	                applicableRule.getToBuildingHeight(), meanVal);
-
-	    } else {
-	        LOG.warn("No Side Yard MDMS rule found for height {}", buildingHeight);
-	        errors.put("MDMS_RULE_MISSING",
-	                "No side yard rule found for given building height in MDMS.");
-	    }
-
+//	    List<SideYardServiceRequirement> mdmsRules = rules.stream()
+//	            .filter(SideYardServiceRequirement.class::isInstance)
+//	            .map(SideYardServiceRequirement.class::cast)
+//	            .filter(r -> Boolean.TRUE.equals(r.getActive()))
+//	            .filter(r -> r.getFromBuildingHeight() != null
+//                && r.getToBuildingHeight() != null)
+//	            .collect(Collectors.toList());
+//
+//	    if (!mdmsRules.isEmpty() && buildingHeight != null) {
+//
+//	        SideYardServiceRequirement applicableRule =
+//	                sideYardRule(buildingHeight, mdmsRules);
+//
+//	        meanVal = applicableRule.getPermissible();
+//	        minVal = meanVal;
+//
+//	        LOG.info("Side Yard applied slab up to height {} → permissible = {}",
+//	                applicableRule.getToBuildingHeight(), meanVal);
+//
+//	    } else {
+//	        LOG.warn("No Side Yard MDMS rule found for height {}", buildingHeight);
+//	        errors.put("MDMS_RULE_MISSING",
+//	                "No side yard rule found for given building height in MDMS.");
+//	    }
+	    
+	    if(buildingHeight.compareTo(new BigDecimal("9.6")) < 0) {
+	    	meanVal = new BigDecimal("1.8");
+	    } else if (buildingHeight.compareTo(new BigDecimal("9.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("12.6")) < 0 ) {
+	    	meanVal = new BigDecimal("2.4");
+		} else if (buildingHeight.compareTo(new BigDecimal("12.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0 ) {
+	    	meanVal = new BigDecimal("3.6");
+		} else if (buildingHeight.compareTo(new BigDecimal("15.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("18.6")) < 0 ) {
+	    	meanVal = new BigDecimal("4.2");
+		} else if (buildingHeight.compareTo(new BigDecimal("18.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("21.6")) < 0 ) {
+	    	meanVal = new BigDecimal("5");
+		} else if (buildingHeight.compareTo(new BigDecimal("21.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("24.6")) < 0 ) {
+	    	meanVal = new BigDecimal("5.5");
+		} else if (buildingHeight.compareTo(new BigDecimal("24.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("27.6")) < 0 ) {
+	    	meanVal = new BigDecimal("6");
+		} else if (buildingHeight.compareTo(new BigDecimal("27.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("30.6")) < 0 ) {
+	    	meanVal = new BigDecimal("7");
+		} else if (buildingHeight.compareTo(new BigDecimal("30.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("36.6")) < 0 ) {
+	    	meanVal = new BigDecimal("9");
+		} else if (buildingHeight.compareTo(new BigDecimal("36.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("45.6")) < 0 ) {
+	    	meanVal = new BigDecimal("10");
+		} else {
+	    	meanVal = new BigDecimal("12");
+		} 
+	    minVal = meanVal;
+	    
 	    // Validate minimum side yard
 	    boolean valid = validateMinimumAndMeanValue(
 	            BigDecimal.valueOf(min), minVal, plotArea);
@@ -786,15 +825,15 @@ public class SideYardService_Assam extends SideYardService {
 				meanVal = new BigDecimal("6");
 			} else if (DxfFileConstants.INDUSTRIAL_STANDALONE_FACTORY.equals(subtypeCode)) {
 				if (plotArea.compareTo(new BigDecimal("744")) <= 0) {
-					meanVal = new BigDecimal("1.8");
+					meanVal = new BigDecimal("1.5");
 				} else if (plotArea.compareTo(new BigDecimal("744")) > 0
 						&& plotArea.compareTo(new BigDecimal("1338")) <= 0) {
-					meanVal = new BigDecimal("3");
+					meanVal = new BigDecimal("2.6");
 				} else if (plotArea.compareTo(new BigDecimal("1338")) > 0
 						&& plotArea.compareTo(new BigDecimal("6690")) <= 0) {
-					meanVal = new BigDecimal("6");
+					meanVal = new BigDecimal("3.0");
 				} else {
-					meanVal = new BigDecimal("6");
+					meanVal = new BigDecimal("5.0");
 				}
 
 			}
@@ -913,23 +952,26 @@ public class SideYardService_Assam extends SideYardService {
 		// Fetch rule set from cache
 		List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.SIDE_YARD_SERVICE.getValue(), false);
 
-		 Optional<SideYardServiceRequirement> matchedRule = rules.stream()
-			        .filter(SideYardServiceRequirement.class::isInstance)
-			        .map(SideYardServiceRequirement.class::cast)
-			        .filter(ruleFeature ->
-			                ruleFeature.getFromPlotDepth() != null && ruleFeature.getToPlotDepth() != null
-			                && depthOfPlot.compareTo(ruleFeature.getFromPlotDepth()) >= 0
-			                && depthOfPlot.compareTo(ruleFeature.getToPlotDepth()) < 0
-			                && Boolean.TRUE.equals(ruleFeature.getActive()))
-			        .findFirst();
-		 
-	    
-
-		if (matchedRule.isPresent()) {
-			SideYardServiceRequirement mdmsRule = matchedRule.get();
-			meanVal = mdmsRule.getPermissible();
-			minVal = meanVal; // Keeping minVal same as permissible from MDMS
-		} 
+//		 Optional<SideYardServiceRequirement> matchedRule = rules.stream()
+//			        .filter(SideYardServiceRequirement.class::isInstance)
+//			        .map(SideYardServiceRequirement.class::cast)
+//			        .filter(ruleFeature ->
+//			                ruleFeature.getFromPlotDepth() != null && ruleFeature.getToPlotDepth() != null
+//			                && depthOfPlot.compareTo(ruleFeature.getFromPlotDepth()) >= 0
+//			                && depthOfPlot.compareTo(ruleFeature.getToPlotDepth()) < 0
+//			                && Boolean.TRUE.equals(ruleFeature.getActive()))
+//			        .findFirst();
+//		 
+//	    
+//
+//		if (matchedRule.isPresent()) {
+//			SideYardServiceRequirement mdmsRule = matchedRule.get();
+//			meanVal = mdmsRule.getPermissible();
+//			minVal = meanVal; // Keeping minVal same as permissible from MDMS
+//		} 
+		meanVal = new BigDecimal("5.0");
+		minVal = meanVal;
+		
 		// Validate actual min value against expected values
 		boolean valid = validateMinimumAndMeanValue(BigDecimal.valueOf(min), minVal, plotArea);
 		
@@ -988,25 +1030,28 @@ public class SideYardService_Assam extends SideYardService {
 	    LOG.info("Fetching SIDE_YARD_SERVICE rules from cache for block: {}", blockName);
 	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.SIDE_YARD_SERVICE.getValue(), false);
 
-	    Optional<SideYardServiceRequirement> matchedRule = rules.stream()
-	            .filter(SideYardServiceRequirement.class::isInstance)
-	            .map(SideYardServiceRequirement.class::cast)
-	            .filter(ruleFeature -> Boolean.TRUE.equals(ruleFeature.getActive()))
-	            .findFirst();
-
-	    if (matchedRule.isPresent()) {
-	        SideYardServiceRequirement mdmsRule = matchedRule.get();
-	        LOG.info("Matched active SIDE_YARD_SERVICE rule from MDMS for block: {}", blockName);
-
-	            meanVal = mdmsRule.getPermissible();
-	            LOG.info("Occupancy subtype: COLLEGE | Permissible Side Yard: {}", meanVal);
-	       
-	        minVal = meanVal;
-	    } else {
-	        LOG.warn("No active MDMS rule found for SIDE_YARD_SERVICE. Setting permissible values to 0.");
-	        meanVal = BigDecimal.ZERO;
-	        minVal = BigDecimal.ZERO;
-	    }
+//	    Optional<SideYardServiceRequirement> matchedRule = rules.stream()
+//	            .filter(SideYardServiceRequirement.class::isInstance)
+//	            .map(SideYardServiceRequirement.class::cast)
+//	            .filter(ruleFeature -> Boolean.TRUE.equals(ruleFeature.getActive()))
+//	            .findFirst();
+//
+//	    if (matchedRule.isPresent()) {
+//	        SideYardServiceRequirement mdmsRule = matchedRule.get();
+//	        LOG.info("Matched active SIDE_YARD_SERVICE rule from MDMS for block: {}", blockName);
+//
+//	            meanVal = mdmsRule.getPermissible();
+//	            LOG.info("Occupancy subtype: COLLEGE | Permissible Side Yard: {}", meanVal);
+//	       
+//	        minVal = meanVal;
+//	    } else {
+//	        LOG.warn("No active MDMS rule found for SIDE_YARD_SERVICE. Setting permissible values to 0.");
+//	        meanVal = BigDecimal.ZERO;
+//	        minVal = BigDecimal.ZERO;
+//	    }
+	    
+	    meanVal = new BigDecimal("3.6");
+	    minVal = meanVal;
 
 	    // Validate the actual minimum distance against expected permissible values
 	    boolean valid = validateMinimumAndMeanValue(BigDecimal.valueOf(min), minVal, plotArea);
@@ -1586,27 +1631,30 @@ public class SideYardService_Assam extends SideYardService {
 	    // Fetch MDMS rules for SIDE_YARD_SERVICE
 	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.SIDE_YARD_SERVICE.getValue(), false);
 
-	    // Match appropriate rule from MDMS based on plot depth
-	    Optional<SideYardServiceRequirement> matchedRule = rules.stream()
-	            .filter(SideYardServiceRequirement.class::isInstance)
-	            .map(SideYardServiceRequirement.class::cast)
-	            .filter(ruleFeature ->
-	                    ruleFeature.getFromPlotDepth() != null &&
-	                    ruleFeature.getToPlotDepth() != null &&
-	                    depthOfPlot.compareTo(ruleFeature.getFromPlotDepth()) >= 0 &&
-	                    depthOfPlot.compareTo(ruleFeature.getToPlotDepth()) <= 0 &&
-	                    Boolean.TRUE.equals(ruleFeature.getActive()))
-	            .findFirst();
-
-	    if (matchedRule.isPresent()) {
-	        SideYardServiceRequirement mdmsRule = matchedRule.get();
-	        meanVal = mdmsRule.getPermissible();
-	        minVal = meanVal; // If MDMS provides separate min, adjust accordingly
-	    } else {
-	        LOG.warn("No matching MDMS rule found for plot depth: {}", depthOfPlot);
-	        errors.put("MDMS_RULE_MISSING", "No setback rule found for given plot depth in MDMS.");
-	    }
-
+//	    // Match appropriate rule from MDMS based on plot depth
+//	    Optional<SideYardServiceRequirement> matchedRule = rules.stream()
+//	            .filter(SideYardServiceRequirement.class::isInstance)
+//	            .map(SideYardServiceRequirement.class::cast)
+//	            .filter(ruleFeature ->
+//	                    ruleFeature.getFromPlotDepth() != null &&
+//	                    ruleFeature.getToPlotDepth() != null &&
+//	                    depthOfPlot.compareTo(ruleFeature.getFromPlotDepth()) >= 0 &&
+//	                    depthOfPlot.compareTo(ruleFeature.getToPlotDepth()) <= 0 &&
+//	                    Boolean.TRUE.equals(ruleFeature.getActive()))
+//	            .findFirst();
+//
+//	    if (matchedRule.isPresent()) {
+//	        SideYardServiceRequirement mdmsRule = matchedRule.get();
+//	        meanVal = mdmsRule.getPermissible();
+//	        minVal = meanVal; // If MDMS provides separate min, adjust accordingly
+//	    } else {
+//	        LOG.warn("No matching MDMS rule found for plot depth: {}", depthOfPlot);
+//	        errors.put("MDMS_RULE_MISSING", "No setback rule found for given plot depth in MDMS.");
+//	    }
+	    
+	    meanVal = new BigDecimal("1.5");
+	    minVal = meanVal;
+	    
 	    // Validate actual min value against expected values
 	    boolean valid = validateMinimumAndMeanValue(BigDecimal.valueOf(min), minVal, plotArea);
 	    if (!valid) {

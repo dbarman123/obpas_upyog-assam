@@ -1429,14 +1429,14 @@ public class Far extends FeatureProcess {
 			return codesMap.get(S_ECFG);
 		else if (codes.contains(S_SAS))
 			return codesMap.get(S_SAS);
-		else if (codes.contains(D_B))
-			return codesMap.get(D_B);
+		else if (codes.contains(D))
+			return codesMap.get(D);
 		else if (codes.contains(D_C))
 			return codesMap.get(D_C);
 		else if (codes.contains(D_A))
 			return codesMap.get(D_A);
-		else if (codes.contains(H_PP))
-			return codesMap.get(H_PP);
+		else if (codes.contains(H))
+			return codesMap.get(H);
 		else if (codes.contains(E_NS))
 			return codesMap.get(E_NS);
 		else if (codes.contains(M_DFPAB))
@@ -1508,7 +1508,7 @@ public class Far extends FeatureProcess {
 				return true;
 			}
 
-			if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(D_B)) {
+			if (mostRestrictiveOccupancyType.getType().getCode().equals(D)) {
 				isAccepted = far.compareTo(POINTFIVE) <= 0;
 				expectedResult = LESS_THAN_EQUAL_TO_ZERO_POINT_FIVE;
 				return true;
@@ -1526,7 +1526,7 @@ public class Far extends FeatureProcess {
 				return true;
 			}
 
-			if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(H_PP)
+			if (mostRestrictiveOccupancyType.getType().getCode().equals(H)
 					|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(E_NS)
 					|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(M_DFPAB)) {
 				isAccepted = far.compareTo(ONE) <= 0;

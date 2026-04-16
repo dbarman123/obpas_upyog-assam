@@ -55,8 +55,6 @@ import static org.egov.edcr.constants.DxfFileConstants.A_R;
 import static org.egov.edcr.constants.DxfFileConstants.B;
 import static org.egov.edcr.constants.DxfFileConstants.C;
 import static org.egov.edcr.constants.DxfFileConstants.D;
-import static org.egov.edcr.constants.DxfFileConstants.D_AW;
-import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.E;
 import static org.egov.edcr.constants.DxfFileConstants.E_CLG;
 import static org.egov.edcr.constants.DxfFileConstants.E_NS;

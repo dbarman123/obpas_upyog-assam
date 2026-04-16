@@ -173,18 +173,16 @@ public class Sanitation extends FeatureProcess {
                     case DxfFileConstants.B_HEI:
                         commonSanitationValidations(pl, b, sanityDetails, o);
                         break;
-                    case DxfFileConstants.C_MIP:
+                    case DxfFileConstants.C_H:
                         commonSanitationValidations(pl, b, sanityDetails, o);
                         if (pl.getPlanInformation().getNoOfBeds() == null)
                             pl.addError(NOOFBEDS,
                                     getLocaleMessage(MSG_ERROR_MANDATORY, FEATURE_NAME, NOOFBEDS, b.getNumber()));
                         break;
-                    case DxfFileConstants.C_MA:
+                    case DxfFileConstants.C_C:
                         commonSanitationValidations(pl, b, sanityDetails, o);
                         break;
                     case DxfFileConstants.D:
-                    case DxfFileConstants.D_AW:
-                    case DxfFileConstants.D_BT:
                         commonSanitationValidations(pl, b, sanityDetails, o);
                         break;
                     case DxfFileConstants.E:
@@ -199,8 +197,7 @@ public class Sanitation extends FeatureProcess {
                     case DxfFileConstants.G:
 //                    case DxfFileConstants.G_SI:
                     case DxfFileConstants.H:
-                    case DxfFileConstants.I1:
-                    case DxfFileConstants.I2:
+                    case DxfFileConstants.I_H:
                         if (sanityDetails.getMaleWaterClosets().isEmpty()
                                 && sanityDetails.getFemaleWaterClosets().isEmpty()) {
                             pl.addError(BLDG_PART_WATER_CLOSET, getLocaleMessage(MSG_ERROR_MANDATORY, FEATURE_NAME,
@@ -472,7 +469,7 @@ public class Sanitation extends FeatureProcess {
                                 failedDimensionSpWcMap, pl);
                         helper.ruleNo.add(RULE_54_6);
                         break;
-                    case DxfFileConstants.C_MIP:
+                    case DxfFileConstants.C_H:
                         if (pl.getPlanInformation().getNoOfBeds() == null) {
                             break;
                         }
@@ -503,7 +500,7 @@ public class Sanitation extends FeatureProcess {
 //                        helper.ruleNo.add(RULE_55_12);
 //                        break;
 
-                    case DxfFileConstants.C_MA:
+                    case DxfFileConstants.C_C:
                         helper.ruleNo.add(RULE_55_12);
                         helper.maleWc += carpetArea * 2 / (4.75 * 3 * 25);
                         helper.femaleWc += carpetArea / (4.75 * 3 * 15);
@@ -534,7 +531,6 @@ public class Sanitation extends FeatureProcess {
                                 failedDimensionSpWcMap, pl);
                         break;
                     case DxfFileConstants.D:
-                    case DxfFileConstants.D_AW:
                         helper.maleWc += carpetArea * 2 / (3 * 200);
                         helper.femaleWc += carpetArea / (3 * 100);
                         helper.urinal += carpetArea * 2 / (3 * 50);
@@ -546,7 +542,8 @@ public class Sanitation extends FeatureProcess {
                                 failedDimensionSpWcMap, pl);
                         helper.ruleNo.add(RULE_55_12);
                         break;
-                    case DxfFileConstants.D_BT:
+                    case DxfFileConstants.D_A:
+                    case DxfFileConstants.D_C:
                         helper.ruleNo.add(RULE_55_12);
                         if (carpetArea <= 1000) {
                             helper.maleWc += 4d;
@@ -612,8 +609,8 @@ public class Sanitation extends FeatureProcess {
                         // accepted = processSanity(pl, b, carpetArea, helper,
                         // scrutinyDetail, type);
                         break;
-                    case DxfFileConstants.I1:
-                    case DxfFileConstants.I2:
+                    case DxfFileConstants.I:
+                    case DxfFileConstants.I_H:
                         double floorArea = carpetArea + (carpetArea * 25 / 100);
                         Double maleOccupant = floorArea * 2 / (3 * 30);
                         Double femaleOccupant = floorArea / (3 * 30);

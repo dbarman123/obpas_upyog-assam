@@ -93,7 +93,6 @@ import static org.egov.edcr.constants.DxfFileConstants.B;
 import static org.egov.edcr.constants.DxfFileConstants.C;
 import static org.egov.edcr.constants.DxfFileConstants.D;
 import static org.egov.edcr.constants.DxfFileConstants.D_A;
-import static org.egov.edcr.constants.DxfFileConstants.D_B;
 import static org.egov.edcr.constants.DxfFileConstants.D_C;
 import static org.egov.edcr.constants.DxfFileConstants.E_CLG;
 import static org.egov.edcr.constants.DxfFileConstants.E_EARC;
@@ -106,7 +105,6 @@ import static org.egov.edcr.constants.DxfFileConstants.E_SFMC;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
 import static org.egov.edcr.constants.DxfFileConstants.H;
-import static org.egov.edcr.constants.DxfFileConstants.H_PP;
 import static org.egov.edcr.constants.DxfFileConstants.J;
 import static org.egov.edcr.constants.DxfFileConstants.K;
 import static org.egov.edcr.constants.DxfFileConstants.M_DFPAB;
@@ -919,8 +917,9 @@ public class Far_Assam extends Far {
 	        }else if (mostRestrictiveOccupancyType != null && roadWidth != null
 	                && !processFarForSpecialOccupancy(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs)) {
 
-	            processFar(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs,
-	                    feature, mostRestrictiveOccupancyType.getType().getName());
+//	            processFar(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs,
+//	                    feature, mostRestrictiveOccupancyType.getType().getName());
+	        	processFarV2(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs, feature, feature);
 	            LOG.info("Processed FAR for normal occupancy");
 
 	        }
@@ -1756,88 +1755,86 @@ public class Far_Assam extends Far {
      * @param distinctOccupancyTypes set of distinct occupancy types to evaluate
      * @return the {@link OccupancyTypeHelper} with the most restrictive FAR requirement
      */
-    protected OccupancyTypeHelper getMostRestrictiveFar(Set<OccupancyTypeHelper> distinctOccupancyTypes) {
-        Set<String> codes = new HashSet<>();
-        Map<String, OccupancyTypeHelper> codesMap = new HashMap<>();
-        for (OccupancyTypeHelper typeHelper : distinctOccupancyTypes) {
+	protected OccupancyTypeHelper getMostRestrictiveFar(Set<OccupancyTypeHelper> distinctOccupancyTypes) {
+		Set<String> codes = new HashSet<>();
+		Map<String, OccupancyTypeHelper> codesMap = new HashMap<>();
+		for (OccupancyTypeHelper typeHelper : distinctOccupancyTypes) {
 
-            if (typeHelper.getType() != null)
-                codesMap.put(typeHelper.getType().getCode(), typeHelper);
-            if (typeHelper.getSubtype() != null)
-                codesMap.put(typeHelper.getSubtype().getCode(), typeHelper);
-        }
-        codes = codesMap.keySet();
-        if (codes.contains(S_ECFG))
-            return codesMap.get(S_ECFG);
-        else if (codes.contains(A_R))
-            return codesMap.get(A_R);
-        else if (codes.contains(S_SAS))
-            return codesMap.get(S_SAS);
-        else if (codes.contains(D_B))
-            return codesMap.get(D_B);
-        else if (codes.contains(D_C))
-            return codesMap.get(D_C);
-        else if (codes.contains(D_A))
-            return codesMap.get(D_A);
-        else if (codes.contains(H_PP))
-            return codesMap.get(H_PP);
-        else if (codes.contains(E_NS))
-            return codesMap.get(E_NS);
-        else if (codes.contains(M_DFPAB))
-            return codesMap.get(M_DFPAB);
-        else if (codes.contains(E_PS))
-            return codesMap.get(E_PS);
-        else if (codes.contains(B_PS))
-            return codesMap.get(B_PS);
-        else if (codes.contains(E_SFMC))
-            return codesMap.get(E_SFMC);
-        else if (codes.contains(E_SFDAP))
-            return codesMap.get(E_SFDAP);
-        else if (codes.contains(E_EARC))
-            return codesMap.get(E_EARC);
-        else if (codes.contains(S_MCH))
-            return codesMap.get(S_MCH);
-        else if (codes.contains(S_BH))
-            return codesMap.get(S_BH);
-        else if (codes.contains(S_CRC))
-            return codesMap.get(S_CRC);
-        else if (codes.contains(S_CA))
-            return codesMap.get(S_CA);
-        else if (codes.contains(S_SC))
-            return codesMap.get(S_SC);
-        else if (codes.contains(S_ICC))
-            return codesMap.get(S_ICC);
-        else if (codes.contains(E_CLG))
-            return codesMap.get(E_CLG);
-        else if (codes.contains(M_OHF))
-            return codesMap.get(M_OHF);
-        else if (codes.contains(M_VH))
-            return codesMap.get(M_VH);
-        else if (codes.contains(M_NAPI))
-            return codesMap.get(M_NAPI);
-        else if (codes.contains(A_SA))
-            return codesMap.get(A_SA);
-        else if (codes.contains(M_HOTHC))
-            return codesMap.get(M_HOTHC);
-        else if (codes.contains(E_SACA))
-            return codesMap.get(E_SACA);
-        else if (codes.contains(G))
-            return codesMap.get(G);
-        else if (codes.contains(F))
-            return codesMap.get(F);
-        else if (codes.contains(B))
-            return codesMap.get(B);
-              else if (codes.contains(D))
-            return codesMap.get(D);
-              else if (codes.contains(H))
-            return codesMap.get(H);
-        else if (codes.contains(A))
-            return codesMap.get(A);
-        else
-            return null;
+			if (typeHelper.getType() != null)
+				codesMap.put(typeHelper.getType().getCode(), typeHelper);
+			if (typeHelper.getSubtype() != null)
+				codesMap.put(typeHelper.getSubtype().getCode(), typeHelper);
+		}
+		codes = codesMap.keySet();
+		if (codes.contains(A_R))
+			return codesMap.get(A_R);
+		else if (codes.contains(DxfFileConstants.A_SR))
+			return codesMap.get(DxfFileConstants.A_SR);
+		else if (codes.contains(DxfFileConstants.A_AF))
+			return codesMap.get(DxfFileConstants.A_AF);
+		else if (codes.contains(DxfFileConstants.A_L))
+			return codesMap.get(DxfFileConstants.A_L);
+		else if (codes.contains(DxfFileConstants.A_SA))
+			return codesMap.get(DxfFileConstants.A_SA);
+		else if (codes.contains(DxfFileConstants.F_CB))
+			return codesMap.get(DxfFileConstants.F_CB);
+		else if (codes.contains(DxfFileConstants.F_O))
+			return codesMap.get(DxfFileConstants.F_O);
+		else if (codes.contains(DxfFileConstants.F_RT))
+			return codesMap.get(DxfFileConstants.F_RT);
+		else if (codes.contains(DxfFileConstants.G_L))
+			return codesMap.get(DxfFileConstants.G_L);
+		else if (codes.contains(DxfFileConstants.G_M))
+			return codesMap.get(DxfFileConstants.G_M);
+		else if (codes.contains(DxfFileConstants.G_F))
+			return codesMap.get(DxfFileConstants.G_F);
+		else if (codes.contains(DxfFileConstants.G_SF))
+			return codesMap.get(DxfFileConstants.G_SF);
+		else if (codes.contains(DxfFileConstants.C_H))
+			return codesMap.get(DxfFileConstants.C_H);
+		else if (codes.contains(DxfFileConstants.C_C))
+			return codesMap.get(DxfFileConstants.C_C);
+		else if (codes.contains(DxfFileConstants.B_PN))
+			return codesMap.get(DxfFileConstants.B_PN);
+		else if (codes.contains(DxfFileConstants.B_NS))
+			return codesMap.get(DxfFileConstants.B_NS);
+		else if (codes.contains(DxfFileConstants.B_PS))
+			return codesMap.get(DxfFileConstants.B_PS);
+		else if (codes.contains(DxfFileConstants.B_HEI))
+			return codesMap.get(DxfFileConstants.B_HEI);
+		else if (codes.contains(DxfFileConstants.B_C))
+			return codesMap.get(DxfFileConstants.B_C);
+		else if (codes.contains(DxfFileConstants.B_TA))
+			return codesMap.get(DxfFileConstants.B_TA);
+		else if (codes.contains(DxfFileConstants.D_A))
+			return codesMap.get(DxfFileConstants.D_A);
+		else if (codes.contains(DxfFileConstants.D_C))
+			return codesMap.get(DxfFileConstants.D_C);
+		else if (codes.contains(DxfFileConstants.H_S))
+			return codesMap.get(DxfFileConstants.H_S);
+		else if (codes.contains(DxfFileConstants.I_H))
+			return codesMap.get(DxfFileConstants.I_H);
+		else if (codes.contains(A))
+			return codesMap.get(A);
+		else if (codes.contains(F))
+			return codesMap.get(F);
+		else if (codes.contains(G))
+			return codesMap.get(G);
+		else if (codes.contains(C))
+			return codesMap.get(C);
+		else if (codes.contains(B))
+			return codesMap.get(B);
+		else if (codes.contains(D))
+			return codesMap.get(D);
+		else if (codes.contains(H))
+			return codesMap.get(H);
+		else if (codes.contains(DxfFileConstants.HAZARDOUS))
+			return codesMap.get(DxfFileConstants.HAZARDOUS);
+		else
+			return null;
 
-    }
-
+	}
+	
     private Boolean processFarForSpecialOccupancy(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far,
                                                   String typeOfArea, BigDecimal roadWidth, HashMap<String, String> errors) {
 
@@ -1860,7 +1857,7 @@ public class Far_Assam extends Far {
                 return true;
             }
 
-            if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(D_B)) {
+            if (mostRestrictiveOccupancyType.getType().getCode().equals(D)) {
                 isAccepted = far.compareTo(POINTFIVE) <= 0;
                 expectedResult = LESS_THAN_EQUAL_TO_ZERO_POINT_FIVE;
                 return true;
@@ -1878,7 +1875,7 @@ public class Far_Assam extends Far {
                 return true;
             }
 
-            if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(H_PP)
+            if (mostRestrictiveOccupancyType.getType().getCode().equals(H)
                     || mostRestrictiveOccupancyType.getSubtype().getCode().equals(E_NS)
                     || mostRestrictiveOccupancyType.getSubtype().getCode().equals(M_DFPAB)) {
                 isAccepted = far.compareTo(ONE) <= 0;
@@ -2073,7 +2070,218 @@ public class Far_Assam extends Far {
             buildResult(pl, occupancyName, far, typeOfArea, roadWidth, expectedResult, isAccepted, additionalMixedUseFar, additionalEWSLIGFar, baseFar, tdr);
         }
     }
+    
+	private void processFarV2(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far, String typeOfArea,
+			BigDecimal roadWidth, HashMap<String, String> errors, String feature, String occupancyName) {
 
+		final BigDecimal ONE_BIGHA_IN_SQM = ONEBIGHA;
+		BigDecimal plotArea = pl.getPlot().getArea();
+		BigDecimal permissibleFar = BigDecimal.ZERO;
+		String TDR = pl.getPlanInformation().getTDR();
+		String todZone = pl.getPlanInformation().getTodZone();
+		BigDecimal additionalMixedUseFar = BigDecimal.ZERO;
+		BigDecimal additionalEWSLIGFar = BigDecimal.ZERO;
+		BigDecimal baseFar = BigDecimal.ZERO;
+		BigDecimal tdr = BigDecimal.ZERO;
+
+		LOG.info("Starting processFar with plotArea: {}, far: {}, roadWidth: {}", plotArea, far, roadWidth);
+
+		OccupancyTypeHelper mostRestrictiveOccupancyType = pl.getVirtualBuilding() != null
+				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
+				: null;
+
+		LOG.info("Most restrictive occupancy type: {}", mostRestrictiveOccupancyType);
+
+		if (roadWidth != null && roadWidth.compareTo(new BigDecimal("2.4")) < 0) {
+			permissibleFar = new BigDecimal("0.75");
+			LOG.info("Road width < 2.4m, permissible FAR restricted to 0.75 (G+1 buildings only)");
+		} else {
+			tdr = BigDecimal.ZERO;
+			if (mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.RESIDENTIAL)
+					|| mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.COMMERCIAL)
+					|| mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.INSTITUTIONAL)
+					|| mostRestrictiveOccupancyType.getType().getCode().equals(DxfFileConstants.HEATH_FACILITES)) {
+				if (roadWidth.compareTo(new BigDecimal("3.6")) >= 0 && roadWidth.compareTo(new BigDecimal("4.5")) < 0) {
+					baseFar = new BigDecimal("1");
+					permissibleFar = new BigDecimal("1.25");
+				} else if (roadWidth.compareTo(new BigDecimal("4.5")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("6.6")) < 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0) {
+					baseFar = new BigDecimal("1.25");
+					permissibleFar = new BigDecimal("1.25");
+				} else if (roadWidth.compareTo(new BigDecimal("4.5")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("6.6")) < 0
+						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
+					baseFar = new BigDecimal("1.25");
+					permissibleFar = new BigDecimal("1.50");
+				} else if (roadWidth.compareTo(new BigDecimal("6.6")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("15.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("1.50");
+				} else if (roadWidth.compareTo(new BigDecimal("6.6")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("8.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("1.60");
+				} else if (roadWidth.compareTo(new BigDecimal("6.6")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("8.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("1.75");
+				} else if (roadWidth.compareTo(new BigDecimal("8.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("15.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("1.75");
+				} else if (roadWidth.compareTo(new BigDecimal("8.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("15.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("2.25");
+				} else if (roadWidth.compareTo(new BigDecimal("8.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("15.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("1.50");
+					permissibleFar = new BigDecimal("2.75");
+				} else if (roadWidth.compareTo(new BigDecimal("15.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("40.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0) {
+					baseFar = new BigDecimal("1.60");
+					permissibleFar = new BigDecimal("1.75");
+				} else if (roadWidth.compareTo(new BigDecimal("15.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("40.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("1.60");
+					permissibleFar = new BigDecimal("2.00");
+				} else if (roadWidth.compareTo(new BigDecimal("15.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("40.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0
+						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
+					baseFar = new BigDecimal("1.60");
+					permissibleFar = new BigDecimal("2.50");
+				} else if (roadWidth.compareTo(new BigDecimal("15.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("40.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("1.60");
+					permissibleFar = new BigDecimal("2.75");
+				} else if (roadWidth.compareTo(new BigDecimal("15.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("40.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("1.60");
+					permissibleFar = new BigDecimal("3.00");
+				} else if (roadWidth.compareTo(new BigDecimal("40.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("50.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0) {
+					baseFar = new BigDecimal("2.00");
+					permissibleFar = new BigDecimal("2.00");
+				} else if (roadWidth.compareTo(new BigDecimal("40.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("50.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("2.00");
+					permissibleFar = new BigDecimal("2.25");
+				} else if (roadWidth.compareTo(new BigDecimal("40.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("50.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0
+						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
+					baseFar = new BigDecimal("2.00");
+					permissibleFar = new BigDecimal("2.75");
+				} else if (roadWidth.compareTo(new BigDecimal("40.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("50.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("2.00");
+					permissibleFar = new BigDecimal("3.00");
+				} else if (roadWidth.compareTo(new BigDecimal("40.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("50.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("2.00");
+					permissibleFar = new BigDecimal("3.25");
+				} else if (roadWidth.compareTo(new BigDecimal("50.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("65.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0) {
+					baseFar = new BigDecimal("2.25");
+					permissibleFar = new BigDecimal("2.25");
+				} else if (roadWidth.compareTo(new BigDecimal("50.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("65.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("2.25");
+					permissibleFar = new BigDecimal("2.50");
+				} else if (roadWidth.compareTo(new BigDecimal("50.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("65.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0
+						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
+					baseFar = new BigDecimal("2.25");
+					permissibleFar = new BigDecimal("3.00");
+				} else if (roadWidth.compareTo(new BigDecimal("50.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("65.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("2.25");
+					permissibleFar = new BigDecimal("3.25");
+				} else if (roadWidth.compareTo(new BigDecimal("50.0")) >= 0
+						&& roadWidth.compareTo(new BigDecimal("65.0")) < 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("2.25");
+					permissibleFar = new BigDecimal("3.50");
+				} else if (roadWidth.compareTo(new BigDecimal("65.0")) >= 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0) {
+					baseFar = new BigDecimal("3.00");
+					permissibleFar = new BigDecimal("5.10");
+				} else if (roadWidth.compareTo(new BigDecimal("65.0")) >= 0
+						&& plotArea.compareTo(new BigDecimal("670")) <= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) > 0) {
+					baseFar = new BigDecimal("3.00");
+					permissibleFar = new BigDecimal("5.20");
+				} else if (roadWidth.compareTo(new BigDecimal("65.0")) >= 0
+						&& plotArea.compareTo(new BigDecimal("1338")) <= 0
+						&& plotArea.compareTo(new BigDecimal("6690")) > 0) {
+					baseFar = new BigDecimal("3.00");
+					permissibleFar = new BigDecimal("5.30");
+				} else if (roadWidth.compareTo(new BigDecimal("65.0")) >= 0
+						&& plotArea.compareTo(new BigDecimal("6690")) <= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("3.00");
+					permissibleFar = new BigDecimal("5.40");
+				} else if (roadWidth.compareTo(new BigDecimal("65.0")) >= 0
+						&& plotArea.compareTo(new BigDecimal("13380")) > 0) {
+					baseFar = new BigDecimal("3.00");
+					permissibleFar = new BigDecimal("5.50");
+				} 
+				
+			} else {
+				LOG.warn("No FAR rule matched for given parameters: plotArea={}, roadWidth={}", plotArea, roadWidth);
+			}
+			computeBaseAndPremiumFarAreas(pl, plotArea, baseFar, permissibleFar, far);
+			LOG.info("Permissible FAR from matched rule: {}", permissibleFar);
+
+		}
+		try {
+			LOG.info("Final permissible FAR to validate against: {}", permissibleFar);
+		} catch (NullPointerException e) {
+			LOG.error("Permissible FAR not found or null", e);
+		}
+
+		boolean isAccepted = far.compareTo(permissibleFar) <= 0;
+		pl.getFarDetails().setPermissableFar(permissibleFar.doubleValue());
+		String expectedResult = "<= " + permissibleFar;
+
+		LOG.info("FAR validation result for occupancy '{}': provided FAR = {}, accepted = {}", occupancyName, far,
+				isAccepted);
+
+		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
+			buildResult(pl, occupancyName, far, typeOfArea, roadWidth, expectedResult, isAccepted,
+					additionalMixedUseFar, additionalEWSLIGFar, baseFar, tdr);
+		}
+	}
+    
     private Optional<FarRequirement> findMatchedFarRule(Plan pl, OccupancyTypeHelper occupancy, BigDecimal plotArea,
                                                         BigDecimal roadWidth) {
         LOG.info("Finding matched FAR rule with plotArea: {}, roadWidth: {}", plotArea, roadWidth);

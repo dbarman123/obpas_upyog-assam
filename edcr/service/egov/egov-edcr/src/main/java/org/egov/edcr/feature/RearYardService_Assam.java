@@ -67,8 +67,6 @@ import static org.egov.edcr.constants.DxfFileConstants.A_R;
 import static org.egov.edcr.constants.DxfFileConstants.B;
 import static org.egov.edcr.constants.DxfFileConstants.C;
 import static org.egov.edcr.constants.DxfFileConstants.D;
-import static org.egov.edcr.constants.DxfFileConstants.D_AW;
-import static org.egov.edcr.constants.DxfFileConstants.D_M;
 import static org.egov.edcr.constants.DxfFileConstants.F;
 import static org.egov.edcr.constants.DxfFileConstants.G;
 import static org.egov.edcr.constants.DxfFileConstants.H;
@@ -325,28 +323,61 @@ public class RearYardService_Assam extends RearYardService {
 	    List<Object> rules = cache.getFeatureRules(
 	            pl, FeatureEnum.REAR_SET_BACK.getValue(), false);
 
-	    List<RearSetBackRequirement> mdmsRules = rules.stream()
-	            .filter(RearSetBackRequirement.class::isInstance)
-	            .map(RearSetBackRequirement.class::cast)
-	            .filter(r -> Boolean.TRUE.equals(r.getActive()))
-	            .filter(r -> r.getFromBuildingHeight() != null
-                && r.getToBuildingHeight() != null)
-	            .sorted(Comparator.comparing(RearSetBackRequirement::getFromBuildingHeight))
-	            .collect(Collectors.toList());
-
-
-	    if (!mdmsRules.isEmpty() && buildingHeight != null) {
-
-	        RearSetBackRequirement applicableRule =
-	                rearSetbackRule(buildingHeight, mdmsRules);
-
-	        meanVal = applicableRule.getPermissible();
-	        minVal = meanVal;
-
-	    } else {
-	        meanVal = BigDecimal.ZERO;
-	        minVal = BigDecimal.ZERO;
-	    }
+//	    List<RearSetBackRequirement> mdmsRules = rules.stream()
+//	            .filter(RearSetBackRequirement.class::isInstance)
+//	            .map(RearSetBackRequirement.class::cast)
+//	            .filter(r -> Boolean.TRUE.equals(r.getActive()))
+//	            .filter(r -> r.getFromBuildingHeight() != null
+//                && r.getToBuildingHeight() != null)
+//	            .sorted(Comparator.comparing(RearSetBackRequirement::getFromBuildingHeight))
+//	            .collect(Collectors.toList());
+//
+//
+//	    if (!mdmsRules.isEmpty() && buildingHeight != null) {
+//
+//	        RearSetBackRequirement applicableRule =
+//	                rearSetbackRule(buildingHeight, mdmsRules);
+//
+//	        meanVal = applicableRule.getPermissible();
+//	        minVal = meanVal;
+//
+//	    } else {
+//	        meanVal = BigDecimal.ZERO;
+//	        minVal = BigDecimal.ZERO;
+//	    }
+	    if(buildingHeight.compareTo(new BigDecimal("9.6")) < 0) {
+	    	meanVal = new BigDecimal("1.8");
+	    } else if (buildingHeight.compareTo(new BigDecimal("9.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("12.6")) < 0 ) {
+	    	meanVal = new BigDecimal("2.4");
+		} else if (buildingHeight.compareTo(new BigDecimal("12.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("15.6")) < 0 ) {
+	    	meanVal = new BigDecimal("3.6");
+		} else if (buildingHeight.compareTo(new BigDecimal("15.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("18.6")) < 0 ) {
+	    	meanVal = new BigDecimal("4.2");
+		} else if (buildingHeight.compareTo(new BigDecimal("18.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("21.6")) < 0 ) {
+	    	meanVal = new BigDecimal("5");
+		} else if (buildingHeight.compareTo(new BigDecimal("21.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("24.6")) < 0 ) {
+	    	meanVal = new BigDecimal("5.5");
+		} else if (buildingHeight.compareTo(new BigDecimal("24.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("27.6")) < 0 ) {
+	    	meanVal = new BigDecimal("6");
+		} else if (buildingHeight.compareTo(new BigDecimal("27.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("30.6")) < 0 ) {
+	    	meanVal = new BigDecimal("7");
+		} else if (buildingHeight.compareTo(new BigDecimal("30.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("36.6")) < 0 ) {
+	    	meanVal = new BigDecimal("9");
+		} else if (buildingHeight.compareTo(new BigDecimal("36.6")) >= 0 
+			&& buildingHeight.compareTo(new BigDecimal("45.6")) < 0 ) {
+	    	meanVal = new BigDecimal("10");
+		} else {
+	    	meanVal = new BigDecimal("12");
+		} 
+	    minVal = meanVal;
 
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
 
@@ -447,25 +478,28 @@ public class RearYardService_Assam extends RearYardService {
 	    
 	    BigDecimal depthOfPlot = pl.getPlanInformation().getDepthOfPlot();
 
-	    Optional<RearSetBackRequirement> matchedRule = rules.stream()
-	        .filter(RearSetBackRequirement.class::isInstance)
-	        .map(RearSetBackRequirement.class::cast)
-	        .filter(ruleFeature ->
-	                ruleFeature.getFromPlotDepth() != null && ruleFeature.getToPlotDepth() != null
-	                && depthOfPlot.compareTo(ruleFeature.getFromPlotDepth()) >= 0
-	                && depthOfPlot.compareTo(ruleFeature.getToPlotDepth()) < 0
-	                && Boolean.TRUE.equals(ruleFeature.getActive()))
-	        .findFirst();
-
-	    if (matchedRule.isPresent()) {
-	        RearSetBackRequirement mdmsRule = matchedRule.get();
-	        meanVal = mdmsRule.getPermissible();
-	        minVal = meanVal; // If there's a separate `minimum` field, use it here.
-	    } else {
-	        meanVal = BigDecimal.ZERO;
-	        minVal = BigDecimal.ZERO;
-	    }
-
+//	    Optional<RearSetBackRequirement> matchedRule = rules.stream()
+//	        .filter(RearSetBackRequirement.class::isInstance)
+//	        .map(RearSetBackRequirement.class::cast)
+//	        .filter(ruleFeature ->
+//	                ruleFeature.getFromPlotDepth() != null && ruleFeature.getToPlotDepth() != null
+//	                && depthOfPlot.compareTo(ruleFeature.getFromPlotDepth()) >= 0
+//	                && depthOfPlot.compareTo(ruleFeature.getToPlotDepth()) < 0
+//	                && Boolean.TRUE.equals(ruleFeature.getActive()))
+//	        .findFirst();
+//
+//	    if (matchedRule.isPresent()) {
+//	        RearSetBackRequirement mdmsRule = matchedRule.get();
+//	        meanVal = mdmsRule.getPermissible();
+//	        minVal = meanVal; // If there's a separate `minimum` field, use it here.
+//	    } else {
+//	        meanVal = BigDecimal.ZERO;
+//	        minVal = BigDecimal.ZERO;
+//	    }
+	    
+	    meanVal = new BigDecimal("5.0");
+	    minVal = meanVal;
+	    
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
 
 	    compareRearYardResult(block.getName(), min, mean, mostRestrictiveOccupancy, rearYardResult, valid, subRule,
@@ -491,26 +525,31 @@ public class RearYardService_Assam extends RearYardService {
 	        // Step 2: Get rules from MDMS
 	        List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.REAR_SET_BACK.getValue(), false);
 
-	        Optional<RearSetBackRequirement> matchedRule = rules.stream()
-	            .filter(RearSetBackRequirement.class::isInstance)
-	            .map(RearSetBackRequirement.class::cast)
-	            .filter(ruleFeature ->
-	                ruleFeature.getFromPlotDepth() != null && ruleFeature.getToPlotDepth() != null
-	                && depthOfPlot.compareTo(ruleFeature.getFromPlotDepth()) >= 0
-	                && depthOfPlot.compareTo(ruleFeature.getToPlotDepth()) <= 0
-	                && Boolean.TRUE.equals(ruleFeature.getActive()))
-	            .findFirst();
-
-	        if (matchedRule.isPresent()) {
-	            RearSetBackRequirement mdmsRule = matchedRule.get();
-	            meanVal = mdmsRule.getPermissible();
-	            minVal = meanVal; // If MDMS has separate min, replace here.
-	        } else {
-	            meanVal = BigDecimal.ZERO;
-	            minVal = BigDecimal.ZERO;
-	        }
-	  
-
+//	        Optional<RearSetBackRequirement> matchedRule = rules.stream()
+//	            .filter(RearSetBackRequirement.class::isInstance)
+//	            .map(RearSetBackRequirement.class::cast)
+//	            .filter(ruleFeature ->
+//	                ruleFeature.getFromPlotDepth() != null && ruleFeature.getToPlotDepth() != null
+//	                && depthOfPlot.compareTo(ruleFeature.getFromPlotDepth()) >= 0
+//	                && depthOfPlot.compareTo(ruleFeature.getToPlotDepth()) <= 0
+//	                && Boolean.TRUE.equals(ruleFeature.getActive()))
+//	            .findFirst();
+//
+//	        if (matchedRule.isPresent()) {
+//	            RearSetBackRequirement mdmsRule = matchedRule.get();
+//	            meanVal = mdmsRule.getPermissible();
+//	            minVal = meanVal; // If MDMS has separate min, replace here.
+//	        } else {
+//	            meanVal = BigDecimal.ZERO;
+//	            minVal = BigDecimal.ZERO;
+//	        }
+	    if(depthOfPlot.compareTo(new BigDecimal("18.0")) > 0) {
+	    	meanVal = new BigDecimal("1.5");
+	    } else {
+	    	meanVal = new BigDecimal("3.0");
+		}
+	   
+	    minVal = meanVal;
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
 
 	    compareRearYardResult(block.getName(), min, mean, mostRestrictiveOccupancy, rearYardResult, valid, subRule,
@@ -751,22 +790,24 @@ public class RearYardService_Assam extends RearYardService {
 	    // Fetch REAR_SET_BACK rules from MDMS
 	    List<Object> rules = cache.getFeatureRules(pl, FeatureEnum.REAR_SET_BACK.getValue(), false);
 
-	    Optional<RearSetBackRequirement> matchedRule = rules.stream()
-	            .filter(RearSetBackRequirement.class::isInstance)
-	            .map(RearSetBackRequirement.class::cast)
-	            .filter(ruleFeature -> Boolean.TRUE.equals(ruleFeature.getActive()))
-	            .findFirst();
-
-	    if (matchedRule.isPresent()) {
-	        RearSetBackRequirement mdmsRule = matchedRule.get();
- 
-	        meanVal = mdmsRule.getPermissible();
-	        
-	        minVal = meanVal;
-	    } else {
-	        meanVal = BigDecimal.ZERO;
-	        minVal = BigDecimal.ZERO;
-	    }
+//	    Optional<RearSetBackRequirement> matchedRule = rules.stream()
+//	            .filter(RearSetBackRequirement.class::isInstance)
+//	            .map(RearSetBackRequirement.class::cast)
+//	            .filter(ruleFeature -> Boolean.TRUE.equals(ruleFeature.getActive()))
+//	            .findFirst();
+//
+//	    if (matchedRule.isPresent()) {
+//	        RearSetBackRequirement mdmsRule = matchedRule.get();
+// 
+//	        meanVal = mdmsRule.getPermissible();
+//	        
+//	        minVal = meanVal;
+//	    } else {
+//	        meanVal = BigDecimal.ZERO;
+//	        minVal = BigDecimal.ZERO;
+//	    }
+	    meanVal = new BigDecimal("6.0");
+	    minVal = meanVal;
 
 	    valid = validateMinimumAndMeanValue(min, mean, minVal, meanVal);
 
@@ -1360,13 +1401,13 @@ public class RearYardService_Assam extends RearYardService {
 	    } else if (F.equalsIgnoreCase(occupancyCode)) {
 	    	  if (buildingHeight.compareTo(BUILDING_HEIGHT) <= 0 &&
 	    		        plot.getArea().compareTo(PLOT_AREA_802_SQM) <= 0) {
-	        // Commercial
-	        valid = processRearYardCommercial(
-	                pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
-	                subRule, rule, minVal, meanVal, depthOfPlot, valid, occupancyName);
+	    		  // Commercial
+	    		  valid = processRearYardCommercial(
+	    				  pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
+	    				  subRule, rule, minVal, meanVal, depthOfPlot, valid, occupancyName);
 
-	    }else{
-	    	 valid = processRearYardResidential(
+	    	  }else{
+	    		  valid = processRearYardResidential(
 		                pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
 		                subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName);
 
@@ -1377,25 +1418,30 @@ public class RearYardService_Assam extends RearYardService {
 	        valid = processRearYardIndustrial(
 	                pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
 	                subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName,plotArea);
-	    } else if (D.equalsIgnoreCase(occupancyCode) &&  D_AW.equalsIgnoreCase(subOccupancyCode)) {
+	    } else if (D.equalsIgnoreCase(occupancyCode)) {
 	       
 	        
 	        valid = processRearYardPlaceOfworship(
 	                pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
 	                subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName);
 	    }else if (C.equalsIgnoreCase(occupancyCode)) {
-	       
-	        
-	        valid = processRearYardHospitalAndNursingHomes(
-	                pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
-	                subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName);
+	     
+	       if(buildingHeight.compareTo(new BigDecimal("21.6")) <= 0) {
+	    	   valid = processRearYardHospitalAndNursingHomes(
+	    			   pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
+	    			   subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName);
+	       } else {
+	    	   valid = processRearYardResidential(
+		                pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
+		                subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName);
+	       }
 	    }else if (D.equalsIgnoreCase(occupancyCode)) {
 	       
 	        
 	        valid = processRearYardAssembly(
 	                pl, block, level, min, mean, mostRestrictiveOccupancy, rearYardResult,
 	                subRule, rule, minVal, meanVal, buildingHeight, valid, occupancyName);
-	    }else if (D.equalsIgnoreCase(occupancyCode) &&  D_M.equalsIgnoreCase(subOccupancyCode)) {
+	    }else if (D.equalsIgnoreCase(occupancyCode)) {
 	       
 	        
 	        valid = processRearYardMultiplex(
